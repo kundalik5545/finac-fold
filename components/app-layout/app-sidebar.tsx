@@ -16,9 +16,17 @@ import Link from "next/link";
 import { NavMain } from "./nav-main";
 import { NavUser } from "./nav-user";
 import { websiteDetails } from "@/data/website-details";
+import { useEffect, useState } from "react";
+import { User } from "@/app/generated/prisma/client";
 
 export function AppSidebar({ variant }: { variant: "sidebar" | "floating" | "inset" }) {
+    const [user, setUser] = useState<User | null>(null);
+    const [loading, setLoading] = useState(true);
+
     const data = websiteDetails;
+
+
+
     return (
         <Sidebar collapsible="offcanvas">
             <SidebarHeader>
@@ -30,9 +38,9 @@ export function AppSidebar({ variant }: { variant: "sidebar" | "floating" | "ins
                         >
                             <Link href="/">
                                 {/* Icon logo */}
-                                <DollarSign size="16" />
+                                <websiteDetails.websiteIcon size="16" />
                                 {/* App Name */}
-                                <span className="text-base font-semibold">Acme Inc.</span>
+                                <span className="text-base font-semibold">{websiteDetails.websiteName}</span>
                             </Link>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
@@ -42,7 +50,7 @@ export function AppSidebar({ variant }: { variant: "sidebar" | "floating" | "ins
                 <NavMain items={data.navMain} />
             </SidebarContent>
             <SidebarFooter>
-                <NavUser user={data.user} />
+                <NavUser />
             </SidebarFooter>
         </Sidebar>
     );

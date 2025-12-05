@@ -13,9 +13,11 @@ import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+
 export function NavMain({ items }: { items: { title: string; url: string; icon: React.ElementType }[] }) {
     const isMobile = useIsMobile();
     const pathname = usePathname();
+
     return (
         <SidebarGroup>
             <SidebarGroupLabel
@@ -38,7 +40,7 @@ export function NavMain({ items }: { items: { title: string; url: string; icon: 
                                         className={cn(
                                             "group relative flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200",
                                             isActive
-                                                ? "bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg transform scale-105"
+                                                ? "bg-linear-to-r from-blue-500 to-purple-600 text-white shadow-lg transform scale-105"
                                                 : "text-gray-700 hover:bg-gray-100 hover:text-blue-600 hover:scale-105 dark:text-white"
                                         )}
                                     >

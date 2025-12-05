@@ -19,11 +19,18 @@ import {
 import { Bell, LogOut, Settings2, User2, EllipsisVertical } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
+import { useEffect, useState } from "react";
 
+type UserType = {
+    name: string;
+    email: string;
+    image: string;
+}
 
-export function NavUser({ user }: { user: { name: string; email: string; avatar: string } }) {
+export function NavUser() {
     const { isMobile } = useSidebar();
     const router = useRouter();
+    const [user, setUser] = useState<UserType | null>(null);
 
     const handleLogout = async () => {
         try {
@@ -35,6 +42,30 @@ export function NavUser({ user }: { user: { name: string; email: string; avatar:
         }
     };
 
+
+    useEffect(() => {
+        const fetchUser = async () => {
+            try {
+                const response = await fetch("/api/user");
+                if (response.ok) {
+                    const data = await response.json();
+                    setUser(data.user);
+                } else {
+                    console.error("Failed to fetch user");
+                    setUser({
+                        name: "John Doe",
+                        email: "john.doe@example.com",
+                        image: "https://avatars.githubusercontent.com/u/167022612",
+                    });
+                }
+            } catch (error) {
+                console.error("Error fetching user:", error);
+            }
+        };
+
+        fetchUser();
+    }, []);
+
     return (
         <SidebarMenu>
             <SidebarMenuItem>
@@ -45,13 +76,13 @@ export function NavUser({ user }: { user: { name: string; email: string; avatar:
                             className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
                         >
                             <Avatar className="h-8 w-8 rounded-lg grayscale">
-                                <AvatarImage src={user.avatar} alt={user.name} />
-                                <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                                <AvatarImage src={user?.image} alt={user?.name || "John Doe"} />
+                                <AvatarFallback className="rounded-lg">{user?.name?.charAt(0) || "JD"}</AvatarFallback>
                             </Avatar>
                             <div className="grid flex-1 text-left text-sm leading-tight">
-                                <span className="truncate font-medium">{user.name}</span>
+                                <span className="truncate font-medium">{user?.name || "John Doe"}</span>
                                 <span className="text-muted-foreground truncate text-xs">
-                                    {user.email}
+                                    {user?.email || "john.doe@example.com"}
                                 </span>
                             </div>
                             <EllipsisVertical className="ml-auto size-4" />
@@ -66,13 +97,13 @@ export function NavUser({ user }: { user: { name: string; email: string; avatar:
                         <DropdownMenuLabel className="p-0 font-normal">
                             <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                                 <Avatar className="h-8 w-8 rounded-lg">
-                                    <AvatarImage src={user.avatar} alt={user.name} />
-                                    <AvatarFallback className="rounded-lg">JK</AvatarFallback>
+                                    <AvatarImage src={user?.image} alt={user?.name || "John Doe"} />
+                                    <AvatarFallback className="rounded-lg">{user?.name?.charAt(0) || "JD"}</AvatarFallback>
                                 </Avatar>
                                 <div className="grid flex-1 text-left text-sm leading-tight">
-                                    <span className="truncate font-medium">{user.name}</span>
+                                    <span className="truncate font-medium">{user?.name || "John Doe"}</span>
                                     <span className="text-muted-foreground truncate text-xs">
-                                        {user.email}
+                                        {user?.email || "john.doe@example.com"}
                                     </span>
                                 </div>
                             </div>

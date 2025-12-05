@@ -23,15 +23,19 @@ import { SidebarTrigger } from "../ui/sidebar";
 import ModeToggle from "./dark-mode";
 import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+
+type UserType = {
+    name: string;
+    email: string;
+    image: string;
+}
 
 const Navbar = () => {
     const isMobile = useIsMobile();
     const router = useRouter();
-    const user = {
-        name: "Kundalik Jadhav",
-        email: "jk@fm.com",
-        avatar: "https://avatars.githubusercontent.com/u/167022612",
-    };
+    const [user, setUser] = useState<UserType | null>(null);
+
     const handleLogout = async () => {
         try {
             await authClient.signOut();
@@ -41,6 +45,29 @@ const Navbar = () => {
             console.error("Logout error:", error);
         }
     };
+
+    useEffect(() => {
+        const fetchUser = async () => {
+            try {
+                const response = await fetch("/api/user");
+                if (response.ok) {
+                    const data = await response.json();
+                    setUser(data.user);
+                } else {
+                    console.error("Failed to fetch user");
+                    setUser({
+                        name: "John Doe",
+                        email: "john.doe@example.com",
+                        image: "https://avatars.githubusercontent.com/u/167022612",
+                    });
+                }
+            } catch (error) {
+                console.error("Error fetching user:", error);
+            }
+        };
+
+        fetchUser();
+    }, []);
     return (
         <header className="flex h-(--header-height) shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height)">
             <div className="flex w-full items-center gap-1 px-4 lg:gap-2 lg:px-6">
@@ -77,9 +104,9 @@ const Navbar = () => {
                                             className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
                                         >
                                             <Avatar className="h-8 w-8 rounded-lg grayscale">
-                                                <AvatarImage src={user.avatar} alt={user.name} />
+                                                <AvatarImage src={user?.image} alt={user?.name || "John Doe"} />
                                                 <AvatarFallback className="rounded-lg">
-                                                    CN
+                                                    {user?.name?.charAt(0) || "JD"}
                                                 </AvatarFallback>
                                             </Avatar>
                                         </SidebarMenuButton>
@@ -93,17 +120,17 @@ const Navbar = () => {
                                         <DropdownMenuLabel className="p-0 font-normal">
                                             <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                                                 <Avatar className="h-8 w-8 rounded-lg">
-                                                    <AvatarImage src={user.avatar} alt={user.name} />
+                                                    <AvatarImage src={user?.image} alt={user?.name || "John Doe"} />
                                                     <AvatarFallback className="rounded-lg">
-                                                        JK
+                                                        {user?.name?.charAt(0) || "JD"}
                                                     </AvatarFallback>
                                                 </Avatar>
                                                 <div className="grid flex-1 text-left text-sm leading-tight">
                                                     <span className="truncate font-medium">
-                                                        {user.name}
+                                                        {user?.name || "John Doe"}
                                                     </span>
                                                     <span className="text-muted-foreground truncate text-xs">
-                                                        {user.email}
+                                                        {user?.email || "john.doe@example.com"}
                                                     </span>
                                                 </div>
                                             </div>
