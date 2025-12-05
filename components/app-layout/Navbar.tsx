@@ -94,7 +94,6 @@ const Navbar = () => {
                         <ModeToggle />
 
                         {/* User detail */}
-
                         <SidebarMenu>
                             <SidebarMenuItem>
                                 <DropdownMenu>
