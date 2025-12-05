@@ -15,7 +15,7 @@ const Authlayout = async ({ children }: { children: React.ReactNode }) => {
     }
 
     return (
-        <div className='bg-red-500 border-2 border-blue-500'>
+        <div>
             {children}
         </div>
     );
