@@ -28,6 +28,7 @@ model User {
   updatedAt     DateTime  @updatedAt
   sessions      Session[]
   accounts      Account[]
+  assets        Asset[]
 
   @@unique([email])
   @@map("user")
@@ -79,4 +80,62 @@ model Verification {
 
   @@index([identifier])
   @@map("verification")
+}
+
+// Assets Model
+model Asset {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  name  String
+  type  AssetType
+  icon  String?
+  color String?
+
+  currentValue   Decimal        @db.Decimal(65, 4)
+  purchaseValue  Decimal        @db.Decimal(65, 4)
+  purchaseDate   DateTime
+  purchaseReason String?
+  paymentMethod  PaymentMethod?
+
+  sellDate   DateTime?
+  sellPrice  Decimal?  @db.Decimal(65, 4)
+  profitLoss Decimal?  @db.Decimal(65, 4)
+  sellReason String?
+
+  transactionStatus TransactionStatus?
+  description       String?
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@index([userId, type])
+}
+
+// Enums
+
+// Asset Type Enum
+enum AssetType {
+  PROPERTY
+  VEHICLE
+  JEWELRY
+  ELECTRONICS
+  OTHER
+}
+
+// Sell Status Enum
+enum TransactionStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+// Payment Method Enum
+enum PaymentMethod {
+  CASH
+  UPI
+  CARD
+  ONLINE
+  OTHER
 }
