@@ -6,6 +6,8 @@ import { SidebarTrigger } from "../ui/sidebar";
 import ModeToggle from "./dark-mode";
 import NotificationIcon from "./notification-icon";
 import { TopNavUser } from "./top-nav-user";
+import Link from "next/link";
+import { websiteDetails } from "@/data/website-details";
 
 const Navbar = async () => {
     // Get session to check authentication status
@@ -23,7 +25,7 @@ const Navbar = async () => {
                     orientation="vertical"
                     className="mx-2 data-[orientation=vertical]:h-4"
                 />
-                <h1 className="text-base font-medium">App Name</h1>
+                <h1 className="text-base font-medium"><Link href="/">{websiteDetails.websiteName}</Link></h1>
 
                 {/* Right Side */}
                 <div className="ml-auto flex items-center gap-2">

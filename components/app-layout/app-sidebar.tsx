@@ -1,5 +1,6 @@
 "use client";
 
+import { User } from "@/app/generated/prisma/client";
 import {
     Sidebar,
     SidebarContent,
@@ -9,20 +10,13 @@ import {
     SidebarMenuButton,
     SidebarMenuItem
 } from "@/components/ui/sidebar";
-import {
-    DollarSign
-} from "lucide-react";
+import { navItems as navItemsData, navQuick as navQuickData } from "@/data/nav-items";
+import { websiteDetails } from "@/data/website-details";
 import Link from "next/link";
 import { NavMain } from "./nav-main";
 import { NavUser } from "./nav-user";
-import { websiteDetails } from "@/data/website-details";
-import { useEffect, useState } from "react";
-import { User } from "@/app/generated/prisma/client";
-import { navItems as navItemsData, navQuick as navQuickData } from "@/data/nav-items";
 
 export function AppSidebar({ variant }: { variant: "sidebar" | "floating" | "inset" }) {
-    const [user, setUser] = useState<User | null>(null);
-    const [loading, setLoading] = useState(true);
 
     type NavItem = {
         title: string;
