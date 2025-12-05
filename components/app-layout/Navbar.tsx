@@ -21,13 +21,25 @@ import { Button } from "../ui/button";
 import { Separator } from "../ui/separator";
 import { SidebarTrigger } from "../ui/sidebar";
 import ModeToggle from "./dark-mode";
+import { authClient } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
 
 const Navbar = () => {
     const isMobile = useIsMobile();
+    const router = useRouter();
     const user = {
         name: "Kundalik Jadhav",
         email: "jk@fm.com",
         avatar: "https://avatars.githubusercontent.com/u/167022612",
+    };
+    const handleLogout = async () => {
+        try {
+            await authClient.signOut();
+            router.push("/signin");
+            router.refresh();
+        } catch (error) {
+            console.error("Logout error:", error);
+        }
     };
     return (
         <header className="flex h-(--header-height) shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height)">
@@ -112,7 +124,7 @@ const Navbar = () => {
                                             </DropdownMenuItem>
                                         </DropdownMenuGroup>
                                         <DropdownMenuSeparator />
-                                        <DropdownMenuItem variant="destructive">
+                                        <DropdownMenuItem variant="destructive" onClick={handleLogout}>
                                             <LogOut />
                                             Log out
                                         </DropdownMenuItem>

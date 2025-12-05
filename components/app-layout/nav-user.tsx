@@ -17,9 +17,23 @@ import {
     useSidebar,
 } from "@/components/ui/sidebar";
 import { Bell, LogOut, Settings2, User2, EllipsisVertical } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { authClient } from "@/lib/auth-client";
+
 
 export function NavUser({ user }: { user: { name: string; email: string; avatar: string } }) {
     const { isMobile } = useSidebar();
+    const router = useRouter();
+
+    const handleLogout = async () => {
+        try {
+            await authClient.signOut();
+            router.push("/signin");
+            router.refresh();
+        } catch (error) {
+            console.error("Logout error:", error);
+        }
+    };
 
     return (
         <SidebarMenu>
@@ -79,7 +93,7 @@ export function NavUser({ user }: { user: { name: string; email: string; avatar:
                             </DropdownMenuItem>
                         </DropdownMenuGroup>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem variant="destructive">
+                        <DropdownMenuItem variant="destructive" onClick={handleLogout}>
                             <LogOut />
                             Log out
                         </DropdownMenuItem>
