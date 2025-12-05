@@ -13,8 +13,13 @@ import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+type NavItem = {
+    title: string;
+    url: string;
+    icon: React.ElementType;
+}
 
-export function NavMain({ items }: { items: { title: string; url: string; icon: React.ElementType }[] }) {
+export function NavMain({ items }: { items: NavItem[] }) {
     const isMobile = useIsMobile();
     const pathname = usePathname();
 
