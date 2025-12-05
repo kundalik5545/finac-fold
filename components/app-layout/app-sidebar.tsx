@@ -10,46 +10,15 @@ import {
     SidebarMenuItem
 } from "@/components/ui/sidebar";
 import {
-    BarChart,
-    DollarSign,
-    File,
-    LayoutDashboard,
-    Plus,
+    DollarSign
 } from "lucide-react";
 import Link from "next/link";
 import { NavMain } from "./nav-main";
 import { NavUser } from "./nav-user";
+import { websiteDetails } from "@/data/website-details";
 
-export function AppSidebar() {
-    const data = {
-        user: {
-            name: "Kundalik Jadhav",
-            email: "jk@fm.com",
-            avatar: "https://avatars.githubusercontent.com/u/167022612",
-        },
-        navMain: [
-            {
-                title: "Dashboard",
-                url: "/dashboard",
-                icon: LayoutDashboard,
-            },
-            {
-                title: "Add Bank",
-                url: "/add-bank",
-                icon: Plus,
-            },
-            {
-                title: "Transactions",
-                url: "/transactions",
-                icon: BarChart,
-            },
-            {
-                title: "File Handle",
-                url: "/file-handle",
-                icon: File,
-            },
-        ],
-    };
+export function AppSidebar({ variant }: { variant: "sidebar" | "floating" | "inset" }) {
+    const data = websiteDetails;
     return (
         <Sidebar collapsible="offcanvas">
             <SidebarHeader>
@@ -57,7 +26,7 @@ export function AppSidebar() {
                     <SidebarMenuItem>
                         <SidebarMenuButton
                             asChild
-                            className="data-[slot=sidebar-menu-button]:!p-1.5"
+                            className="data-[slot=sidebar-menu-button]:p-1.5!"
                         >
                             <Link href="/">
                                 {/* Icon logo */}
