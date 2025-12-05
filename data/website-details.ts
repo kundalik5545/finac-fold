@@ -6,6 +6,7 @@ export const websiteDetails = {
     email: "jk@fm.com",
     avatar: "https://avatars.githubusercontent.com/u/167022612",
   },
+  websiteName: "Finac Fold",
   navMain: [
     {
       title: "Dashboard",
