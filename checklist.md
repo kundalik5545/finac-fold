@@ -20,4 +20,6 @@ desing the assests tracking page with typescipt, shadcn, tailwindcss.
 - Show todo in table format and in calendar format in daily/weekly/monthly show upcoming todos using toggle view mode
 - make it responsive and nice
 
-#
+# Investment Goals
+
+Create a feature called goals which helps user to track there future goals and its progress.
