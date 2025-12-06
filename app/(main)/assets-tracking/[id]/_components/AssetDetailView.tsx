@@ -66,7 +66,7 @@ export function AssetDetailView({ asset }: { asset: Asset }) {
             {/* Header with actions */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl md:text-3xl font-bold">{asset.name}</h1>
+                    <h1 className="text-2xl md:text-3xl font-bold">{asset.name}{asset?.icon}</h1>
                     <Badge className="mt-2">{asset.type}</Badge>
                 </div>
                 <div className="flex gap-2">
@@ -130,8 +130,8 @@ export function AssetDetailView({ asset }: { asset: Asset }) {
                             <div>
                                 <p
                                     className={`text-2xl font-bold ${isGain
-                                            ? "text-green-600 dark:text-green-400"
-                                            : "text-red-600 dark:text-red-400"
+                                        ? "text-green-600 dark:text-green-400"
+                                        : "text-red-600 dark:text-red-400"
                                         }`}
                                 >
                                     {formatCurrency(Math.abs(gainLoss))}
