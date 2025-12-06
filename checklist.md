@@ -23,3 +23,20 @@ desing the assests tracking page with typescipt, shadcn, tailwindcss.
 # Investment Goals
 
 Create a feature called goals which helps user to track there future goals and its progress.
+
+- User should abel to add, edit, delete the goals using api
+- Show goals in table format and card format with toggle button
+- Show goals progress and percentage completion
+- Show charts like bar or area or donut chart to show the data
+- Make charts and page responsive
+- user should able to add icon and color and as per color card baground should shown
+- Use Prisma model goal and add extra fields which are needed as required
+- use color picker for such that create premade color template with ligh colors and user should select one of them make 10 color template. Create this as utitlity functionality so that we can use it whenever required.
+- also create utitlity functionality to pick icon and show picked icon in box. for icons i will use windown emoji win + . functionality 💰 like this.
+- make nice and beautiful ui
+- add back button which is created inside the custom-components folder when ever required
+- use can add progress of goals like when ever he saves some money he will update or create a new transaction to update current goal value which will change goals percentage.
+- create seperate table to track goal added new amount values over time so for eavh goal when user click on individual goal history of goal transaction can be shown.
+- for each goal show area chart with date for every time user add new transaction to upadate current balance.
+- add other required details as per indusrty standards
+- check functionality for any error after creating it.

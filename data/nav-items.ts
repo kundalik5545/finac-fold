@@ -58,7 +58,7 @@ export const navItems = [
   },
   {
     title: "Goals",
-    url: "/investments/goals",
+    url: "/goals",
     icon: Target,
   },
   {
