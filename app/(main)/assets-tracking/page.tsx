@@ -32,7 +32,7 @@ const AssetsTrackingPage = async () => {
             <section className="flex justify-between items-center pb-5">
                 <div>
                     <h1 className="text-xl md:text-2xl lg:text-3xl font-bold">
-                        Assets Tracking
+                        Assets
                     </h1>
                     {totalCurrentValue > 0 && (
                         <p className="text-sm text-muted-foreground mt-1">

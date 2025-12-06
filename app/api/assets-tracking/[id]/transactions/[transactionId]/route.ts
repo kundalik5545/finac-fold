@@ -16,7 +16,7 @@ export async function PATCH(request: NextRequest, { params }: ParamsType) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { transactionId } = params;
+    const { transactionId } = await params;
     const body = await request.json();
 
     // Validate input with zod schema
@@ -74,7 +74,7 @@ export async function DELETE(_request: NextRequest, { params }: ParamsType) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { transactionId } = params;
+    const { transactionId } = await params;
 
     await deleteTransaction(transactionId, session.user.id);
 

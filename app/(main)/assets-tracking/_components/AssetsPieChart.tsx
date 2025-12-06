@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { Pie, PieChart, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
+import { Pie, PieChart, Cell, ResponsiveContainer, Legend } from "recharts";
 import {
     ChartContainer,
     ChartTooltip,
@@ -10,8 +10,24 @@ import {
 } from "@/components/ui/chart";
 import { Asset } from "@/lib/assets-tracking-types";
 
+// Define a larger color palette for variety
+const PIE_COLORS = [
+    "#14b8a6", // teal-500
+    "#f43f5e", // rose-500
+    "#a855f7", // purple-500
+    "#3b82f6", // blue-500
+    "#10b981", // green-500
+    "#f472b6", // pink-400
+    "#fbbf24", // yellow-400
+    "#6366f1", // indigo-500
+    "#ef4444", // red-500
+    "#f59e42", // orange-400
+    "#8b5cf6", // violet-500
+    "#22d3ee", // cyan-400
+];
+
 export function AssetsPieChart({ assets }: { assets: Asset[] }) {
-    // Calculate data for pie chart
+    // Calculate data for donut chart
     const chartData = useMemo(() => {
         const totalValue = assets.reduce(
             (sum, asset) => sum + Number(asset.currentValue),
@@ -26,7 +42,7 @@ export function AssetsPieChart({ assets }: { assets: Asset[] }) {
                 name: asset.name,
                 value: value,
                 percentage: percentage,
-                fill: `hsl(var(--chart-${(index % 5) + 1}))`,
+                fill: PIE_COLORS[index % PIE_COLORS.length], // use palette
             };
         });
     }, [assets]);
@@ -37,7 +53,7 @@ export function AssetsPieChart({ assets }: { assets: Asset[] }) {
         assets.forEach((asset, index) => {
             config[asset.name] = {
                 label: asset.name,
-                color: `hsl(var(--chart-${(index % 5) + 1}))`,
+                color: PIE_COLORS[index % PIE_COLORS.length],
             };
         });
 
@@ -88,10 +104,12 @@ export function AssetsPieChart({ assets }: { assets: Asset[] }) {
                         nameKey="name"
                         cx="50%"
                         cy="50%"
-                        outerRadius={80}
+                        outerRadius={90}
+                        innerRadius={54} // make donut hole
                         label={({ name, percentage }) =>
                             `${name}: ${percentage.toFixed(1)}%`
                         }
+                        isAnimationActive={false}
                     >
                         {chartData.map((entry, index) => (
                             <Cell key={`cell-${index}`} fill={entry.fill} />
@@ -110,4 +128,3 @@ export function AssetsPieChart({ assets }: { assets: Asset[] }) {
         </ChartContainer>
     );
 }
-

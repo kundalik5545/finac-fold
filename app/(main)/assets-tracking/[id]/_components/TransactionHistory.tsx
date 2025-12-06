@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, Trash } from "lucide-react";
+import { Plus, Trash, Edit } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -31,7 +31,9 @@ export function TransactionHistory({
     const router = useRouter();
     const [transactions, setTransactions] = useState(initialTransactions);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [editingTransaction, setEditingTransaction] = useState<AssetsTransaction | null>(null);
     const [loadingStates, setLoadingStates] = useState<{
         [key: string]: boolean;
     }>({});
@@ -43,12 +45,24 @@ export function TransactionHistory({
         notes: "",
     });
 
+    // Edit form state
+    const [editFormData, setEditFormData] = useState({
+        value: "",
+        date: "",
+        notes: "",
+    });
+
     const formatDate = (date: Date | string) => {
         return new Date(date).toLocaleDateString("en-IN", {
             year: "numeric",
             month: "long",
             day: "numeric",
         });
+    };
+
+    const formatDateForInput = (date: Date | string) => {
+        const d = new Date(date);
+        return d.toISOString().split("T")[0];
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -91,11 +105,6 @@ export function TransactionHistory({
         } finally {
             setIsSubmitting(false);
         }
-    };
-
-    const formatDateForInput = (date: Date | string) => {
-        const d = new Date(date);
-        return d.toISOString().split("T")[0];
     };
 
     const handleEdit = (transaction: AssetsTransaction) => {
@@ -258,79 +267,79 @@ export function TransactionHistory({
                                         {isSubmitting ? "Adding..." : "Add Transaction"}
                                     </Button>
                                 </div>
-              </form>
-            </DialogContent>
-          </Dialog>
+                            </form>
+                        </DialogContent>
+                    </Dialog>
 
-          {/* Edit Transaction Dialog */}
-          <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Edit Transaction</DialogTitle>
-                <DialogDescription>
-                  Update the transaction details
-                </DialogDescription>
-              </DialogHeader>
-              <form onSubmit={handleEditSubmit} className="space-y-4">
-                <div>
-                  <Label htmlFor="edit-value">Value *</Label>
-                  <Input
-                    id="edit-value"
-                    type="number"
-                    step="0.01"
-                    required
-                    value={editFormData.value}
-                    onChange={(e) =>
-                      setEditFormData({ ...editFormData, value: e.target.value })
-                    }
-                    placeholder="Enter asset value"
-                  />
+                    {/* Edit Transaction Dialog */}
+                    <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+                        <DialogContent>
+                            <DialogHeader>
+                                <DialogTitle>Edit Transaction</DialogTitle>
+                                <DialogDescription>
+                                    Update the transaction details
+                                </DialogDescription>
+                            </DialogHeader>
+                            <form onSubmit={handleEditSubmit} className="space-y-4">
+                                <div>
+                                    <Label htmlFor="edit-value">Value *</Label>
+                                    <Input
+                                        id="edit-value"
+                                        type="number"
+                                        step="0.01"
+                                        required
+                                        value={editFormData.value}
+                                        onChange={(e) =>
+                                            setEditFormData({ ...editFormData, value: e.target.value })
+                                        }
+                                        placeholder="Enter asset value"
+                                    />
+                                </div>
+                                <div>
+                                    <Label htmlFor="edit-date">Date *</Label>
+                                    <Input
+                                        id="edit-date"
+                                        type="date"
+                                        required
+                                        value={editFormData.date}
+                                        onChange={(e) =>
+                                            setEditFormData({ ...editFormData, date: e.target.value })
+                                        }
+                                    />
+                                </div>
+                                <div>
+                                    <Label htmlFor="edit-notes">Notes</Label>
+                                    <Textarea
+                                        id="edit-notes"
+                                        value={editFormData.notes}
+                                        onChange={(e) =>
+                                            setEditFormData({ ...editFormData, notes: e.target.value })
+                                        }
+                                        placeholder="Optional notes about this transaction"
+                                        rows={3}
+                                    />
+                                </div>
+                                <div className="flex justify-end gap-2">
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={() => {
+                                            setIsEditDialogOpen(false);
+                                            setEditingTransaction(null);
+                                        }}
+                                    >
+                                        Cancel
+                                    </Button>
+                                    <Button type="submit" disabled={isSubmitting}>
+                                        {isSubmitting ? "Updating..." : "Update Transaction"}
+                                    </Button>
+                                </div>
+                            </form>
+                        </DialogContent>
+                    </Dialog>
                 </div>
-                <div>
-                  <Label htmlFor="edit-date">Date *</Label>
-                  <Input
-                    id="edit-date"
-                    type="date"
-                    required
-                    value={editFormData.date}
-                    onChange={(e) =>
-                      setEditFormData({ ...editFormData, date: e.target.value })
-                    }
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="edit-notes">Notes</Label>
-                  <Textarea
-                    id="edit-notes"
-                    value={editFormData.notes}
-                    onChange={(e) =>
-                      setEditFormData({ ...editFormData, notes: e.target.value })
-                    }
-                    placeholder="Optional notes about this transaction"
-                    rows={3}
-                  />
-                </div>
-                <div className="flex justify-end gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => {
-                      setIsEditDialogOpen(false);
-                      setEditingTransaction(null);
-                    }}
-                  >
-                    Cancel
-                  </Button>
-                  <Button type="submit" disabled={isSubmitting}>
-                    {isSubmitting ? "Updating..." : "Update Transaction"}
-                  </Button>
-                </div>
-              </form>
-            </DialogContent>
-          </Dialog>
-        </div>
-      </CardHeader>
-      <CardContent>
+            </CardHeader>
+            <CardContent>
                 {!transactions || transactions.length === 0 ? (
                     <p className="text-center text-muted-foreground py-8">
                         No transactions yet. Add one to track value changes over time.
@@ -359,14 +368,23 @@ export function TransactionHistory({
                                         </p>
                                     )}
                                 </div>
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => handleDelete(transaction.id)}
-                                    disabled={!!loadingStates[`delete-${transaction.id}`]}
-                                >
-                                    <Trash size={16} className="text-red-500" />
-                                </Button>
+                                <div className="flex items-center gap-2">
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => handleEdit(transaction)}
+                                    >
+                                        <Edit size={16} />
+                                    </Button>
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => handleDelete(transaction.id)}
+                                        disabled={!!loadingStates[`delete-${transaction.id}`]}
+                                    >
+                                        <Trash size={16} className="text-red-500" />
+                                    </Button>
+                                </div>
                             </div>
                         ))}
                     </div>
@@ -375,4 +393,3 @@ export function TransactionHistory({
         </Card>
     );
 }
-

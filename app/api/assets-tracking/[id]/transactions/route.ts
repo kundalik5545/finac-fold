@@ -16,7 +16,7 @@ export async function GET(_request: NextRequest, { params }: ParamsType) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { id: assetId } = params;
+    const { id: assetId } = await params;
 
     const transactions = await getTransactions(assetId, session.user.id);
 
@@ -43,7 +43,7 @@ export async function POST(request: NextRequest, { params }: ParamsType) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { id: assetId } = params;
+    const { id: assetId } = await params;
     const body = await request.json();
 
     // Validate data with schema

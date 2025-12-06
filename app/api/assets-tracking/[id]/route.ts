@@ -16,7 +16,7 @@ export async function GET(_request: NextRequest, { params }: ParamsType) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { id } = params;
+    const { id } = await params;
 
     const asset = await getAsset(id, session.user.id);
 
@@ -43,7 +43,7 @@ export async function PATCH(request: NextRequest, { params }: ParamsType) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { id } = params;
+    const { id } = await params;
     const body = await request.json();
 
     // Validate input with zod schema
@@ -125,7 +125,7 @@ export async function DELETE(_request: NextRequest, { params }: ParamsType) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { id } = params;
+    const { id } = await params;
 
     await deleteAsset(id, session.user.id);
 

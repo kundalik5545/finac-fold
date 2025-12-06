@@ -8,6 +8,7 @@ import { AssetsTrackingCard } from "./AssetsTrackingCard";
 import { AssetsPieChart } from "./AssetsPieChart";
 import { AssetsLineChart } from "./AssetsLineChart";
 import { Asset } from "@/lib/assets-tracking-types";
+import { AssestsAreacChart } from "./AssestsAreacChart";
 
 export function AssetsTrackingClient({ assets }: { assets: Asset[] }) {
     const [viewMode, setViewMode] = useState<"table" | "card">("table");
@@ -53,13 +54,10 @@ export function AssetsTrackingClient({ assets }: { assets: Asset[] }) {
                         Asset Analytics
                     </h2>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div className="grid grid-cols-1 lg:grid-cols-1 gap-8">
                         {/* Pie Chart */}
                         <div className="space-y-4">
-                            <h3 className="text-md md:text-lg font-semibold">
-                                Asset Distribution
-                            </h3>
-                            <AssetsPieChart assets={assets} />
+                            <AssestsAreacChart assets={assets} />
                         </div>
 
                         {/* Line Chart */}
@@ -67,7 +65,10 @@ export function AssetsTrackingClient({ assets }: { assets: Asset[] }) {
                             <h3 className="text-md md:text-lg font-semibold">
                                 Value Over Time
                             </h3>
-                            <AssetsLineChart assets={assets} />
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                                <AssetsPieChart assets={assets} />
+                                <AssetsLineChart assets={assets} />
+                            </div>
                         </div>
                     </div>
                 </div>
