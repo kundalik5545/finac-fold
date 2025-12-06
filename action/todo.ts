@@ -8,6 +8,8 @@ import {
   TodoTag,
   RecurringTodo,
   TodoFilters,
+  TodoPriority,
+  RecurringFrequency,
 } from "@/lib/todo-types";
 import { Prisma } from "@/app/generated/prisma/client";
 
@@ -161,7 +163,7 @@ export async function createTodo(
     title: string;
     description?: string | null;
     dueDate?: Date | string | null;
-    priority?: Prisma.TodoPriority;
+    priority?: TodoPriority;
     categoryId?: string | null;
     tagIds?: string[];
     recurringId?: string | null;
@@ -213,7 +215,7 @@ export async function updateTodo(
     title?: string;
     description?: string | null;
     dueDate?: Date | string | null;
-    priority?: Prisma.TodoPriority;
+    priority?: TodoPriority;
     completed?: boolean;
     categoryId?: string | null;
     tagIds?: string[];
@@ -535,20 +537,27 @@ export async function deleteTag(id: string, userId: string): Promise<void> {
  */
 export async function createRecurringTodo(
   data: {
-    frequency: Prisma.RecurringFrequency;
+    frequency: RecurringFrequency;
     interval?: number;
     startDate: Date | string;
     endDate?: Date | string | null;
     title: string;
     description?: string | null;
-    priority?: Prisma.TodoPriority;
+    priority?: TodoPriority;
     categoryId?: string | null;
     tagIds?: string[];
   },
   userId: string
 ): Promise<RecurringTodo> {
   try {
-    const { title, description, priority, categoryId, tagIds, ...recurringData } = data;
+    const {
+      title,
+      description,
+      priority,
+      categoryId,
+      tagIds,
+      ...recurringData
+    } = data;
 
     // Create the recurring pattern
     const recurring = await prisma.recurringTodo.create({
@@ -629,7 +638,9 @@ export async function generateRecurringTodoInstances(
           nextDueDate.setMonth(lastDueDate.getMonth() + recurring.interval);
           break;
         case "YEARLY":
-          nextDueDate.setFullYear(lastDueDate.getFullYear() + recurring.interval);
+          nextDueDate.setFullYear(
+            lastDueDate.getFullYear() + recurring.interval
+          );
           break;
       }
 
@@ -723,4 +734,3 @@ export async function deleteRecurringTodo(
     throw new Error("Failed to delete recurring todo");
   }
 }
-

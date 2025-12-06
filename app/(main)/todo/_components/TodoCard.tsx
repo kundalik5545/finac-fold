@@ -65,8 +65,7 @@ export function TodoCard({ todo }: TodoCardProps) {
     });
   };
 
-  const handleToggleComplete = async (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const handleToggleComplete = async () => {
     setIsLoading(true);
 
     try {
@@ -105,9 +104,8 @@ export function TodoCard({ todo }: TodoCardProps) {
 
   return (
     <Card
-      className={`cursor-pointer hover:shadow-md transition-shadow ${
-        todo.completed ? "opacity-60" : ""
-      }`}
+      className={`cursor-pointer hover:shadow-md transition-shadow ${todo.completed ? "opacity-60" : ""
+        }`}
       onClick={() => router.push(`/todo/edit/${todo.id}`)}
     >
       <CardContent className="p-4">
@@ -124,9 +122,8 @@ export function TodoCard({ todo }: TodoCardProps) {
               />
               <div className="flex-1 min-w-0">
                 <h3
-                  className={`font-semibold ${
-                    todo.completed ? "line-through" : ""
-                  }`}
+                  className={`font-semibold ${todo.completed ? "line-through" : ""
+                    }`}
                 >
                   {todo.title}
                 </h3>

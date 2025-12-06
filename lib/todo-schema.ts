@@ -12,8 +12,8 @@ export const todoFormSchema = z.object({
     .optional()
     .nullable(),
   dueDate: z.string().or(z.date()).optional().nullable(),
-  priority: z.enum(["LOW", "MEDIUM", "HIGH", "URGENT"]).default("MEDIUM"),
-  completed: z.boolean().default(false),
+  priority: z.enum(["LOW", "MEDIUM", "HIGH", "URGENT"]),
+  completed: z.boolean(),
   categoryId: z.string().optional().nullable(),
   tagIds: z.array(z.string()).optional(),
   recurringId: z.string().optional().nullable(),
@@ -42,7 +42,7 @@ export const tagFormSchema = z.object({
 // Recurring Todo Form Schema
 export const recurringTodoFormSchema = z.object({
   frequency: z.enum(["DAILY", "WEEKLY", "MONTHLY", "YEARLY"]),
-  interval: z.number().min(1, "Interval must be at least 1").default(1),
+  interval: z.number().min(1, "Interval must be at least 1"),
   startDate: z.string().or(z.date()),
   endDate: z.string().or(z.date()).optional().nullable(),
   title: z
@@ -54,7 +54,7 @@ export const recurringTodoFormSchema = z.object({
     .max(1000, "Description must be less than 1000 characters")
     .optional()
     .nullable(),
-  priority: z.enum(["LOW", "MEDIUM", "HIGH", "URGENT"]).default("MEDIUM"),
+  priority: z.enum(["LOW", "MEDIUM", "HIGH", "URGENT"]),
   categoryId: z.string().optional().nullable(),
   tagIds: z.array(z.string()).optional(),
 });
@@ -79,4 +79,3 @@ export type CategoryFormValues = z.infer<typeof categoryFormSchema>;
 export type TagFormValues = z.infer<typeof tagFormSchema>;
 export type RecurringTodoFormValues = z.infer<typeof recurringTodoFormSchema>;
 export type TodoFilterValues = z.infer<typeof todoFilterSchema>;
-

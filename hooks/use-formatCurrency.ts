@@ -7,7 +7,7 @@ import { useCallback } from "react";
  */
 export function useFormatCurrency(locale = "en-IN", currency = "INR") {
   const formatCurrency = useCallback(
-    (amount) => {
+    (amount: number) => {
       if (amount === null || amount === undefined || isNaN(amount)) {
         return "";
       }

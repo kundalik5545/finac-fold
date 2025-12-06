@@ -21,7 +21,7 @@ export async function getAssets(userId: string) {
   }
 }
 
-export async function getAssetStats(userId) {
+export async function getAssetStats(userId: string) {
   try {
     const assets = await prisma.asset.findMany({
       where: {
@@ -30,7 +30,16 @@ export async function getAssetStats(userId) {
     });
 
     // Calculate stats by type
-    const statsByType = {};
+    const statsByType: Record<
+      string,
+      {
+        type: string;
+        count: number;
+        totalCurrentValue: number;
+        totalPurchaseValue: number;
+        totalGainLoss: number;
+      }
+    > = {};
     let totalCurrentValue = 0;
     let totalPurchaseValue = 0;
 

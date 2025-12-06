@@ -7,7 +7,7 @@ export const goalFormSchema = z.object({
     .min(1, "Name is required")
     .max(100, "Name must be less than 100 characters"),
   targetAmount: z.number().min(0.01, "Target amount must be greater than 0"),
-  currentAmount: z.number().min(0, "Current amount must be non-negative").default(0),
+  currentAmount: z.number().min(0, "Current amount must be non-negative"),
   targetDate: z.string().or(z.date()),
   description: z
     .string()
@@ -38,4 +38,3 @@ export const updateGoalTransactionSchema = goalTransactionSchema.partial();
 // Type exports for use in components
 export type GoalFormValues = z.infer<typeof goalFormSchema>;
 export type GoalTransactionFormValues = z.infer<typeof goalTransactionSchema>;
-
