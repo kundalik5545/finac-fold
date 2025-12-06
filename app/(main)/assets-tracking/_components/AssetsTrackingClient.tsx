@@ -9,10 +9,12 @@ import { AssetsPieChart } from "./AssetsPieChart";
 import { AssetsLineChart } from "./AssetsLineChart";
 import { Asset } from "@/lib/assets-tracking-types";
 import { AssestsAreacChart } from "./AssestsAreacChart";
+import { AssestsLineChartMultiple } from "./AssestsLineChartMultiple";
 
 export function AssetsTrackingClient({ assets }: { assets: Asset[] }) {
     const [viewMode, setViewMode] = useState<"table" | "card">("table");
 
+    console.log("Assets Tracking Client", assets);
     return (
         <div className="space-y-8">
             {/* View Toggle */}
@@ -55,10 +57,6 @@ export function AssetsTrackingClient({ assets }: { assets: Asset[] }) {
                     </h2>
 
                     <div className="grid grid-cols-1 lg:grid-cols-1 gap-8">
-                        {/* Pie Chart */}
-                        <div className="space-y-4">
-                            <AssestsAreacChart assets={assets} />
-                        </div>
 
                         {/* Line Chart */}
                         <div className="space-y-4">
@@ -67,8 +65,14 @@ export function AssetsTrackingClient({ assets }: { assets: Asset[] }) {
                             </h3>
                             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                                 <AssetsPieChart assets={assets} />
-                                <AssetsLineChart assets={assets} />
+                                {/* <AssetsLineChart assets={assets} /> */}
+                                <AssestsLineChartMultiple assets={assets} />
                             </div>
+                        </div>
+
+                        {/* Area Chart */}
+                        <div className="space-y-4">
+                            <AssestsAreacChart assets={assets} />
                         </div>
                     </div>
                 </div>

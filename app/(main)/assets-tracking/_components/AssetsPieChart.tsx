@@ -9,6 +9,15 @@ import {
     ChartConfig,
 } from "@/components/ui/chart";
 import { Asset } from "@/lib/assets-tracking-types";
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardFooter,
+    CardHeader,
+    CardTitle,
+} from "@/components/ui/card";
+import { TrendingUp } from "lucide-react";
 
 // Define a larger color palette for variety
 const PIE_COLORS = [
@@ -78,53 +87,75 @@ export function AssetsPieChart({ assets }: { assets: Asset[] }) {
     }
 
     return (
-        <ChartContainer config={chartConfig} className="min-h-[300px] w-full">
-            <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                    <ChartTooltip
-                        content={
-                            <ChartTooltipContent
-                                formatter={(value, name, props) => (
-                                    <div className="flex flex-col gap-1">
-                                        <div className="font-semibold">{name}</div>
-                                        <div className="text-sm">
-                                            {formatCurrency(Number(value))}
-                                        </div>
-                                        <div className="text-xs text-muted-foreground">
-                                            {props.payload?.percentage?.toFixed(2)}% of total
-                                        </div>
-                                    </div>
-                                )}
+        <Card>
+            <CardHeader>
+                <CardTitle>Asset Distribution Chart</CardTitle>
+                <CardDescription>
+                    Asset distribution by value
+                </CardDescription>
+            </CardHeader>
+            <CardContent>
+                <ChartContainer config={chartConfig} className="min-h-[300px] w-full">
+                    <ResponsiveContainer width="100%" height={300}>
+                        <PieChart>
+                            <ChartTooltip
+                                content={
+                                    <ChartTooltipContent
+                                        formatter={(value, name, props) => (
+                                            <div className="flex flex-col gap-1">
+                                                <div className="font-semibold">{name}</div>
+                                                <div className="text-sm">
+                                                    {formatCurrency(Number(value))}
+                                                </div>
+                                                <div className="text-xs text-muted-foreground">
+                                                    {props.payload?.percentage?.toFixed(2)}% of total
+                                                </div>
+                                            </div>
+                                        )}
+                                    />
+                                }
                             />
-                        }
-                    />
-                    <Pie
-                        data={chartData}
-                        dataKey="value"
-                        nameKey="name"
-                        cx="50%"
-                        cy="50%"
-                        outerRadius={90}
-                        innerRadius={54} // make donut hole
-                        label={({ name, percentage }) =>
-                            `${name}: ${percentage.toFixed(1)}%`
-                        }
-                        isAnimationActive={false}
-                    >
-                        {chartData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.fill} />
-                        ))}
-                    </Pie>
-                    <Legend
-                        verticalAlign="bottom"
-                        height={36}
-                        formatter={(value) => {
-                            const item = chartData.find((d) => d.name === value);
-                            return `${value} (${item?.percentage.toFixed(1)}%)`;
-                        }}
-                    />
-                </PieChart>
-            </ResponsiveContainer>
-        </ChartContainer>
+                            <Pie
+                                data={chartData}
+                                dataKey="value"
+                                nameKey="name"
+                                cx="50%"
+                                cy="50%"
+                                outerRadius={90}
+                                innerRadius={54} // make donut hole
+                                label={({ name, percentage }) =>
+                                    `${name}: ${percentage.toFixed(1)}%`
+                                }
+                                isAnimationActive={false}
+                            >
+                                {chartData.map((entry, index) => (
+                                    <Cell key={`cell-${index}`} fill={entry.fill} />
+                                ))}
+                            </Pie>
+                            <Legend
+                                verticalAlign="bottom"
+                                height={36}
+                                formatter={(value) => {
+                                    const item = chartData.find((d) => d.name === value);
+                                    return `${value} (${item?.percentage.toFixed(1)}%)`;
+                                }}
+                            />
+                        </PieChart>
+                    </ResponsiveContainer>
+                </ChartContainer>
+            </CardContent>
+            <CardFooter>
+                <div className="flex w-full items-start gap-2 text-sm">
+                    <div className="grid gap-2">
+                        <div className="flex items-center gap-2 leading-none font-medium">
+                            Showing value of all assets
+                        </div>
+                        <div className="text-muted-foreground flex items-center gap-2 leading-none">
+                            Showing distribution of all assets by value
+                        </div>
+                    </div>
+                </div>
+            </CardFooter>
+        </Card>
     );
 }
