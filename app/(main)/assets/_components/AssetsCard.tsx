@@ -8,24 +8,25 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
+import { Asset, AssetType } from "@/lib/ts-types";
 
-export function AssetsCard({ assets }) {
+export function AssetsCard({ assets }: { assets: Asset[] }) {
   const { formatCurrency } = useFormatCurrency("en-IN", "INR");
   const router = useRouter();
-  const [loadingStates, setLoadingStates] = useState({});
+  const [loadingStates, setLoadingStates] = useState<{ [key: string]: boolean }>({});
 
-  const getTypeColor = (type) => {
-    const colors = {
-      PROPERTY: "bg-blue-500",
-      VEHICLE: "bg-green-500",
-      JEWELRY: "bg-yellow-500",
-      ELECTRONICS: "bg-purple-500",
-      OTHER: "bg-gray-500",
+  const getTypeColor = (type: AssetType) => {
+    const colors: Record<AssetType, string> = {
+      "PROPERTY": "bg-blue-500",
+      "VEHICLE": "bg-green-500",
+      "JEWELRY": "bg-yellow-500",
+      "ELECTRONICS": "bg-purple-500",
+      "OTHER": "bg-gray-500",
     };
     return colors[type] || colors.OTHER;
   };
 
-  const handleDelete = async (assetId, assetName) => {
+  const handleDelete = async (assetId: string, assetName: string) => {
     if (!confirm(`Are you sure you want to delete "${assetName}"?`)) {
       return;
     }
@@ -51,7 +52,7 @@ export function AssetsCard({ assets }) {
     }
   };
 
-  const handleEdit = (assetId, e) => {
+  const handleEdit = (assetId: string, e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
     router.push(`/assets/edit/${assetId}`);
   };
@@ -66,7 +67,7 @@ export function AssetsCard({ assets }) {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {assets.map((asset) => {
+      {assets.map((asset: Asset) => {
         const purchaseValue = Number(asset.purchaseValue);
         const currentValue = Number(asset.currentValue);
         const gainLoss = currentValue - purchaseValue;
@@ -103,11 +104,10 @@ export function AssetsCard({ assets }) {
                       <TrendingDown className="w-4 h-4 text-red-600 dark:text-red-400" />
                     )}
                     <p
-                      className={`text-sm font-semibold ${
-                        isGain
-                          ? "text-green-600 dark:text-green-400"
-                          : "text-red-600 dark:text-red-400"
-                      }`}
+                      className={`text-sm font-semibold ${isGain
+                        ? "text-green-600 dark:text-green-400"
+                        : "text-red-600 dark:text-red-400"
+                        }`}
                     >
                       {formatCurrency(Math.abs(gainLoss))} ({gainLossPercent.toFixed(2)}%)
                     </p>
@@ -117,14 +117,14 @@ export function AssetsCard({ assets }) {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={(e) => handleEdit(asset.id, e)}
+                    onClick={(e: React.MouseEvent<HTMLButtonElement>) => handleEdit(asset.id, e)}
                   >
                     <Edit size={16} />
                   </Button>
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={(e) => {
+                    onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
                       e.stopPropagation();
                       handleDelete(asset.id, asset.name);
                     }}

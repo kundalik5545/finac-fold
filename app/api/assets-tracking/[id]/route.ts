@@ -1,15 +1,12 @@
 import { auth } from "@/lib/auth";
-import { addAssetSchema } from "@/lib/form-schema";
-import prisma from "@/lib/prisma";
+import { updateAssetSchema } from "@/lib/assets-tracking-schema";
 import { headers } from "next/headers";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { ZodError } from "zod";
+import { getAsset, updateAsset, deleteAsset } from "@/action/assets-tracking";
 
 type ParamsType = { params: { id: string } };
-
-// Create a PATCH schema allowing partial updates (all fields optional)
-const updateAssetSchema = addAssetSchema.partial();
 
 export async function GET(_request: NextRequest, { params }: ParamsType) {
   try {
@@ -21,20 +18,16 @@ export async function GET(_request: NextRequest, { params }: ParamsType) {
 
     const { id } = params;
 
-    const asset = await prisma.asset.findFirst({
-      where: {
-        id,
-        userId: session.user.id,
-      },
-    });
-
-    if (!asset) {
-      return NextResponse.json({ error: "Asset not found" }, { status: 404 });
-    }
+    const asset = await getAsset(id, session.user.id);
 
     return NextResponse.json({ asset });
   } catch (error) {
     console.error("Error fetching asset:", error);
+
+    if (error instanceof Error && error.message === "Asset not found") {
+      return NextResponse.json({ error: "Asset not found" }, { status: 404 });
+    }
+
     return NextResponse.json(
       { error: "Failed to fetch asset" },
       { status: 500 }
@@ -53,23 +46,10 @@ export async function PATCH(request: NextRequest, { params }: ParamsType) {
     const { id } = params;
     const body = await request.json();
 
-    console.log("body", body);
     // Validate input with zod schema
     const validatedData = updateAssetSchema.parse(body);
 
-    // Check if asset exists and belongs to user
-    const existingAsset = await prisma.asset.findFirst({
-      where: {
-        id,
-        userId: session.user.id,
-      },
-    });
-
-    if (!existingAsset) {
-      return NextResponse.json({ error: "Asset not found" }, { status: 404 });
-    }
-
-    // Prepare update object only including provided fields
+    // Prepare update object
     const updateData: Record<string, any> = {};
     if ("name" in validatedData) updateData.name = validatedData.name;
     if ("type" in validatedData) updateData.type = validatedData.type;
@@ -113,11 +93,7 @@ export async function PATCH(request: NextRequest, { params }: ParamsType) {
     if ("description" in validatedData)
       updateData.description = validatedData.description ?? null;
 
-    // Update asset with only provided fields
-    const asset = await prisma.asset.update({
-      where: { id },
-      data: updateData,
-    });
+    const asset = await updateAsset(id, updateData, session.user.id);
 
     return NextResponse.json({ asset });
   } catch (error) {
@@ -128,6 +104,10 @@ export async function PATCH(request: NextRequest, { params }: ParamsType) {
         { error: "Validation error", details: error.issues },
         { status: 400 }
       );
+    }
+
+    if (error instanceof Error && error.message === "Asset not found") {
+      return NextResponse.json({ error: "Asset not found" }, { status: 404 });
     }
 
     return NextResponse.json(
@@ -147,25 +127,16 @@ export async function DELETE(_request: NextRequest, { params }: ParamsType) {
 
     const { id } = params;
 
-    // Check if asset exists and belongs to user
-    const existingAsset = await prisma.asset.findFirst({
-      where: {
-        id,
-        userId: session.user.id,
-      },
-    });
-
-    if (!existingAsset) {
-      return NextResponse.json({ error: "Asset not found" }, { status: 404 });
-    }
-
-    await prisma.asset.delete({
-      where: { id },
-    });
+    await deleteAsset(id, session.user.id);
 
     return NextResponse.json({ message: "Asset deleted successfully" });
   } catch (error) {
     console.error("Error deleting asset:", error);
+
+    if (error instanceof Error && error.message === "Asset not found") {
+      return NextResponse.json({ error: "Asset not found" }, { status: 404 });
+    }
+
     return NextResponse.json(
       { error: "Failed to delete asset" },
       { status: 500 }

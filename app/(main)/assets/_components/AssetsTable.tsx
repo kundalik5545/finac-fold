@@ -17,15 +17,23 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
-import { Asset } from "@/lib/ts-types";
+import { Asset, AssetType } from "@/lib/ts-types";
+
+// Types for color mapping and loading states
+type TypeColorMap = {
+  [key in AssetType]: string;
+};
+type LoadingStates = {
+  [key: string]: boolean;
+};
 
 export function AssetsTable({ assets }: { assets: Asset[] }) {
   const { formatCurrency } = useFormatCurrency("en-IN", "INR");
   const isMobile = useIsMobile();
   const router = useRouter();
-  const [loadingStates, setLoadingStates] = useState({});
+  const [loadingStates, setLoadingStates] = useState<LoadingStates>({});
 
-  const formatDate = (date: Date) => {
+  const formatDate = (date: Date | string) => {
     return new Date(date).toLocaleDateString("en-IN", {
       year: "numeric",
       month: "short",
@@ -33,8 +41,8 @@ export function AssetsTable({ assets }: { assets: Asset[] }) {
     });
   };
 
-  const getTypeColor = (type) => {
-    const colors = {
+  const getTypeColor = (type: AssetType) => {
+    const colors: TypeColorMap = {
       PROPERTY: "bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200",
       VEHICLE: "bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200",
       JEWELRY: "bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200",
@@ -44,7 +52,7 @@ export function AssetsTable({ assets }: { assets: Asset[] }) {
     return colors[type] || colors.OTHER;
   };
 
-  const handleDelete = async (assetId, assetName) => {
+  const handleDelete = async (assetId: string, assetName: string) => {
     if (!confirm(`Are you sure you want to delete "${assetName}"?`)) {
       return;
     }
@@ -70,7 +78,7 @@ export function AssetsTable({ assets }: { assets: Asset[] }) {
     }
   };
 
-  const handleEdit = (assetId) => {
+  const handleEdit = (assetId: string) => {
     router.push(`/assets/edit/${assetId}`);
   };
 
@@ -157,7 +165,7 @@ export function AssetsTable({ assets }: { assets: Asset[] }) {
                       variant="ghost"
                       size="sm"
                       onClick={() => handleDelete(asset.id, asset.name)}
-                      disabled={loadingStates[`delete-${asset.id}`]}
+                      disabled={!!loadingStates[`delete-${asset.id}`]}
                     >
                       <Trash size={16} className="text-red-500" />
                     </Button>

@@ -63,7 +63,7 @@ export const navItems = [
   },
   {
     title: "Assets",
-    url: "/assets",
+    url: "/assets-tracking",
     icon: Building2,
   },
   {

@@ -52,9 +52,11 @@ export default function EditAssetForm({ asset }: { asset: any }) {
     handleSubmit,
     formState: { errors },
     setValue,
+    watch,
   } = useForm<z.infer<typeof updateAssetSchema>>({
     resolver: zodResolver(updateAssetSchema),
     defaultValues: {
+      id: asset.id || "",
       name: asset.name || "",
       type: asset.type || "OTHER",
       icon: asset.icon || null,
@@ -79,6 +81,7 @@ export default function EditAssetForm({ asset }: { asset: any }) {
 
   const onSubmit = async (data: z.infer<typeof updateAssetSchema>) => {
     setIsSubmitting(true);
+
     try {
       const response = await fetch(`/api/assets/${asset.id}`, {
         method: "PATCH",
@@ -130,7 +133,7 @@ export default function EditAssetForm({ asset }: { asset: any }) {
             <div className="flex flex-col space-y-2">
               <Label htmlFor="type">Asset Type *</Label>
               <Select
-                defaultValue={asset.type || "OTHER"}
+                value={watch("type") || "OTHER"}
                 onValueChange={(value) =>
                   setValue("type", value as z.infer<typeof updateAssetSchema>["type"], {
                     shouldValidate: true,
@@ -246,7 +249,7 @@ export default function EditAssetForm({ asset }: { asset: any }) {
             <div className="flex flex-col space-y-2">
               <Label htmlFor="paymentMethod">Payment Method</Label>
               <Select
-                defaultValue={asset.paymentMethod || ""}
+                value={watch("paymentMethod") || ""}
                 onValueChange={(value) =>
                   setValue("paymentMethod", value ? (value as z.infer<typeof updateAssetSchema>["paymentMethod"]) : null, {
                     shouldValidate: true,
@@ -337,7 +340,7 @@ export default function EditAssetForm({ asset }: { asset: any }) {
             <div className="flex flex-col space-y-2">
               <Label htmlFor="transactionStatus">Transaction Status</Label>
               <Select
-                defaultValue={asset.transactionStatus || ""}
+                value={watch("transactionStatus") || ""}
                 onValueChange={(value) =>
                   setValue("transactionStatus", value ? (value as z.infer<typeof updateAssetSchema>["transactionStatus"]) : null, {
                     shouldValidate: true,

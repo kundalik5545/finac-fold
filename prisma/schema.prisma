@@ -19,16 +19,17 @@ model Test {
 }
 
 model User {
-  id            String    @id
-  name          String
-  email         String
-  emailVerified Boolean   @default(false)
-  image         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  sessions      Session[]
-  accounts      Account[]
-  assets        Asset[]
+  id                 String              @id
+  name               String
+  email              String
+  emailVerified      Boolean             @default(false)
+  image              String?
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  sessions           Session[]
+  accounts           Account[]
+  assets             Asset[]
+  assetsTransactions AssetsTransaction[]
 
   @@unique([email])
   @@map("user")
@@ -107,10 +108,32 @@ model Asset {
   transactionStatus TransactionStatus?
   description       String?
 
+  userId             String
+  user               User                @relation(fields: [userId], references: [id])
+  assetsTransactions AssetsTransaction[]
+
+  @@index([userId, type])
+}
+
+// Assets Transaction Model - Tracks historical price changes
+model AssetsTransaction {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  value Decimal  @db.Decimal(65, 4)
+  date  DateTime
+  notes String?
+
+  assetId String
+  asset   Asset  @relation(fields: [assetId], references: [id], onDelete: Cascade)
+
   userId String
   user   User   @relation(fields: [userId], references: [id])
 
-  @@index([userId, type])
+  @@index([assetId, date])
+  @@index([userId])
+  @@map("assets_transaction")
 }
 
 // Enums
