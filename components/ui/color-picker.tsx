@@ -5,16 +5,16 @@ import { Check } from "lucide-react";
 
 // 10 premade light color templates (pastel colors)
 const DEFAULT_COLORS = [
-  "#FFE5E5", // Light Pink
-  "#E5F3FF", // Light Blue
-  "#E5FFE5", // Light Green
-  "#FFF5E5", // Light Orange
-  "#F0E5FF", // Light Purple
-  "#FFE5F0", // Light Rose
-  "#E5FFFF", // Light Cyan
-  "#FFFEE5", // Light Yellow
-  "#E5E5FF", // Light Indigo
-  "#FFE5D9", // Light Peach
+  "#ffb3b3", // Darker Pink
+  "#99ccff", // Darker Blue
+  "#99ffb3", // Darker Green
+  "#ffd699", // Darker Orange
+  "#c3a6ff", // Darker Purple
+  "#ffb3d9", // Darker Rose
+  "#99ffff", // Darker Cyan
+  "#ffff99", // Darker Yellow
+  "#b3b3ff", // Darker Indigo
+  "#ffb38c", // Darker Peach
 ];
 
 interface ColorPickerProps {
