@@ -30,6 +30,9 @@ model User {
   accounts           Account[]
   assets             Asset[]
   assetsTransactions AssetsTransaction[]
+  todos              Todo[]
+  todoCategories     TodoCategory[]
+  todoTags           TodoTag[]
 
   @@unique([email])
   @@map("user")
@@ -136,6 +139,68 @@ model AssetsTransaction {
   @@map("assets_transaction")
 }
 
+// Todo List Models
+model Todo {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  title       String
+  description String?
+  dueDate     DateTime?
+  priority    TodoPriority @default(MEDIUM)
+  completed   Boolean      @default(false)
+  completedAt DateTime?
+
+  categoryId String?
+  category   TodoCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  tags       TodoTag[]
+
+  recurringId String?
+  recurring   RecurringTodo? @relation(fields: [recurringId], references: [id], onDelete: SetNull)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, dueDate])
+  @@index([userId, completed])
+  @@map("todo")
+}
+
+model TodoCategory {
+  id     String  @id @default(uuid())
+  name   String
+  color  String?
+  userId String
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  todos  Todo[]
+
+  @@unique([userId, name])
+  @@map("todo_category")
+}
+
+model TodoTag {
+  id     String @id @default(uuid())
+  name   String
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  todos  Todo[]
+
+  @@unique([userId, name])
+  @@map("todo_tag")
+}
+
+model RecurringTodo {
+  id        String             @id @default(uuid())
+  frequency RecurringFrequency
+  interval  Int                @default(1)
+  startDate DateTime
+  endDate   DateTime?
+  todos     Todo[]
+
+  @@map("recurring_todo")
+}
+
 // Enums
 
 // Asset Type Enum
@@ -161,4 +226,20 @@ enum PaymentMethod {
   CARD
   ONLINE
   OTHER
+}
+
+// Todo Priority Enum
+enum TodoPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+// Recurring Frequency Enum
+enum RecurringFrequency {
+  DAILY
+  WEEKLY
+  MONTHLY
+  YEARLY
 }
