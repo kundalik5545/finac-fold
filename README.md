@@ -1,5 +1,40 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Environment Variables
+
+This project requires the following environment variables to be set:
+
+### Required Environment Variables
+
+1. **NEXT_PUBLIC_BASE_URL** - Your application's base URL
+
+   - **Local Development**: `http://localhost:3000`
+   - **Production**: Your deployed app URL (e.g., `https://your-app.vercel.app` or `https://yourdomain.com`)
+   - This is used by the authentication client to make API requests
+
+2. **DATABASE_URL** - Supabase PostgreSQL connection string
+   - Get this from your Supabase project: Settings > Database > Connection string
+   - Format: `postgresql://postgres:[YOUR-PASSWORD]@[YOUR-PROJECT-REF].supabase.co:5432/postgres`
+   - For connection pooling (recommended): Add `?pgbouncer=true&connection_limit=1` at the end
+   - Example: `postgresql://postgres:password@xxxxx.supabase.co:5432/postgres?pgbouncer=true&connection_limit=1`
+
+### Optional Environment Variables
+
+- **BETTER_AUTH_URL** - Override URL for auth endpoints (defaults to NEXT_PUBLIC_BASE_URL)
+
+### Setting Up Environment Variables
+
+1. Create a `.env.local` file in the root directory
+2. Add the required variables:
+   ```env
+   NEXT_PUBLIC_BASE_URL=http://localhost:3000
+   DATABASE_URL=postgresql://postgres:password@xxxxx.supabase.co:5432/postgres
+   ```
+3. For production deployments, set these in your hosting platform's environment variables settings:
+   - **Vercel**: Project Settings → Environment Variables
+   - **Netlify**: Site Settings → Environment Variables
+   - **Other platforms**: Use their respective environment variable configuration
+
 ## Getting Started
 
 First, run the development server:
