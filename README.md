@@ -12,11 +12,19 @@ This project requires the following environment variables to be set:
    - **Production**: Your deployed app URL (e.g., `https://your-app.vercel.app` or `https://yourdomain.com`)
    - This is used by the authentication client to make API requests
 
-2. **DATABASE_URL** - Supabase PostgreSQL connection string
+2. **DATABASE_URL** - Supabase PostgreSQL connection string (pooled connection for application runtime)
    - Get this from your Supabase project: Settings > Database > Connection string
+   - Use the **Connection pooling** mode (port 6543) for better performance
+   - Format: `postgresql://postgres:[YOUR-PASSWORD]@[YOUR-PROJECT-REF].supabase.co:6543/postgres?pgbouncer=true&connection_limit=1`
+   - Example: `postgresql://postgres:password@xxxxx.supabase.co:6543/postgres?pgbouncer=true&connection_limit=1`
+
+3. **SHADOW_DATABASE_URL** - Supabase PostgreSQL direct connection string (required for Prisma migrations)
+   - Get this from your Supabase project: Settings > Database > Connection string
+   - Use the **Direct connection** mode (port 5432) - **NOT** the pooled connection
+   - This is required for `prisma db push` and migrations because Prisma uses prepared statements
    - Format: `postgresql://postgres:[YOUR-PASSWORD]@[YOUR-PROJECT-REF].supabase.co:5432/postgres`
-   - For connection pooling (recommended): Add `?pgbouncer=true&connection_limit=1` at the end
-   - Example: `postgresql://postgres:password@xxxxx.supabase.co:5432/postgres?pgbouncer=true&connection_limit=1`
+   - Example: `postgresql://postgres:password@xxxxx.supabase.co:5432/postgres`
+   - **Important**: Do NOT add `?pgbouncer=true` to this URL
 
 ### Optional Environment Variables
 
@@ -28,8 +36,10 @@ This project requires the following environment variables to be set:
 2. Add the required variables:
    ```env
    NEXT_PUBLIC_BASE_URL=http://localhost:3000
-   DATABASE_URL=postgresql://postgres:password@xxxxx.supabase.co:5432/postgres
+   DATABASE_URL=postgresql://postgres:password@xxxxx.supabase.co:6543/postgres?pgbouncer=true&connection_limit=1
+   SHADOW_DATABASE_URL=postgresql://postgres:password@xxxxx.supabase.co:5432/postgres
    ```
+   **Note**: `DATABASE_URL` uses port 6543 (pooled), while `SHADOW_DATABASE_URL` uses port 5432 (direct connection)
 3. For production deployments, set these in your hosting platform's environment variables settings:
    - **Vercel**: Project Settings → Environment Variables
    - **Netlify**: Site Settings → Environment Variables
@@ -52,6 +62,14 @@ bun dev
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+
+## Troubleshooting
+
+### "prepared statement 's1' already exists" Error
+
+If you encounter this error when running `prisma db push` or migrations, it means you're using a pooled connection (PgBouncer) which doesn't support prepared statements required by Prisma migrations.
+
+**Solution**: Ensure you have set the `SHADOW_DATABASE_URL` environment variable with a direct connection (port 5432, without `?pgbouncer=true`) as described above. The `prisma.config.ts` file is configured to use `SHADOW_DATABASE_URL` for migrations, while your application uses `DATABASE_URL` (pooled connection) for runtime.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
