@@ -213,15 +213,15 @@ app/api/transactions/
 
 ### To-dos
 
-- [ ] Create API routes: /api/transactions/route.ts (GET, POST) and /api/transactions/[id]/route.ts (GET, PUT, DELETE)
-- [ ] Enhance getTransactions function in action/bank-account.ts to support payment method, status filters, date presets, and pagination
-- [ ] Verify and update Transaction types in lib/bank-account-types.ts to include relations (category, subCategory, bankAccount)
-- [ ] Create app/(main)/transactions/page.tsx with TransactionClient and stats
-- [ ] Create TransactionClient component managing view state, filters, and pagination
-- [ ] Create TransactionFilters component with all filter options (category, subcategory, type, payment method, status, date presets)
-- [ ] Create TransactionTable component with pagination and responsive design
-- [ ] Create TransactionDonutChart and TransactionBarChart components that update based on filters
-- [ ] Create TransactionStats component showing total income, expense, and net balance
-- [ ] Create add transaction page and TransactionForm component
-- [ ] Create edit transaction page and EditTransactionForm component
-- [ ] Create utility functions for date filtering (daily/weekly/monthly presets) and transaction grouping for charts
+- [x] Create API routes: /api/transactions/route.ts (GET, POST) and /api/transactions/[id]/route.ts (GET, PUT, DELETE)
+- [x] Enhance getTransactions function in action/bank-account.ts to support payment method, status filters, date presets, and pagination
+- [x] Verify and update Transaction types in lib/bank-account-types.ts to include relations (category, subCategory, bankAccount)
+- [x] Create app/(main)/transactions/page.tsx with TransactionClient and stats
+- [x] Create TransactionClient component managing view state, filters, and pagination
+- [x] Create TransactionFilters component with all filter options (category, subcategory, type, payment method, status, date presets)
+- [x] Create TransactionTable component with pagination and responsive design
+- [x] Create TransactionDonutChart and TransactionBarChart components that update based on filters
+- [x] Create TransactionStats component showing total income, expense, and net balance
+- [x] Create add transaction page and TransactionForm component
+- [x] Create edit transaction page and EditTransactionForm component
+- [x] Create utility functions for date filtering (daily/weekly/monthly presets) and transaction grouping for charts

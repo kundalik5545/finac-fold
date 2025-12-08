@@ -121,6 +121,16 @@ export type Transaction = {
   categoryId: string | null;
   subCategoryId: string | null;
   paymentMethod: PaymentMethod | null;
+  category?: Category | null;
+  subCategory?: SubCategory | null;
+  bankAccount?: BankAccount | null;
+};
+
+// Transaction with relations
+export type TransactionWithRelations = Transaction & {
+  category: Category | null;
+  subCategory: SubCategory | null;
+  bankAccount: BankAccount | null;
 };
 
 // Bank Account with relations

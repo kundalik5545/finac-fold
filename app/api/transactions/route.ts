@@ -8,7 +8,7 @@ import { StatusScode } from "@/helpers/status-code";
 import type { NextRequest } from "next/server";
 
 /**
- * GET /api/bank-account/transactions
+ * GET /api/transactions
  * Fetch all transactions for the authenticated user (with optional filters)
  */
 export async function GET(request: NextRequest) {
@@ -30,16 +30,34 @@ export async function GET(request: NextRequest) {
       | "CREDIT"
       | "DEBIT"
       | null;
+    const paymentMethod = searchParams.get("paymentMethod") as
+      | "CASH"
+      | "UPI"
+      | "CARD"
+      | "ONLINE"
+      | "OTHER"
+      | null;
+    const status = searchParams.get("status") as
+      | "PENDING"
+      | "COMPLETED"
+      | "FAILED"
+      | null;
     const startDate = searchParams.get("startDate");
     const endDate = searchParams.get("endDate");
+    const skip = searchParams.get("skip");
+    const take = searchParams.get("take");
 
     const filters = {
       ...(bankAccountId && { bankAccountId }),
       ...(categoryId && { categoryId }),
       ...(subCategoryId && { subCategoryId }),
       ...(transactionType && { transactionType }),
+      ...(paymentMethod && { paymentMethod }),
+      ...(status && { status }),
       ...(startDate && { startDate }),
       ...(endDate && { endDate }),
+      ...(skip && { skip: parseInt(skip, 10) }),
+      ...(take && { take: parseInt(take, 10) }),
     };
 
     const result = await getTransactions(session.user.id, filters);
@@ -58,7 +76,7 @@ export async function GET(request: NextRequest) {
 }
 
 /**
- * POST /api/bank-account/transactions
+ * POST /api/transactions
  * Create a new transaction
  */
 export async function POST(request: Request) {

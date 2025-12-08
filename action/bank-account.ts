@@ -933,13 +933,18 @@ export async function getTransactions(
     categoryId?: string;
     subCategoryId?: string;
     transactionType?: "CREDIT" | "DEBIT";
+    paymentMethod?: "CASH" | "UPI" | "CARD" | "ONLINE" | "OTHER";
+    status?: "PENDING" | "COMPLETED" | "FAILED";
     startDate?: Date | string;
     endDate?: Date | string;
+    skip?: number;
+    take?: number;
   }
-): Promise<Transaction[]> {
+): Promise<{ transactions: Transaction[]; total: number }> {
   try {
     const where: Prisma.TransactionWhereInput = {
       userId,
+      isActive: true, // Only fetch active transactions by default
     };
 
     if (filters?.bankAccountId) {
@@ -954,6 +959,12 @@ export async function getTransactions(
     if (filters?.transactionType) {
       where.transactionType = filters.transactionType;
     }
+    if (filters?.paymentMethod) {
+      where.paymentMethod = filters.paymentMethod;
+    }
+    if (filters?.status) {
+      where.status = filters.status;
+    }
     if (filters?.startDate || filters?.endDate) {
       where.date = {};
       if (filters.startDate) {
@@ -964,20 +975,79 @@ export async function getTransactions(
       }
     }
 
+    // Get total count for pagination
+    const total = await prisma.transaction.count({ where });
+
+    // Fetch transactions with pagination
     const transactions = await prisma.transaction.findMany({
       where,
+      include: {
+        category: true,
+        subCategory: true,
+        bankAccount: true,
+      },
       orderBy: {
         date: "desc",
       },
+      skip: filters?.skip,
+      take: filters?.take,
     });
 
-    return transactions.map((t) => ({
-      ...t,
-      amount: Number(t.amount),
-    }));
+    return {
+      transactions: transactions.map((t) => ({
+        ...t,
+        amount: Number(t.amount),
+        bankAccount: t.bankAccount
+          ? {
+              ...t.bankAccount,
+              startingBalance: t.bankAccount.startingBalance
+                ? Number(t.bankAccount.startingBalance)
+                : 0, // default starting balance is 0
+              insuranceAmount: t.bankAccount.insuranceAmount
+                ? Number(t.bankAccount.insuranceAmount)
+                : null,
+            }
+          : null,
+      })),
+      total,
+    };
   } catch (error) {
     console.error("Error fetching transactions:", error);
     throw new Error("Failed to fetch transactions");
+  }
+}
+
+/**
+ * Get a single transaction by ID with relations
+ */
+export async function getTransaction(
+  transactionId: string,
+  userId: string
+): Promise<Transaction | null> {
+  try {
+    const transaction = await prisma.transaction.findFirst({
+      where: {
+        id: transactionId,
+        userId,
+      },
+      include: {
+        category: true,
+        subCategory: true,
+        bankAccount: true,
+      },
+    });
+
+    if (!transaction) {
+      return null;
+    }
+
+    return {
+      ...transaction,
+      amount: Number(transaction.amount),
+    };
+  } catch (error) {
+    console.error("Error fetching transaction:", error);
+    throw new Error("Failed to fetch transaction");
   }
 }
 
@@ -993,6 +1063,11 @@ export async function createTransaction(
       data: {
         ...data,
         userId,
+      },
+      include: {
+        category: true,
+        subCategory: true,
+        bankAccount: true,
       },
     });
 
@@ -1032,6 +1107,11 @@ export async function updateTransaction(
     const transaction = await prisma.transaction.update({
       where: { id: transactionId },
       data,
+      include: {
+        category: true,
+        subCategory: true,
+        bankAccount: true,
+      },
     });
 
     return {
