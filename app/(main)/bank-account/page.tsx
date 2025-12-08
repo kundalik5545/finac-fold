@@ -11,9 +11,10 @@ import { BankAccount } from "@/lib/bank-account-types";
 
 const BankAccountPage = async () => {
   let bankAccounts: BankAccount[] = [];
+  let session;
 
   try {
-    const session = await auth.api.getSession({ headers: await headers() });
+    session = await auth.api.getSession({ headers: await headers() });
 
     if (session?.user) {
       bankAccounts = await getBankAccounts(session.user.id);
