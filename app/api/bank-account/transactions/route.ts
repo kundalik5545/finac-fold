@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
-import { transactionFormSchema } from "@/lib/bank-account-schema";
+import { transactionFormSchema } from "@/lib/schema/bank-account-schema";
 import { ZodError } from "zod";
 import { getTransactions, createTransaction } from "@/action/bank-account";
-import { StatusScode } from "@/lib/status-code";
+import { StatusScode } from "@/helpers/status-code";
 import type { NextRequest } from "next/server";
 
 /**
@@ -44,10 +44,7 @@ export async function GET(request: NextRequest) {
 
     const transactions = await getTransactions(session.user.id, filters);
 
-    return NextResponse.json(
-      { transactions },
-      { status: StatusScode.OK }
-    );
+    return NextResponse.json({ transactions }, { status: StatusScode.OK });
   } catch (error) {
     console.error("Error fetching transactions:", error);
     return NextResponse.json(
@@ -136,10 +133,7 @@ export async function POST(request: Request) {
       session.user.id
     );
 
-    return NextResponse.json(
-      { transaction },
-      { status: StatusScode.CREATED }
-    );
+    return NextResponse.json({ transaction }, { status: StatusScode.CREATED });
   } catch (error) {
     console.error("Error creating transaction:", error);
 
@@ -160,4 +154,3 @@ export async function POST(request: Request) {
     );
   }
 }
-

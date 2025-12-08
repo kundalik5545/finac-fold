@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
-import { BankAccount } from "@/lib/bank-account-types";
+import { BankAccount } from "@/lib/schema/bank-account-types";
 import { cn } from "@/lib/utils";
 
 export function BankAccountCard({ bankAccount }: { bankAccount: BankAccount }) {

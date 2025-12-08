@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useFormatCurrency } from "@/hooks/use-formatCurrency";
-import { BankAccount, BankTransaction } from "@/lib/bank-account-types";
+import { BankAccount, BankTransaction } from "@/lib/schema/bank-account-types";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 

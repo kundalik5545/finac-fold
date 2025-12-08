@@ -6,7 +6,7 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { CategoriesClient } from "./_components/CategoriesClient";
 import { getCategories } from "@/action/bank-account";
-import { Category } from "@/lib/bank-account-types";
+import { Category } from "@/lib/schema/bank-account-types";
 
 /**
  * Categories Page

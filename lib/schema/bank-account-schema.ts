@@ -87,7 +87,11 @@ export const bankCardFormSchema = z.object({
     .max(50, "Card issuer must be less than 50 characters")
     .optional()
     .nullable(),
-  cvv: z.string().max(4, "CVV must be less than 4 characters").optional().nullable(),
+  cvv: z
+    .string()
+    .max(4, "CVV must be less than 4 characters")
+    .optional()
+    .nullable(),
   expiryDate: z.string().or(z.date()).optional().nullable(),
   limit: z
     .number()
@@ -108,7 +112,11 @@ export const bankCardFormSchema = z.object({
     .optional()
     .nullable(),
   paymentMethod: z.string().optional().nullable(),
-  cardPin: z.string().max(10, "Card PIN must be less than 10 characters").optional().nullable(),
+  cardPin: z
+    .string()
+    .max(10, "Card PIN must be less than 10 characters")
+    .optional()
+    .nullable(),
   paymentStatus: z
     .enum(["PENDING", "COMPLETED", "FAILED"])
     .optional()
@@ -194,9 +202,10 @@ export const updateTransactionSchema = transactionFormSchema.partial();
 
 // Type exports for use in components
 export type BankAccountFormValues = z.infer<typeof bankAccountFormSchema>;
-export type BankTransactionFormValues = z.infer<typeof bankTransactionFormSchema>;
+export type BankTransactionFormValues = z.infer<
+  typeof bankTransactionFormSchema
+>;
 export type BankCardFormValues = z.infer<typeof bankCardFormSchema>;
 export type CategoryFormValues = z.infer<typeof categoryFormSchema>;
 export type SubCategoryFormValues = z.infer<typeof subCategoryFormSchema>;
 export type TransactionFormValues = z.infer<typeof transactionFormSchema>;
-

@@ -8,7 +8,7 @@ import {
   Category,
   SubCategory,
   Transaction,
-} from "@/lib/bank-account-types";
+} from "@/lib/schema/bank-account-types";
 import { Prisma } from "@/app/generated/prisma/client";
 
 // ============================================
@@ -32,7 +32,9 @@ export async function getBankAccounts(userId: string): Promise<BankAccount[]> {
     return bankAccounts.map((account) => ({
       ...account,
       startingBalance: Number(account.startingBalance),
-      insuranceAmount: account.insuranceAmount ? Number(account.insuranceAmount) : null,
+      insuranceAmount: account.insuranceAmount
+        ? Number(account.insuranceAmount)
+        : null,
     }));
   } catch (error) {
     console.error("Error fetching bank accounts:", error);
@@ -46,7 +48,9 @@ export async function getBankAccounts(userId: string): Promise<BankAccount[]> {
 export async function getBankAccount(
   bankAccountId: string,
   userId: string
-): Promise<BankAccount & { bankTransactions: BankTransaction[]; bankCards: BankCard[] }> {
+): Promise<
+  BankAccount & { bankTransactions: BankTransaction[]; bankCards: BankCard[] }
+> {
   try {
     const bankAccount = await prisma.bankAccount.findFirst({
       where: {
@@ -74,7 +78,9 @@ export async function getBankAccount(
     return {
       ...bankAccount,
       startingBalance: Number(bankAccount.startingBalance),
-      insuranceAmount: bankAccount.insuranceAmount ? Number(bankAccount.insuranceAmount) : null,
+      insuranceAmount: bankAccount.insuranceAmount
+        ? Number(bankAccount.insuranceAmount)
+        : null,
       bankTransactions: bankAccount.bankTransactions.map((t) => ({
         ...t,
         amount: Number(t.amount),
@@ -85,7 +91,9 @@ export async function getBankAccount(
       bankCards: bankAccount.bankCards.map((card) => ({
         ...card,
         limit: card.limit ? Number(card.limit) : null,
-        lastBillAmount: card.lastBillAmount ? Number(card.lastBillAmount) : null,
+        lastBillAmount: card.lastBillAmount
+          ? Number(card.lastBillAmount)
+          : null,
         paymentAmount: card.paymentAmount ? Number(card.paymentAmount) : null,
       })),
     };
@@ -99,7 +107,10 @@ export async function getBankAccount(
  * Create a new bank account
  */
 export async function createBankAccount(
-  data: Omit<Prisma.BankAccountCreateInput, "user" | "bankTransactions" | "bankCards" | "transactions">,
+  data: Omit<
+    Prisma.BankAccountCreateInput,
+    "user" | "bankTransactions" | "bankCards" | "transactions"
+  >,
   userId: string
 ): Promise<BankAccount> {
   try {
@@ -115,7 +126,9 @@ export async function createBankAccount(
     return {
       ...bankAccount,
       startingBalance: Number(bankAccount.startingBalance),
-      insuranceAmount: bankAccount.insuranceAmount ? Number(bankAccount.insuranceAmount) : null,
+      insuranceAmount: bankAccount.insuranceAmount
+        ? Number(bankAccount.insuranceAmount)
+        : null,
     };
   } catch (error) {
     console.error("Error creating bank account:", error);
@@ -128,7 +141,12 @@ export async function createBankAccount(
  */
 export async function updateBankAccount(
   bankAccountId: string,
-  data: Partial<Omit<Prisma.BankAccountUpdateInput, "user" | "bankTransactions" | "bankCards" | "transactions">>,
+  data: Partial<
+    Omit<
+      Prisma.BankAccountUpdateInput,
+      "user" | "bankTransactions" | "bankCards" | "transactions"
+    >
+  >,
   userId: string
 ): Promise<BankAccount> {
   try {
@@ -149,7 +167,9 @@ export async function updateBankAccount(
     return {
       ...bankAccount,
       startingBalance: Number(bankAccount.startingBalance),
-      insuranceAmount: bankAccount.insuranceAmount ? Number(bankAccount.insuranceAmount) : null,
+      insuranceAmount: bankAccount.insuranceAmount
+        ? Number(bankAccount.insuranceAmount)
+        : null,
     };
   } catch (error) {
     console.error("Error updating bank account:", error);
@@ -272,7 +292,14 @@ export async function getBankTransactions(
  */
 export async function createBankTransaction(
   bankAccountId: string,
-  data: Omit<Prisma.BankTransactionCreateInput, "bankAccount" | "user" | "totalDeposit" | "totalWithdrawal" | "currentBalance">,
+  data: Omit<
+    Prisma.BankTransactionCreateInput,
+    | "bankAccount"
+    | "user"
+    | "totalDeposit"
+    | "totalWithdrawal"
+    | "currentBalance"
+  >,
   userId: string
 ): Promise<BankTransaction> {
   try {
@@ -344,7 +371,9 @@ export async function createBankTransaction(
  */
 export async function updateBankTransaction(
   transactionId: string,
-  data: Partial<Omit<Prisma.BankTransactionUpdateInput, "bankAccount" | "user">>,
+  data: Partial<
+    Omit<Prisma.BankTransactionUpdateInput, "bankAccount" | "user">
+  >,
   userId: string
 ): Promise<BankTransaction> {
   try {
@@ -650,7 +679,10 @@ export async function getCategories(userId: string): Promise<Category[]> {
  * Create a new category
  */
 export async function createCategory(
-  data: Omit<Prisma.CategoryCreateInput, "user" | "subCategories" | "transactions">,
+  data: Omit<
+    Prisma.CategoryCreateInput,
+    "user" | "subCategories" | "transactions"
+  >,
   userId: string
 ): Promise<Category> {
   try {
@@ -675,7 +707,9 @@ export async function createCategory(
  */
 export async function updateCategory(
   categoryId: string,
-  data: Partial<Omit<Prisma.CategoryUpdateInput, "user" | "subCategories" | "transactions">>,
+  data: Partial<
+    Omit<Prisma.CategoryUpdateInput, "user" | "subCategories" | "transactions">
+  >,
   userId: string
 ): Promise<Category> {
   try {
@@ -731,14 +765,16 @@ export async function deleteCategory(
     });
   } catch (error) {
     console.error("Error deleting category:", error);
-    
+
     // Handle Prisma errors
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
       if (error.code === "P2003") {
-        throw new Error("Cannot delete category: it is referenced by transactions");
+        throw new Error(
+          "Cannot delete category: it is referenced by transactions"
+        );
       }
     }
-    
+
     throw new Error(
       `Failed to delete category: ${
         error instanceof Error ? error.message : "Unknown error"
@@ -782,13 +818,16 @@ export async function getSubCategories(
  * Create a new subcategory
  */
 export async function createSubCategory(
-  data: Omit<Prisma.SubCategoryCreateInput, "category" | "user" | "transactions">,
+  data: Omit<
+    Prisma.SubCategoryCreateInput,
+    "category" | "user" | "transactions"
+  >,
   userId: string
 ): Promise<SubCategory> {
   try {
     // Extract categoryId from data to avoid conflict with relation
     const { categoryId, ...restData } = data as any;
-    
+
     const subCategory = await prisma.subCategory.create({
       data: {
         ...restData,
@@ -800,17 +839,19 @@ export async function createSubCategory(
     return subCategory;
   } catch (error) {
     console.error("Error creating subcategory:", error);
-    
+
     // Handle Prisma unique constraint violations
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
       if (error.code === "P2002") {
-        throw new Error("A subcategory with this name already exists for this category");
+        throw new Error(
+          "A subcategory with this name already exists for this category"
+        );
       }
       if (error.code === "P2003") {
         throw new Error("Invalid category reference");
       }
     }
-    
+
     // Pass through the actual error message for better debugging
     throw new Error(
       `Failed to create subcategory: ${
@@ -825,7 +866,9 @@ export async function createSubCategory(
  */
 export async function updateSubCategory(
   subCategoryId: string,
-  data: Partial<Omit<Prisma.SubCategoryUpdateInput, "category" | "user" | "transactions">>,
+  data: Partial<
+    Omit<Prisma.SubCategoryUpdateInput, "category" | "user" | "transactions">
+  >,
   userId: string
 ): Promise<SubCategory> {
   try {
@@ -968,7 +1011,12 @@ export async function createTransaction(
  */
 export async function updateTransaction(
   transactionId: string,
-  data: Partial<Omit<Prisma.TransactionUpdateInput, "user" | "bankAccount" | "category" | "subCategory">>,
+  data: Partial<
+    Omit<
+      Prisma.TransactionUpdateInput,
+      "user" | "bankAccount" | "category" | "subCategory"
+    >
+  >,
   userId: string
 ): Promise<Transaction> {
   try {
@@ -1021,4 +1069,3 @@ export async function deleteTransaction(
     throw new Error("Failed to delete transaction");
   }
 }
-

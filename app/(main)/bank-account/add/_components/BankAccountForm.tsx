@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { bankAccountFormSchema } from "@/lib/bank-account-schema";
+import { bankAccountFormSchema } from "@/lib/schema/bank-account-schema";
 import { useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -199,7 +199,7 @@ export function BankAccountForm() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="SAVINGS">Savings</SelectItem>
-                      <SelectItem value="CHECKING">Checking</SelectItem>
+                      <SelectItem value="SALARY">Salary</SelectItem>
                       <SelectItem value="CURRENT">Current</SelectItem>
                       <SelectItem value="OTHER">Other</SelectItem>
                     </SelectContent>

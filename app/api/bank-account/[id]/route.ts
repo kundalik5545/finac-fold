@@ -1,5 +1,5 @@
 import { auth } from "@/lib/auth";
-import { updateBankAccountSchema } from "@/lib/bank-account-schema";
+import { updateBankAccountSchema } from "@/lib/schema/bank-account-schema";
 import { headers } from "next/headers";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
@@ -9,7 +9,7 @@ import {
   updateBankAccount,
   deleteBankAccount,
 } from "@/action/bank-account";
-import { StatusScode } from "@/lib/status-code";
+import { StatusScode } from "@/helpers/status-code";
 
 type ParamsType = { params: Promise<{ id: string }> };
 
@@ -32,10 +32,7 @@ export async function GET(_request: NextRequest, { params }: ParamsType) {
 
     const bankAccount = await getBankAccount(id, session.user.id);
 
-    return NextResponse.json(
-      { bankAccount },
-      { status: StatusScode.OK }
-    );
+    return NextResponse.json({ bankAccount }, { status: StatusScode.OK });
   } catch (error) {
     console.error("Error fetching bank account:", error);
 
@@ -108,8 +105,12 @@ export async function PATCH(request: NextRequest, { params }: ParamsType) {
       updateData.color = toNullIfEmpty(validatedData.color);
     if ("description" in validatedData)
       updateData.description = toNullIfEmpty(validatedData.description);
-    if ("isActive" in validatedData) updateData.isActive = validatedData.isActive;
-    if ("accountOpeningDate" in validatedData && validatedData.accountOpeningDate !== undefined) {
+    if ("isActive" in validatedData)
+      updateData.isActive = validatedData.isActive;
+    if (
+      "accountOpeningDate" in validatedData &&
+      validatedData.accountOpeningDate !== undefined
+    ) {
       const accountOpeningDate =
         validatedData.accountOpeningDate instanceof Date
           ? validatedData.accountOpeningDate
@@ -129,10 +130,7 @@ export async function PATCH(request: NextRequest, { params }: ParamsType) {
       session.user.id
     );
 
-    return NextResponse.json(
-      { bankAccount },
-      { status: StatusScode.OK }
-    );
+    return NextResponse.json({ bankAccount }, { status: StatusScode.OK });
   } catch (error) {
     console.error("Error updating bank account:", error);
 
@@ -196,4 +194,3 @@ export async function DELETE(_request: NextRequest, { params }: ParamsType) {
     );
   }
 }
-

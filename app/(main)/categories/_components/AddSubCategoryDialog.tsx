@@ -4,8 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { subCategoryFormSchema } from "@/lib/bank-account-schema";
-import type { SubCategoryFormValues } from "@/lib/bank-account-schema";
+import { subCategoryFormSchema } from "@/lib/schema/bank-account-schema";
+import type { SubCategoryFormValues } from "@/lib/schema/bank-account-schema";
 import {
   Dialog,
   DialogContent,

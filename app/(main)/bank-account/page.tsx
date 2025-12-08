@@ -7,7 +7,7 @@ import { headers } from "next/headers";
 import { BankAccountClient } from "./_components/BankAccountClient";
 import { BankAccountStats } from "./_components/BankAccountStats";
 import { getBankAccounts, calculateBalance } from "@/action/bank-account";
-import { BankAccount } from "@/lib/bank-account-types";
+import { BankAccount } from "@/lib/schema/bank-account-types";
 
 const BankAccountPage = async () => {
   let bankAccounts: BankAccount[] = [];

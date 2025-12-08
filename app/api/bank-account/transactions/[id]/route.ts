@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
-import { updateTransactionSchema } from "@/lib/bank-account-schema";
+import { updateTransactionSchema } from "@/lib/schema/bank-account-schema";
 import { ZodError } from "zod";
 import { updateTransaction, deleteTransaction } from "@/action/bank-account";
-import { StatusScode } from "@/lib/status-code";
+import { StatusScode } from "@/helpers/status-code";
 import type { NextRequest } from "next/server";
 
 type ParamsType = { params: Promise<{ id: string }> };
@@ -60,8 +60,10 @@ export async function PATCH(request: NextRequest, { params }: ParamsType) {
     }
     if ("description" in validatedData)
       updateData.description = toNullIfEmpty(validatedData.description);
-    if ("currency" in validatedData) updateData.currency = validatedData.currency;
-    if ("isActive" in validatedData) updateData.isActive = validatedData.isActive;
+    if ("currency" in validatedData)
+      updateData.currency = validatedData.currency;
+    if ("isActive" in validatedData)
+      updateData.isActive = validatedData.isActive;
     if ("bankAccountId" in validatedData)
       updateData.bankAccountId = validatedData.bankAccountId ?? null;
     if ("categoryId" in validatedData)
@@ -77,10 +79,7 @@ export async function PATCH(request: NextRequest, { params }: ParamsType) {
       session.user.id
     );
 
-    return NextResponse.json(
-      { transaction },
-      { status: StatusScode.OK }
-    );
+    return NextResponse.json({ transaction }, { status: StatusScode.OK });
   } catch (error) {
     console.error("Error updating transaction:", error);
 
@@ -144,4 +143,3 @@ export async function DELETE(_request: NextRequest, { params }: ParamsType) {
     );
   }
 }
-

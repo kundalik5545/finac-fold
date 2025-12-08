@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
-import { bankAccountFormSchema } from "@/lib/bank-account-schema";
+import { bankAccountFormSchema } from "@/lib/schema/bank-account-schema";
 import { ZodError } from "zod";
 import { getBankAccounts, createBankAccount } from "@/action/bank-account";
-import { StatusScode } from "@/lib/status-code";
+import { StatusScode } from "@/helpers/status-code";
 
 /**
  * GET /api/bank-account
@@ -23,10 +23,7 @@ export async function GET() {
 
     const bankAccounts = await getBankAccounts(session.user.id);
 
-    return NextResponse.json(
-      { bankAccounts },
-      { status: StatusScode.OK }
-    );
+    return NextResponse.json({ bankAccounts }, { status: StatusScode.OK });
   } catch (error) {
     console.error("Error fetching bank accounts:", error);
     return NextResponse.json(
@@ -114,12 +111,12 @@ export async function POST(request: Request) {
     };
 
     // Create bank account
-    const bankAccount = await createBankAccount(bankAccountData, session.user.id);
-
-    return NextResponse.json(
-      { bankAccount },
-      { status: StatusScode.CREATED }
+    const bankAccount = await createBankAccount(
+      bankAccountData,
+      session.user.id
     );
+
+    return NextResponse.json({ bankAccount }, { status: StatusScode.CREATED });
   } catch (error) {
     console.error("Error creating bank account:", error);
 
@@ -140,4 +137,3 @@ export async function POST(request: Request) {
     );
   }
 }
-

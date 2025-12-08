@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Table2, LayoutGrid } from "lucide-react";
 import { CategoriesTableView } from "./CategoriesTableView";
 import { CategoriesCardView } from "./CategoriesCardView";
-import { Category } from "@/lib/bank-account-types";
+import { Category } from "@/lib/schema/bank-account-types";
 
 /**
  * CategoriesClient Component
