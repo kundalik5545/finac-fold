@@ -1,7 +1,7 @@
 "use server";
 
 import prisma from "@/lib/prisma";
-import { Goal, GoalTransaction } from "@/lib/goals-types";
+import { Goal, GoalTransaction } from "@/lib/types/goals-types";
 import { Prisma } from "@/app/generated/prisma/client";
 
 // ============================================

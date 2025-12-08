@@ -22,7 +22,7 @@ import {
   TodoCategory,
   TodoTag,
   TodoPriority,
-} from "@/lib/todo-types";
+} from "@/lib/types/todo-types";
 import { toggleTodoComplete, deleteTodo } from "@/action/todo";
 
 interface TodoTableViewProps {
@@ -171,9 +171,8 @@ export function TodoTableView({ todos, categories, tags }: TodoTableViewProps) {
             return (
               <TableRow
                 key={todo.id}
-                className={`hover:bg-muted/50 cursor-pointer ${
-                  todo.completed ? "opacity-60" : ""
-                }`}
+                className={`hover:bg-muted/50 cursor-pointer ${todo.completed ? "opacity-60" : ""
+                  }`}
                 onClick={() => router.push(`/todo/edit/${todo.id}`)}
               >
                 <TableCell>
@@ -191,9 +190,8 @@ export function TodoTableView({ todos, categories, tags }: TodoTableViewProps) {
                   />
                 </TableCell>
                 <TableCell
-                  className={`text-sm font-medium ${
-                    todo.completed ? "line-through" : ""
-                  }`}
+                  className={`text-sm font-medium ${todo.completed ? "line-through" : ""
+                    }`}
                 >
                   {todo.title}
                 </TableCell>
@@ -235,10 +233,10 @@ export function TodoTableView({ todos, categories, tags }: TodoTableViewProps) {
                     <div className="flex gap-1 flex-wrap">
                       {todo.tags && todo.tags.length > 0
                         ? todo.tags.map((tag) => (
-                            <Badge key={tag.id} variant="outline">
-                              {tag.name}
-                            </Badge>
-                          ))
+                          <Badge key={tag.id} variant="outline">
+                            {tag.name}
+                          </Badge>
+                        ))
                         : "-"}
                     </div>
                   </TableCell>

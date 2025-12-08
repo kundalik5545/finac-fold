@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useFormatCurrency } from "@/hooks/use-formatCurrency";
-import { Asset } from "@/lib/assets-tracking-types";
+import { Asset } from "@/lib/types/assets-tracking-types";
 
 export function AssetDetailView({ asset }: { asset: Asset }) {
     const { formatCurrency } = useFormatCurrency("en-IN", "INR");

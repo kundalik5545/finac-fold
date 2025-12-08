@@ -6,7 +6,7 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { GoalsClient } from "./_components/GoalsClient";
 import { getGoals } from "@/action/goals";
-import { Goal } from "@/lib/goals-types";
+import { Goal } from "@/lib/types/goals-types";
 
 const GoalsPage = async () => {
   let goals: Goal[] = [];

@@ -1,5 +1,5 @@
 import { auth } from "@/lib/auth";
-import { updateGoalSchema } from "@/lib/goals-schema";
+import { updateGoalSchema } from "@/lib/schema/goals-schema";
 import { headers } from "next/headers";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
@@ -56,7 +56,10 @@ export async function PATCH(request: NextRequest, { params }: ParamsType) {
       updateData.targetAmount = validatedData.targetAmount;
     if ("currentAmount" in validatedData)
       updateData.currentAmount = validatedData.currentAmount;
-    if ("targetDate" in validatedData && validatedData.targetDate !== undefined) {
+    if (
+      "targetDate" in validatedData &&
+      validatedData.targetDate !== undefined
+    ) {
       const targetDate =
         validatedData.targetDate instanceof Date
           ? validatedData.targetDate
@@ -119,4 +122,3 @@ export async function DELETE(_request: NextRequest, { params }: ParamsType) {
     );
   }
 }
-

@@ -6,7 +6,7 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { TodoClient } from "./_components/TodoClient";
 import { getTodos, getCategories, getTags } from "@/action/todo";
-import { TodoWithRelations, TodoCategory, TodoTag } from "@/lib/todo-types";
+import { TodoWithRelations, TodoCategory, TodoTag } from "@/lib/types/todo-types";
 
 const TodoPage = async () => {
   let todos: TodoWithRelations[] = [];

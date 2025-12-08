@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Trash, Edit, Check, X } from "lucide-react";
-import { TodoCategory } from "@/lib/todo-types";
+import { TodoCategory } from "@/lib/types/todo-types";
 import {
   createCategory,
   updateCategory,

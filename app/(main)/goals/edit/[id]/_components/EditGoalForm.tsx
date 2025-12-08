@@ -8,13 +8,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { goalFormSchema } from "@/lib/goals-schema";
+import { goalFormSchema } from "@/lib/schema/goals-schema";
 import { useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { IconPicker } from "@/components/ui/icon-picker";
 import { ColorPicker } from "@/components/ui/color-picker";
-import { Goal } from "@/lib/goals-types";
+import { Goal } from "@/lib/types/goals-types";
 
 export function EditGoalForm({ goal }: { goal: Goal }) {
   const router = useRouter();

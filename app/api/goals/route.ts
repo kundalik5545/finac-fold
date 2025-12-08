@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
-import { goalFormSchema } from "@/lib/goals-schema";
+import { goalFormSchema } from "@/lib/schema/goals-schema";
 import { ZodError } from "zod";
 import { getGoals, createGoal } from "@/action/goals";
 

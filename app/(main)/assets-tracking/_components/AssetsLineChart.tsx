@@ -16,7 +16,7 @@ import {
     ChartTooltipContent,
     ChartConfig,
 } from "@/components/ui/chart";
-import { Asset } from "@/lib/assets-tracking-types";
+import { Asset } from "@/lib/types/assets-tracking-types";
 
 export function AssetsLineChart({ assets }: { assets: Asset[] }) {
     // Build chart data: x-axis is asset type/name, y-axes are currentValue and purchasePrice

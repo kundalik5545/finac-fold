@@ -21,7 +21,7 @@ import {
   ChartConfig,
   ChartContainer,
 } from "@/components/ui/chart";
-import { Goal } from "@/lib/goals-types";
+import { Goal } from "@/lib/types/goals-types";
 import { format } from "date-fns";
 import { TrendingUp } from "lucide-react";
 

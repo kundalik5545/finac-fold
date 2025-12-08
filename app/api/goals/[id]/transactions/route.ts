@@ -1,13 +1,10 @@
 import { auth } from "@/lib/auth";
-import { goalTransactionSchema } from "@/lib/goals-schema";
+import { goalTransactionSchema } from "@/lib/schema/goals-schema";
 import { headers } from "next/headers";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { ZodError } from "zod";
-import {
-  getGoalTransactions,
-  createGoalTransaction,
-} from "@/action/goals";
+import { getGoalTransactions, createGoalTransaction } from "@/action/goals";
 
 type ParamsType = { params: Promise<{ id: string }> };
 
@@ -90,4 +87,3 @@ export async function POST(request: NextRequest, { params }: ParamsType) {
     );
   }
 }
-

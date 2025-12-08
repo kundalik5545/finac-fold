@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { TodoWithRelations, CalendarViewMode } from "@/lib/todo-types";
+import { TodoWithRelations, CalendarViewMode } from "@/lib/types/todo-types";
 import { DailyView } from "./DailyView";
 import { WeeklyView } from "./WeeklyView";
 import { MonthlyView } from "./MonthlyView";

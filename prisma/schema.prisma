@@ -35,6 +35,12 @@ model User {
   todoTags           TodoTag[]
   goals              Goal[]
   goalTransactions   GoalTransaction[]
+  bankAccounts       BankAccount[]
+  bankTransactions   BankTransaction[]
+  categories         Category[]
+  subCategories      SubCategory[]
+  bankCards          bankCard[]
+  transactions       Transaction[]
 
   @@unique([email])
   @@map("user")
@@ -247,8 +253,178 @@ model GoalTransaction {
   @@map("goal_transaction")
 }
 
-// Enums
+// Bank Account Model
+model BankAccount {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
+  name               String
+  accountNumber      String?
+  bankName           String?
+  accountType        AccountType?
+  ifscCode           String?
+  branch             String?
+  startingBalance    Decimal      @default(0) @db.Decimal(65, 4)
+  icon               String?
+  color              String?
+  description        String?
+  isActive           Boolean      @default(true)
+  accountOpeningDate DateTime?
+  isInsuranceActive  Boolean?     @default(false)
+  insuranceAmount    Decimal?     @db.Decimal(65, 4)
+
+  userId           String
+  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bankTransactions BankTransaction[]
+  bankCards        bankCard[]
+  transactions     Transaction[]
+
+  @@index([userId])
+  @@index([userId, accountNumber])
+  @@map("bank_account")
+}
+
+model bankCard {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  name           String
+  cardNumber     String?
+  cardType       CardType
+  cardIssuer     String?
+  cvv            String?
+  expiryDate     DateTime?
+  limit          Decimal?       @default(0) @db.Decimal(65, 4)
+  lastBillAmount Decimal?       @default(0) @db.Decimal(65, 4)
+  paymentDueDay  Int?
+  paymentMethod  String?
+  cardPin        String?        @default("1234")
+  paymentStatus  PaymentStatus?
+  paymentAmount  Decimal?       @default(0) @db.Decimal(65, 4)
+  paymentDate    DateTime?
+  color          String?
+  icon           String?
+  notes          String?
+  isActive       Boolean        @default(true)
+
+  userId        String
+  user          User        @relation(fields: [userId], references: [id])
+  bankAccountId String
+  bankAccount   BankAccount @relation(fields: [bankAccountId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([bankAccountId])
+  @@map("bank_card")
+}
+
+// Bank Transaction Model - Tracks all transactions for a bank account
+model BankTransaction {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  amount          Decimal         @db.Decimal(65, 4)
+  totalDeposit    Decimal         @default(0.0) @db.Decimal(65, 4)
+  totalWithdrawal Decimal         @default(0.0) @db.Decimal(65, 4)
+  currentBalance  Decimal         @db.Decimal(65, 4)
+  transactionDate DateTime
+  transactionType TransactionType
+  description     String?
+
+  bankAccountId String
+  bankAccount   BankAccount @relation(fields: [bankAccountId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@index([bankAccountId, transactionDate])
+  @@index([userId])
+  @@index([userId, transactionType])
+  @@index([transactionDate])
+  @@map("bank_transaction")
+}
+
+model Category {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  name          String
+  type          CategoryType
+  color         String?
+  icon          String?
+  userId        String
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subCategories SubCategory[]
+  transactions  Transaction[]
+
+  @@unique([userId, name])
+  @@index([userId])
+  @@map("category")
+}
+
+model SubCategory {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  name         String
+  color        String?
+  icon         String?
+  userId       String?
+  categoryId   String
+  category     Category      @relation(fields: [categoryId], references: [id])
+  user         User?         @relation(fields: [userId], references: [id])
+  transactions Transaction[]
+
+  @@unique([userId, categoryId, name])
+  @@index([userId])
+  @@index([categoryId])
+  @@map("sub_category")
+}
+
+// Tranasction model
+model Transaction {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  amount          Decimal           @db.Decimal(65, 4)
+  transactionType TransactionType
+  status          TransactionStatus @default(PENDING)
+  date            DateTime
+  description     String?
+  currency        Currency          @default(INR)
+  isActive        Boolean           @default(true)
+  userId          String
+  bankAccountId   String?
+  categoryId      String?
+  subCategoryId   String?
+  paymentMethod   PaymentMethod?
+
+  category    Category?    @relation(fields: [categoryId], references: [id])
+  subCategory SubCategory? @relation(fields: [subCategoryId], references: [id])
+  user        User         @relation(fields: [userId], references: [id])
+  bankAccount BankAccount? @relation(fields: [bankAccountId], references: [id])
+
+  @@index([userId])
+  @@index([categoryId])
+  @@index([date])
+  @@map("transaction")
+}
+
+// Currency Enum
+enum Currency {
+  INR
+  USD
+  EUR
+  GBP
+  OTHER
+}
+
+// Budget Model
 // Asset Type Enum
 enum AssetType {
   PROPERTY
@@ -288,4 +464,40 @@ enum RecurringFrequency {
   WEEKLY
   MONTHLY
   YEARLY
+}
+
+// Account Type Enum
+enum AccountType {
+  SAVINGS
+  CHECKING
+  CURRENT
+  OTHER
+}
+
+// Transaction Type Enum
+enum TransactionType {
+  CREDIT
+  DEBIT
+}
+
+// Card Type Enum
+enum CardType {
+  DEBIT
+  CREDIT
+  PREPAID
+  OTHER
+}
+
+// Payment Status Enum
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+enum CategoryType {
+  INCOME
+  EXPENSE
+  TRANSFER
+  INVESTMENT
 }

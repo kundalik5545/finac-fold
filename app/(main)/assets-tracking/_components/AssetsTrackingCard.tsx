@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
-import { Asset, AssetType } from "@/lib/assets-tracking-types";
+import { Asset, AssetType } from "@/lib/types/assets-tracking-types";
 
 export function AssetsTrackingCard({ assets }: { assets: Asset[] }) {
     const { formatCurrency } = useFormatCurrency("en-IN", "INR");
@@ -159,8 +159,8 @@ export function AssetsTrackingCard({ assets }: { assets: Asset[] }) {
                                         )}
                                         <p
                                             className={`text-sm font-semibold ${isGain
-                                                    ? "text-green-600 dark:text-green-400"
-                                                    : "text-red-600 dark:text-red-400"
+                                                ? "text-green-600 dark:text-green-400"
+                                                : "text-red-600 dark:text-red-400"
                                                 }`}
                                         >
                                             {formatCurrency(Math.abs(gainLoss))} (

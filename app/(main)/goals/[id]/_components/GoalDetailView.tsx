@@ -8,7 +8,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useFormatCurrency } from "@/hooks/use-formatCurrency";
-import { Goal } from "@/lib/goals-types";
+import { Goal } from "@/lib/types/goals-types";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 

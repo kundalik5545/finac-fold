@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Trash, Check, X } from "lucide-react";
-import { TodoTag } from "@/lib/todo-types";
+import { TodoTag } from "@/lib/types/todo-types";
 import { createTag, deleteTag } from "@/action/todo";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";

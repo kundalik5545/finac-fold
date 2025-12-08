@@ -7,7 +7,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { useFormatCurrency } from "@/hooks/use-formatCurrency";
-import { AssetsTransaction } from "@/lib/assets-tracking-types";
+import { AssetsTransaction } from "@/lib/types/assets-tracking-types";
 import {
     Dialog,
     DialogContent,

@@ -16,7 +16,7 @@ import {
   ChartTooltipContent,
   ChartConfig,
 } from "@/components/ui/chart";
-import { Goal } from "@/lib/goals-types";
+import { Goal } from "@/lib/types/goals-types";
 import {
   Card,
   CardContent,

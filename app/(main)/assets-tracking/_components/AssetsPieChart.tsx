@@ -8,7 +8,7 @@ import {
     ChartTooltipContent,
     ChartConfig,
 } from "@/components/ui/chart";
-import { Asset } from "@/lib/assets-tracking-types";
+import { Asset } from "@/lib/types/assets-tracking-types";
 import {
     Card,
     CardContent,

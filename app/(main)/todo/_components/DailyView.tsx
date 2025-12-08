@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { TodoWithRelations, TodoPriority } from "@/lib/todo-types";
+import { TodoWithRelations, TodoPriority } from "@/lib/types/todo-types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -165,9 +165,8 @@ export function DailyView({ todos }: DailyViewProps) {
                         />
                         <div className="flex-1 min-w-0">
                           <h4
-                            className={`font-medium ${
-                              todo.completed ? "line-through" : ""
-                            }`}
+                            className={`font-medium ${todo.completed ? "line-through" : ""
+                              }`}
                           >
                             {todo.title}
                           </h4>
@@ -235,9 +234,8 @@ export function DailyView({ todos }: DailyViewProps) {
                         />
                         <div className="flex-1 min-w-0">
                           <h4
-                            className={`font-medium ${
-                              todo.completed ? "line-through" : ""
-                            }`}
+                            className={`font-medium ${todo.completed ? "line-through" : ""
+                              }`}
                           >
                             {todo.title}
                           </h4>
@@ -305,9 +303,8 @@ export function DailyView({ todos }: DailyViewProps) {
                         />
                         <div className="flex-1 min-w-0">
                           <h4
-                            className={`font-medium ${
-                              todo.completed ? "line-through" : ""
-                            }`}
+                            className={`font-medium ${todo.completed ? "line-through" : ""
+                              }`}
                           >
                             {todo.title}
                           </h4>
@@ -375,9 +372,8 @@ export function DailyView({ todos }: DailyViewProps) {
                         />
                         <div className="flex-1 min-w-0">
                           <h4
-                            className={`font-medium ${
-                              todo.completed ? "line-through" : ""
-                            }`}
+                            className={`font-medium ${todo.completed ? "line-through" : ""
+                              }`}
                           >
                             {todo.title}
                           </h4>

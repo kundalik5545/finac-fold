@@ -21,7 +21,7 @@ import {
   ChartConfig,
   ChartContainer,
 } from "@/components/ui/chart";
-import { GoalTransaction } from "@/lib/goals-types";
+import { GoalTransaction } from "@/lib/types/goals-types";
 import { format } from "date-fns";
 
 function formatCurrency(value: number) {

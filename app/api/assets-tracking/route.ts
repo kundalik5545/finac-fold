@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
-import { assetFormSchema } from "@/lib/assets-tracking-schema";
+import { assetFormSchema } from "@/lib/schema/assets-tracking-schema";
 import { ZodError } from "zod";
 import { getAssets, createAsset } from "@/action/assets-tracking";
 

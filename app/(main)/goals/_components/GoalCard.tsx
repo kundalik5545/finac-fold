@@ -9,7 +9,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Goal } from "@/lib/goals-types";
+import { Goal } from "@/lib/types/goals-types";
 import { cn } from "@/lib/utils";
 
 export function GoalCard({ goal }: { goal: Goal }) {

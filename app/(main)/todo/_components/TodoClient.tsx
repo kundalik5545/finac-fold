@@ -13,7 +13,7 @@ import {
   TodoTag,
   CalendarViewMode,
   TodoFilters as TodoFiltersType,
-} from "@/lib/todo-types";
+} from "@/lib/types/todo-types";
 
 type ViewMode = "table" | "card" | "calendar";
 

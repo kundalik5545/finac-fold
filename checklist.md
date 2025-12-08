@@ -40,3 +40,24 @@ Create a feature called goals which helps user to track there future goals and i
 - for each goal show area chart with date for every time user add new transaction to upadate current balance.
 - add other required details as per indusrty standards
 - check functionality for any error after creating it.
+
+# Feature - Bank Account
+
+Create a feature bank account so user can add details about there bank accounts and related balancea and transactions.
+
+- User should be able to add, edit and delete bank accounts
+- Upon adding bank account show them and cards and upon clicking that card user will navigate to details page
+  - Bank details page should have
+    - total balance (optional)
+    - total expense and total income
+    - all transaction related to that bank in table format
+    - filter to filter transaction based on date range and credit, debit, and categories, sub categories
+    - Show line chart for transaction for daily, weekly, monthly or date range basis
+    - show donut chart for income and expense categories (use pre made color and icon components inside )
+    - back button from back-button.tsx
+- make card responsive and nice looking
+- create prisma model and migrate
+- show stats about bank account page
+  - show total accounts and total balance
+  - current month spendings analytics
+  - show donut and bar charts to show comparision for weekyl and monthyl spendings

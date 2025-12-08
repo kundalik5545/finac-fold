@@ -17,7 +17,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
-import { Asset, AssetType } from "@/lib/assets-tracking-types";
+import { Asset, AssetType } from "@/lib/types/assets-tracking-types";
 
 // Types for color mapping and loading states
 type TypeColorMap = {
@@ -164,8 +164,8 @@ export function AssetsTrackingTable({ assets }: { assets: Asset[] }) {
                                 </TableCell>
                                 <TableCell
                                     className={`text-right text-sm font-semibold ${isGain
-                                            ? "text-green-600 dark:text-green-400"
-                                            : "text-red-600 dark:text-red-400"
+                                        ? "text-green-600 dark:text-green-400"
+                                        : "text-red-600 dark:text-red-400"
                                         }`}
                                 >
                                     <div className="flex items-center justify-end gap-1">

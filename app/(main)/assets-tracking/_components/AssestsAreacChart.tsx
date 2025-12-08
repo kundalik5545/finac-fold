@@ -22,7 +22,7 @@ import {
     ChartConfig,
     ChartContainer,
 } from "@/components/ui/chart";
-import { Asset } from "@/lib/assets-tracking-types";
+import { Asset } from "@/lib/types/assets-tracking-types";
 import { format } from "date-fns";
 import React from "react";
 

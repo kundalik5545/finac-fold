@@ -10,7 +10,7 @@ import {
   TodoFilters,
   TodoPriority,
   RecurringFrequency,
-} from "@/lib/todo-types";
+} from "@/lib/types/todo-types";
 import { Prisma } from "@/app/generated/prisma/client";
 
 // ============================================

@@ -1,5 +1,5 @@
 import { auth } from "@/lib/auth";
-import { assetTransactionSchema } from "@/lib/assets-tracking-schema";
+import { assetTransactionSchema } from "@/lib/schema/assets-tracking-schema";
 import { headers } from "next/headers";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
