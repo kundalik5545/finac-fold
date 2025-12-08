@@ -17,7 +17,7 @@ interface TransactionClientProps {
     bankAccounts: BankAccount[];
 }
 
-const PAGE_SIZE = 5;
+const PAGE_SIZE = 10;
 
 /**
  * TransactionClient Component

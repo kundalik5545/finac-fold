@@ -30,6 +30,16 @@ import {
     type DatePreset,
 } from "@/lib/utils/transaction-utils";
 
+// ---- Chart Color Variables (Edit here to change; syncs with theme CSS vars by default) ----
+const INCOME_BAR_COLOR = "#10b981";
+const EXPENSE_BAR_COLOR = "#ef4444";
+// const INCOME_BAR_COLOR = "hsl(var(--chart-1))";
+// const EXPENSE_BAR_COLOR = "hsl(var(--chart-2))"; 
+
+// You can also use custom HEX/RGB if desired, e.g. "#388e3c" or "rgb(220, 53, 69)"
+
+// ------------------------------------------------------------------------------------------
+
 interface TransactionBarChartProps {
     transactions: Transaction[];
     datePreset?: DatePreset;
@@ -90,11 +100,11 @@ export function TransactionBarChart({
         () => ({
             Income: {
                 label: "Income",
-                color: "hsl(var(--chart-1))",
+                color: INCOME_BAR_COLOR,
             },
             Expense: {
                 label: "Expense",
-                color: "hsl(var(--chart-2))",
+                color: EXPENSE_BAR_COLOR,
             },
         }),
         []
@@ -165,8 +175,8 @@ export function TransactionBarChart({
                                 }
                             />
                             <Legend />
-                            <Bar dataKey="Income" fill="hsl(var(--chart-1))" radius={[4, 4, 0, 0]} />
-                            <Bar dataKey="Expense" fill="hsl(var(--chart-2))" radius={[4, 4, 0, 0]} />
+                            <Bar dataKey="Income" fill={INCOME_BAR_COLOR} radius={[4, 4, 0, 0]} />
+                            <Bar dataKey="Expense" fill={EXPENSE_BAR_COLOR} radius={[4, 4, 0, 0]} />
                         </BarChart>
                     </ResponsiveContainer>
                 </ChartContainer>

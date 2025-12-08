@@ -1044,6 +1044,15 @@ export async function getTransaction(
     return {
       ...transaction,
       amount: Number(transaction.amount),
+      bankAccount: transaction.bankAccount
+        ? {
+            ...transaction.bankAccount,
+            startingBalance: Number(transaction.bankAccount.startingBalance),
+            insuranceAmount: transaction.bankAccount.insuranceAmount
+              ? Number(transaction.bankAccount.insuranceAmount)
+              : null,
+          }
+        : null,
     };
   } catch (error) {
     console.error("Error fetching transaction:", error);
@@ -1074,6 +1083,15 @@ export async function createTransaction(
     return {
       ...transaction,
       amount: Number(transaction.amount),
+      bankAccount: transaction.bankAccount
+        ? {
+            ...transaction.bankAccount,
+            startingBalance: Number(transaction.bankAccount.startingBalance),
+            insuranceAmount: transaction.bankAccount.insuranceAmount
+              ? Number(transaction.bankAccount.insuranceAmount)
+              : null,
+          }
+        : null,
     };
   } catch (error) {
     console.error("Error creating transaction:", error);
@@ -1117,6 +1135,15 @@ export async function updateTransaction(
     return {
       ...transaction,
       amount: Number(transaction.amount),
+      bankAccount: transaction.bankAccount
+        ? {
+            ...transaction.bankAccount,
+            startingBalance: Number(transaction.bankAccount.startingBalance),
+            insuranceAmount: transaction.bankAccount.insuranceAmount
+              ? Number(transaction.bankAccount.insuranceAmount)
+              : null,
+          }
+        : null,
     };
   } catch (error) {
     console.error("Error updating transaction:", error);
