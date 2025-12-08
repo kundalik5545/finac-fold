@@ -145,9 +145,34 @@ export async function createInvestment(
 ): Promise<Investment> {
   try {
     const investedAmount = Number(data.investedAmount);
-    const quantity = Number(data.quantity);
-    const currentPrice = Number(data.currentPrice) || 0;
-    const currentValue = currentPrice * quantity;
+    let quantity = Number(data.quantity) || 0;
+    let currentPrice = Number(data.currentPrice) || 0;
+
+    // For stocks and mutual funds, if quantity is 0 but investedAmount and currentPrice are set,
+    // calculate quantity from investedAmount / currentPrice
+    if (quantity === 0 && investedAmount > 0 && currentPrice > 0) {
+      const calculatedQuantity = investedAmount / currentPrice;
+      // Use calculated quantity if it makes sense (at least 0.0001)
+      if (calculatedQuantity >= 0.0001) {
+        quantity = calculatedQuantity;
+      }
+    }
+
+    // If currentPrice is not provided but quantity and investedAmount are set,
+    // calculate currentPrice from investedAmount / quantity (purchase price per unit)
+    if (currentPrice === 0 && quantity > 0 && investedAmount > 0) {
+      currentPrice = investedAmount / quantity;
+    }
+
+    // Calculate currentValue: if currentPrice is set, use it; otherwise, use investedAmount
+    // When first buying, currentValue should equal investedAmount initially
+    let currentValue: number;
+    if (currentPrice > 0 && quantity > 0) {
+      currentValue = currentPrice * quantity;
+    } else {
+      // If no price/quantity info, assume current value equals invested amount initially
+      currentValue = investedAmount;
+    }
 
     // Create investment with initial price history
     const investment = await prisma.investment.create({
@@ -316,7 +341,15 @@ export async function deleteInvestment(
 }
 
 /**
+ * Helper function to delay execution (for rate limiting)
+ */
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/**
  * Fetch latest prices for investments from Alpha Vantage API
+ * Processes all investments with delays to avoid rate limiting
  */
 export async function fetchLatestPrices(
   investmentIds: string[],
@@ -331,58 +364,148 @@ export async function fetchLatestPrices(
     });
 
     const updatedInvestments: Investment[] = [];
+    const errors: string[] = [];
 
-    for (const investment of investments) {
-      // Only fetch prices for supported types
+    // Filter investments that support price fetching
+    const investmentsToFetch = investments.filter((investment) => {
       const investmentType = investment.type as InvestmentType;
-      if (!supportsPriceFetching(investmentType)) {
-        continue;
+      return supportsPriceFetching(investmentType);
+    });
+
+    console.log(
+      `Fetching prices for ${investmentsToFetch.length} investment(s)...`
+    );
+
+    // Process each investment with a delay to avoid rate limiting
+    // Alpha Vantage free tier allows 5 API calls per minute
+    for (let i = 0; i < investmentsToFetch.length; i++) {
+      const investment = investmentsToFetch[i];
+      const investmentType = investment.type as InvestmentType;
+
+      // Add delay between API calls (except for the first one)
+      // 15 seconds delay = 4 calls per minute (safe margin)
+      if (i > 0) {
+        await delay(15000);
       }
 
       try {
-        const newPrice = await fetchInvestmentPrice(
-          investmentType,
-          investment.symbol || null
-        );
+        // For Gold, symbol is not required
+        const symbol =
+          investmentType === InvestmentType.GOLD
+            ? null
+            : investment.symbol || null;
 
-        if (newPrice !== null && newPrice > 0) {
-          // Create price history entry
-          await prisma.investmentPriceHistory.create({
-            data: {
-              price: newPrice,
-              date: new Date(),
-              source: "API",
-              investment: {
-                connect: { id: investment.id },
-              },
-              user: {
-                connect: { id: userId },
-              },
-            },
-          });
-
-          updatedInvestments.push({
-            ...updated,
-            type: updated.type as InvestmentType,
-            currentPrice: Number(updated.currentPrice),
-            investedAmount: Number(updated.investedAmount),
-            currentValue: Number(updated.currentValue),
-            quantity: Number(updated.quantity),
-          });
+        if (investmentType !== InvestmentType.GOLD && !symbol) {
+          errors.push(
+            `${investment.name}: Symbol is required for ${investmentType}`
+          );
+          continue;
         }
-      } catch (error) {
-        console.error(
-          `Error fetching price for investment ${investment.id}:`,
-          error
+
+        console.log(
+          `Fetching price for ${investment.name} (${investmentType})...`
         );
+
+        const newPrice = await fetchInvestmentPrice(investmentType, symbol);
+
+        if (newPrice === null || newPrice <= 0) {
+          errors.push(
+            `${investment.name}: Failed to fetch price (returned ${newPrice})`
+          );
+          continue;
+        }
+
+        const quantity = Number(investment.quantity);
+        const investedAmount = Number(investment.investedAmount);
+
+        // Ensure quantity is valid (greater than 0)
+        if (quantity <= 0) {
+          errors.push(
+            `${investment.name}: Invalid quantity (${quantity}). Please set quantity > 0.`
+          );
+          continue;
+        }
+
+        const newCurrentValue = newPrice * quantity;
+
+        // Debug logging
+        console.log(`Updating investment ${investment.name}:`, {
+          symbol: investment.symbol,
+          quantity,
+          investedAmount,
+          oldPrice: Number(investment.currentPrice),
+          newPrice,
+          oldValue: Number(investment.currentValue),
+          newCurrentValue,
+          profit: newCurrentValue - investedAmount,
+          profitPercent:
+            investedAmount > 0
+              ? ((newCurrentValue - investedAmount) / investedAmount) * 100
+              : 0,
+        });
+
+        // Update investment price and value in database
+        const updated = await prisma.investment.update({
+          where: { id: investment.id },
+          data: {
+            currentPrice: newPrice,
+            currentValue: newCurrentValue,
+          },
+        });
+
+        // Create price history entry
+        await prisma.investmentPriceHistory.create({
+          data: {
+            price: newPrice,
+            date: new Date(),
+            source: "API",
+            investment: {
+              connect: { id: investment.id },
+            },
+            user: {
+              connect: { id: userId },
+            },
+          },
+        });
+
+        updatedInvestments.push({
+          ...updated,
+          type: updated.type as InvestmentType,
+          currentPrice: Number(updated.currentPrice),
+          investedAmount: Number(updated.investedAmount),
+          currentValue: Number(updated.currentValue),
+          quantity: Number(updated.quantity),
+        });
+
+        console.log(`✓ Successfully updated ${investment.name}`);
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : "Unknown error";
+        console.error(
+          `Error fetching price for investment ${investment.name}:`,
+          errorMessage
+        );
+        errors.push(`${investment.name}: ${errorMessage}`);
         // Continue with other investments even if one fails
       }
+    }
+
+    // Log summary
+    console.log(
+      `Price fetch completed: ${updatedInvestments.length} succeeded, ${errors.length} failed`
+    );
+    if (errors.length > 0) {
+      console.error("Errors:", errors);
     }
 
     return updatedInvestments;
   } catch (error) {
     console.error("Error fetching latest prices:", error);
-    throw new Error("Failed to fetch latest prices");
+    throw new Error(
+      `Failed to fetch latest prices: ${
+        error instanceof Error ? error.message : "Unknown error"
+      }`
+    );
   }
 }
 

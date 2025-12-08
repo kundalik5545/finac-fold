@@ -33,7 +33,11 @@ export async function POST(request: NextRequest) {
     );
 
     return NextResponse.json(
-      { investments: updatedInvestments },
+      {
+        investments: updatedInvestments,
+        successCount: updatedInvestments.length,
+        totalRequested: validatedData.investmentIds.length,
+      },
       { status: StatusScode.OK }
     );
   } catch (error) {

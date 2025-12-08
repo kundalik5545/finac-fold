@@ -37,14 +37,26 @@ export function FetchPricesButton({ investments }: FetchPricesButtonProps) {
         },
         body: JSON.stringify({ investmentIds }),
       });
-      console.log("response from fetch prices", response);
 
       const data = await response.json();
 
       if (response.ok) {
-        toast.success(
-          `Successfully updated prices for ${data.investments.length} investment(s)`
-        );
+        const successCount = data.successCount || data.investments?.length || 0;
+        const totalRequested = data.totalRequested || investments.length;
+        
+        if (successCount === totalRequested) {
+          toast.success(
+            `Successfully updated prices for all ${successCount} investment(s)`
+          );
+        } else if (successCount > 0) {
+          toast.warning(
+            `Updated prices for ${successCount} out of ${totalRequested} investment(s). Some investments may have failed due to missing symbols or API rate limits.`
+          );
+        } else {
+          toast.error(
+            "Failed to update prices. Please check if symbols are correct and API key is configured."
+          );
+        }
         router.refresh();
       } else {
         toast.error(data.error || "Failed to fetch latest prices");

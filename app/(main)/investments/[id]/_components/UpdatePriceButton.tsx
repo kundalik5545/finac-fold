@@ -38,11 +38,17 @@ export function UpdatePriceButton({ investment }: UpdatePriceButtonProps) {
       if (response.ok) {
         if (data.investments && data.investments.length > 0) {
           const updatedInvestment = data.investments[0];
+          const oldPrice = investment.currentPrice;
+          const newPrice = updatedInvestment.currentPrice;
+          
           toast.success(
-            `Price updated successfully. New price: ${formatCurrency(updatedInvestment.currentPrice)}`
+            `Price updated successfully. ${formatCurrency(oldPrice)} → ${formatCurrency(newPrice)}`
           );
         } else {
-          toast.warning("Price could not be fetched. Please check if the symbol is correct and API key is configured.");
+          const errorMsg = investment.symbol
+            ? `Price could not be fetched for ${investment.symbol}. Please check if the symbol is correct and API key is configured.`
+            : `Price could not be fetched. Please ensure the investment has a valid symbol and API key is configured.`;
+          toast.warning(errorMsg);
         }
         router.refresh();
       } else {
