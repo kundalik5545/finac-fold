@@ -16,6 +16,7 @@ import {
   calculateInvestmentStatsByType,
   calculateAllInvestmentStats,
   supportsPriceFetching,
+  requiresManualTransactions,
 } from "@/lib/utils/investment-utils";
 import { fetchInvestmentPrice } from "@/lib/utils/alpha-vantage";
 import { createTransaction } from "./bank-account";
@@ -827,35 +828,60 @@ export async function createInvestmentTransaction(
 
     const transactionAmount = Number(data.amount);
     const isInvest = data.transactionType === "INVEST";
+    const investmentType = investment.type as InvestmentType;
+    const isManualInvestment = requiresManualTransactions(investmentType);
 
     // Calculate new invested amount and current value
     const currentInvestedAmount = Number(investment.investedAmount);
-    const currentValue = Number(investment.currentValue);
     const currentPrice = Number(investment.currentPrice);
+    const quantity = Number(investment.quantity);
 
     let newInvestedAmount: number;
     let newCurrentValue: number;
 
     if (isInvest) {
       newInvestedAmount = currentInvestedAmount + transactionAmount;
-      // For manual investments (FD, NPS, PF), increase current value proportionally
-      if (currentInvestedAmount > 0) {
-        const ratio = newInvestedAmount / currentInvestedAmount;
-        newCurrentValue = currentValue * ratio;
-      } else {
-        newCurrentValue = transactionAmount; // First investment
-      }
     } else {
       newInvestedAmount = Math.max(
         0,
         currentInvestedAmount - transactionAmount
       );
-      // For withdrawals, decrease current value proportionally
-      if (currentInvestedAmount > 0) {
-        const ratio = newInvestedAmount / currentInvestedAmount;
-        newCurrentValue = currentValue * ratio;
+    }
+
+    // For manual investments (NPS, PF, FD), currentValue should be based on currentPrice * quantity
+    // It should NOT increase proportionally with contributions - only when price changes
+    // This ensures profit/loss calculation is based on price appreciation, not contributions
+    if (isManualInvestment) {
+      // Recalculate currentValue based on currentPrice * quantity
+      // If quantity is 0 or price is 0, use investedAmount as fallback
+      if (currentPrice > 0 && quantity > 0) {
+        newCurrentValue = currentPrice * quantity;
+      } else if (currentPrice > 0) {
+        // If we have price but no quantity, calculate quantity from investedAmount / price
+        // This handles the case where user hasn't set quantity yet
+        const calculatedQuantity = newInvestedAmount / currentPrice;
+        newCurrentValue = currentPrice * calculatedQuantity;
       } else {
-        newCurrentValue = 0;
+        // If no price set, currentValue equals investedAmount (no profit/loss yet)
+        newCurrentValue = newInvestedAmount;
+      }
+    } else {
+      // For stocks/mutual funds/gold, use the existing proportional logic
+      const currentValue = Number(investment.currentValue);
+      if (isInvest) {
+        if (currentInvestedAmount > 0) {
+          const ratio = newInvestedAmount / currentInvestedAmount;
+          newCurrentValue = currentValue * ratio;
+        } else {
+          newCurrentValue = transactionAmount; // First investment
+        }
+      } else {
+        if (currentInvestedAmount > 0) {
+          const ratio = newInvestedAmount / currentInvestedAmount;
+          newCurrentValue = currentValue * ratio;
+        } else {
+          newCurrentValue = 0;
+        }
       }
     }
 
@@ -887,22 +913,41 @@ export async function createInvestmentTransaction(
     ]);
 
     // Create price history entry for manual updates
-    await prisma.investmentPriceHistory.create({
-      data: {
-        price:
-          newInvestedAmount > 0
-            ? newCurrentValue / Number(investment.quantity)
-            : 0,
-        date: new Date(data.date),
-        source: "MANUAL",
-        investment: {
-          connect: { id: investmentId },
+    // For manual investments (NPS, PF, FD), only create price history if price is actually set
+    // Don't create price history entries just because of contributions
+    if (isManualInvestment && currentPrice > 0) {
+      await prisma.investmentPriceHistory.create({
+        data: {
+          price: currentPrice,
+          date: new Date(data.date),
+          source: "MANUAL",
+          investment: {
+            connect: { id: investmentId },
+          },
+          user: {
+            connect: { id: userId },
+          },
         },
-        user: {
-          connect: { id: userId },
+      });
+    } else if (!isManualInvestment) {
+      // For stocks/mutual funds/gold, create price history based on calculated price
+      await prisma.investmentPriceHistory.create({
+        data: {
+          price:
+            newInvestedAmount > 0 && quantity > 0
+              ? newCurrentValue / quantity
+              : currentPrice,
+          date: new Date(data.date),
+          source: "MANUAL",
+          investment: {
+            connect: { id: investmentId },
+          },
+          user: {
+            connect: { id: userId },
+          },
         },
-      },
-    });
+      });
+    }
 
     // Create transaction entry in main Transaction table
     try {
@@ -1002,10 +1047,33 @@ export async function updateInvestmentTransaction(
     });
 
     if (investment) {
+      const investmentType = investment.type as InvestmentType;
+      const isManualInvestment = requiresManualTransactions(investmentType);
       const currentPrice = Number(investment.currentPrice);
       const quantity = Number(investment.quantity);
-      const newCurrentValue =
-        currentPrice > 0 ? currentPrice * quantity : totalInvested;
+
+      let newCurrentValue: number;
+
+      // For manual investments (NPS, PF, FD), currentValue should be based on currentPrice * quantity
+      // It should NOT be based on investedAmount
+      if (isManualInvestment) {
+        if (currentPrice > 0 && quantity > 0) {
+          newCurrentValue = currentPrice * quantity;
+        } else if (currentPrice > 0) {
+          // If we have price but no quantity, calculate quantity from investedAmount / price
+          const calculatedQuantity = totalInvested / currentPrice;
+          newCurrentValue = currentPrice * calculatedQuantity;
+        } else {
+          // If no price set, currentValue equals investedAmount (no profit/loss yet)
+          newCurrentValue = totalInvested;
+        }
+      } else {
+        // For stocks/mutual funds/gold, use price * quantity or fallback to investedAmount
+        newCurrentValue =
+          currentPrice > 0 && quantity > 0
+            ? currentPrice * quantity
+            : totalInvested;
+      }
 
       await prisma.investment.update({
         where: { id: existing.investmentId },
@@ -1068,10 +1136,33 @@ export async function deleteInvestmentTransaction(
     });
 
     if (investment) {
+      const investmentType = investment.type as InvestmentType;
+      const isManualInvestment = requiresManualTransactions(investmentType);
       const currentPrice = Number(investment.currentPrice);
       const quantity = Number(investment.quantity);
-      const newCurrentValue =
-        currentPrice > 0 ? currentPrice * quantity : totalInvested;
+
+      let newCurrentValue: number;
+
+      // For manual investments (NPS, PF, FD), currentValue should be based on currentPrice * quantity
+      // It should NOT be based on investedAmount
+      if (isManualInvestment) {
+        if (currentPrice > 0 && quantity > 0) {
+          newCurrentValue = currentPrice * quantity;
+        } else if (currentPrice > 0) {
+          // If we have price but no quantity, calculate quantity from investedAmount / price
+          const calculatedQuantity = totalInvested / currentPrice;
+          newCurrentValue = currentPrice * calculatedQuantity;
+        } else {
+          // If no price set, currentValue equals investedAmount (no profit/loss yet)
+          newCurrentValue = totalInvested;
+        }
+      } else {
+        // For stocks/mutual funds/gold, use price * quantity or fallback to investedAmount
+        newCurrentValue =
+          currentPrice > 0 && quantity > 0
+            ? currentPrice * quantity
+            : totalInvested;
+      }
 
       await prisma.investment.update({
         where: { id: existing.investmentId },
