@@ -112,6 +112,11 @@ export async function POST(request: Request) {
     );
   } catch (error) {
     console.error("Error creating subcategory:", error);
+    console.error("Error details:", {
+      message: error instanceof Error ? error.message : "Unknown error",
+      stack: error instanceof Error ? error.stack : undefined,
+      name: error instanceof Error ? error.name : undefined,
+    });
 
     if (error instanceof ZodError) {
       return NextResponse.json(
@@ -120,11 +125,16 @@ export async function POST(request: Request) {
       );
     }
 
+    // Extract error message from the error
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    
     return NextResponse.json(
       {
-        error: `Failed to create subcategory: ${
-          error instanceof Error ? error.message : "Unknown error"
-        }`,
+        error: errorMessage,
+        details: error instanceof Error ? {
+          name: error.name,
+          message: error.message,
+        } : undefined,
       },
       { status: StatusScode.INTERNAL_SERVER_ERROR }
     );

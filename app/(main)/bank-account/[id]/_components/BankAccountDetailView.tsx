@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { useFormatCurrency } from "@/hooks/use-formatCurrency";
 import { BankAccount, BankTransaction } from "@/lib/bank-account-types";
 import { cn } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface BankAccountDetailViewProps {
   bankAccount: BankAccount;
@@ -25,7 +26,7 @@ export function BankAccountDetailView({
   const { formatCurrency } = useFormatCurrency("en-IN", "INR");
   const router = useRouter();
   const [isDeleting, setIsDeleting] = useState(false);
-
+  const isMobile = useIsMobile();
   // Calculate total income and expense
   const totalIncome = transactions
     .filter((t) => t.transactionType === "CREDIT")
@@ -99,18 +100,19 @@ export function BankAccountDetailView({
             </Badge>
           </div>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-col md:flex-row gap-2">
           <Button variant="outline" onClick={handleEdit}>
-            <Edit size={16} className="mr-2" />
-            Edit
+            {isMobile ? <Edit size={16} /> : <Edit size={16} className="mr-2" />}
+            {isMobile ? "" : "Edit"}
           </Button>
           <Button
             variant="destructive"
             onClick={handleDelete}
             disabled={isDeleting}
           >
-            <Trash size={16} className="mr-2" />
-            {isDeleting ? "Deleting..." : "Delete"}
+            {isMobile ? <Trash size={16} /> : <Trash size={16} className="mr-2" />}
+            {isMobile ? isDeleting ? "Deleting..." : "" : "Delete"}
+
           </Button>
         </div>
       </div>

@@ -107,6 +107,10 @@ export async function DELETE(_request: NextRequest, { params }: ParamsType) {
     );
   } catch (error) {
     console.error("Error deleting category:", error);
+    console.error("Error details:", {
+      message: error instanceof Error ? error.message : "Unknown error",
+      stack: error instanceof Error ? error.stack : undefined,
+    });
 
     if (error instanceof Error && error.message === "Category not found") {
       return NextResponse.json(
@@ -115,8 +119,17 @@ export async function DELETE(_request: NextRequest, { params }: ParamsType) {
       );
     }
 
+    // Extract error message from the error
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    
     return NextResponse.json(
-      { error: "Failed to delete category" },
+      {
+        error: errorMessage,
+        details: error instanceof Error ? {
+          name: error.name,
+          message: error.message,
+        } : undefined,
+      },
       { status: StatusScode.INTERNAL_SERVER_ERROR }
     );
   }

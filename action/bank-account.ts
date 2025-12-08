@@ -627,6 +627,13 @@ export async function getCategories(userId: string): Promise<Category[]> {
       where: {
         userId,
       },
+      include: {
+        subCategories: {
+          orderBy: {
+            createdAt: "desc",
+          },
+        },
+      },
       orderBy: {
         createdAt: "desc",
       },
@@ -694,7 +701,7 @@ export async function updateCategory(
 }
 
 /**
- * Delete a category
+ * Delete a category (cascade deletes all subcategories)
  */
 export async function deleteCategory(
   categoryId: string,
@@ -710,12 +717,33 @@ export async function deleteCategory(
       throw new Error("Category not found");
     }
 
+    // Delete all subcategories first (cascade delete)
+    await prisma.subCategory.deleteMany({
+      where: {
+        categoryId,
+        userId, // Only delete subcategories owned by the user
+      },
+    });
+
+    // Now delete the category
     await prisma.category.delete({
       where: { id: categoryId },
     });
   } catch (error) {
     console.error("Error deleting category:", error);
-    throw new Error("Failed to delete category");
+    
+    // Handle Prisma errors
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      if (error.code === "P2003") {
+        throw new Error("Cannot delete category: it is referenced by transactions");
+      }
+    }
+    
+    throw new Error(
+      `Failed to delete category: ${
+        error instanceof Error ? error.message : "Unknown error"
+      }`
+    );
   }
 }
 
@@ -758,23 +786,37 @@ export async function createSubCategory(
   userId: string
 ): Promise<SubCategory> {
   try {
+    // Extract categoryId from data to avoid conflict with relation
+    const { categoryId, ...restData } = data as any;
+    
     const subCategory = await prisma.subCategory.create({
       data: {
-        ...data,
-        userId,
-        category: {
-          connect: { id: data.categoryId },
-        },
-        user: {
-          connect: { id: userId },
-        },
+        ...restData,
+        categoryId, // Set categoryId directly (required field)
+        userId, // Set userId directly (optional field)
       },
     });
 
     return subCategory;
   } catch (error) {
     console.error("Error creating subcategory:", error);
-    throw new Error("Failed to create subcategory");
+    
+    // Handle Prisma unique constraint violations
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      if (error.code === "P2002") {
+        throw new Error("A subcategory with this name already exists for this category");
+      }
+      if (error.code === "P2003") {
+        throw new Error("Invalid category reference");
+      }
+    }
+    
+    // Pass through the actual error message for better debugging
+    throw new Error(
+      `Failed to create subcategory: ${
+        error instanceof Error ? error.message : "Unknown error"
+      }`
+    );
   }
 }
 

@@ -155,7 +155,7 @@ export function BankAccountCard({ bankAccount }: { bankAccount: BankAccount }) {
       <CardContent className="pt-2 pb-5 px-5">
         <div className="flex items-center justify-between gap-x-6 flex-wrap">
           {bankAccount.bankName && (
-            <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
+            <div className="flex items-center gap-2 text-sm mt-1 text-muted-foreground">
               <Building2 className="h-4 w-4" />
               <span className="truncate">{bankAccount.bankName}</span>
             </div>

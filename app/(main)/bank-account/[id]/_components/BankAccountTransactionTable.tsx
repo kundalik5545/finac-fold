@@ -174,9 +174,8 @@ export function BankAccountTransactionTable({
                     {transaction.description || "—"}
                   </TableCell>
                   <TableCell
-                    className={`text-right font-semibold ${
-                      isCredit ? "text-green-600" : "text-red-600"
-                    }`}
+                    className={`text-right font-semibold ${isCredit ? "text-green-600" : "text-red-600"
+                      }`}
                   >
                     {isCredit ? "+" : "-"}
                     {formatCurrency(Number(transaction.amount))}

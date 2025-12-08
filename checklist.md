@@ -61,3 +61,12 @@ Create a feature bank account so user can add details about there bank accounts 
   - show total accounts and total balance
   - current month spendings analytics
   - show donut and bar charts to show comparision for weekyl and monthyl spendings
+
+# Feature - cateogry and sub category
+
+create a new feature to categories and sub categories.
+
+- User should able to add edit and delete the categories and sub categories
+- upon adding category and sub category show them in table and card format with toggle button
+- show category name and icon then sub categories as badge with icon
+- dont show category color in baground of card

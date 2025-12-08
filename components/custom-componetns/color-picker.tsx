@@ -7,7 +7,7 @@ import { Check } from "lucide-react";
 const DEFAULT_COLORS = [
   "#ffb3b3", // Darker Pink
   "#99ccff", // Darker Blue
-  "#99ffb3", // Darker Green
+  "#47479a", // Darker Green
   "#ffd699", // Darker Orange
   "#c3a6ff", // Darker Purple
   "#ffb3d9", // Darker Rose

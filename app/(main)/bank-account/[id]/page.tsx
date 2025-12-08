@@ -27,7 +27,7 @@ export default async function BankAccountDetailPage({ params }: ParamsType) {
     bankAccount = await getBankAccount(id, session.user.id);
     balance = await calculateBalance(id, session.user.id);
     categories = await getCategories(session.user.id);
-    
+
     // Get subcategories for all categories
     const allSubCategories = await Promise.all(
       categories.map((cat) => getSubCategories(cat.id, session.user.id))
@@ -46,7 +46,7 @@ export default async function BankAccountDetailPage({ params }: ParamsType) {
 
   return (
     <div className="container mx-auto md:max-w-5xl lg:max-w-7xl xl:max-w-full px-2 md:px-0 py-6">
-      <div className="mb-4">
+      <div className="mb-4 flex justify-end">
         <BackButton />
       </div>
       <div className="space-y-8">

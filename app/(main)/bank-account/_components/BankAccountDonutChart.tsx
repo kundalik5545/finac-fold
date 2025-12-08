@@ -62,7 +62,7 @@ export function BankAccountDonutChart({ bankAccounts }: { bankAccounts: BankAcco
           try {
             const response = await fetch(`/api/bank-account/${account.id}/transactions`);
             if (!response.ok) continue;
-            
+
             let data: any = {};
             try {
               const text = await response.text();
