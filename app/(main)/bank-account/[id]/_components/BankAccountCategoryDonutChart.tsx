@@ -55,6 +55,7 @@ export function BankAccountCategoryDonutChart({
         id: categoryId,
         name: transaction.transactionType === "CREDIT" ? "Income" : "Expense",
         color: transaction.transactionType === "CREDIT" ? "#10b981" : "#ef4444",
+        icon: undefined,
       };
 
       if (!categoryTotals[categoryId]) {

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { updateCategorySchema } from "@/lib/bank-account-schema";
-import type { CategoryFormValues } from "@/lib/bank-account-schema";
+import type { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -36,7 +36,7 @@ export function EditCategoryForm({ category }: { category: Category }) {
     formState: { errors },
     setValue,
     watch,
-  } = useForm<CategoryFormValues>({
+  } = useForm<z.infer<typeof updateCategorySchema>>({
     resolver: zodResolver(updateCategorySchema),
     defaultValues: {
       name: category.name,
@@ -57,7 +57,7 @@ export function EditCategoryForm({ category }: { category: Category }) {
     setValue("color", category.color || null);
   }, [category, setValue]);
 
-  const onSubmit = async (data: CategoryFormValues) => {
+  const onSubmit = async (data: z.infer<typeof updateCategorySchema>) => {
     setIsLoading(true);
 
     try {
@@ -114,7 +114,7 @@ export function EditCategoryForm({ category }: { category: Category }) {
             <Select
               value={typeValue}
               onValueChange={(value) =>
-                setValue("type", value as CategoryFormValues["type"])
+                setValue("type", value as z.infer<typeof updateCategorySchema>["type"])
               }
             >
               <SelectTrigger id="type">

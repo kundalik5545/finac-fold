@@ -51,7 +51,7 @@ export function BankAccountEditForm({ bankAccount }: BankAccountEditFormProps) {
       name: bankAccount.name ?? "",
       bankName: bankAccount.bankName ?? "",
       accountNumber: bankAccount.accountNumber ?? "",
-      accountType: bankAccount.accountType as "SAVINGS" | "SALARY" | "CURRENT" | "OTHER" | null,
+      accountType: bankAccount.accountType as "SAVINGS" | "CHECKING" | "CURRENT" | "OTHER" | null,
       ifscCode: bankAccount.ifscCode ?? "",
       branch: bankAccount.branch ?? "",
       startingBalance: bankAccount.startingBalance ?? 0,
@@ -68,7 +68,7 @@ export function BankAccountEditForm({ bankAccount }: BankAccountEditFormProps) {
   });
 
   /** ✅ ALL controlled values via watch */
-  const accountType = watch("accountType") as "SAVINGS" | "SALARY" | "CURRENT" | "OTHER" | null;
+  const accountType = watch("accountType") as "SAVINGS" | "CHECKING" | "CURRENT" | "OTHER" | null;
   const icon = watch("icon") as string | null;
   const color = watch("color") as string | null;
   const isInsuranceActive = watch("isInsuranceActive") as boolean | null;
@@ -147,7 +147,7 @@ export function BankAccountEditForm({ bankAccount }: BankAccountEditFormProps) {
             <div>
               <Label>Account Type</Label>
               <Select
-                value={accountType}
+                value={accountType ?? undefined}
                 onValueChange={(v) =>
                   setValue("accountType", v as FormValues["accountType"])
                 }
@@ -157,7 +157,7 @@ export function BankAccountEditForm({ bankAccount }: BankAccountEditFormProps) {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="SAVINGS">Savings</SelectItem>
-                  <SelectItem value="SALARY">Salary</SelectItem>
+                  <SelectItem value="CHECKING">Checking</SelectItem>
                   <SelectItem value="CURRENT">Current</SelectItem>
                   <SelectItem value="OTHER">Other</SelectItem>
                 </SelectContent>
@@ -206,7 +206,7 @@ export function BankAccountEditForm({ bankAccount }: BankAccountEditFormProps) {
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <Checkbox
-                checked={isInsuranceActive}
+                checked={isInsuranceActive ?? false}
                 onCheckedChange={(v) =>
                   setValue("isInsuranceActive", Boolean(v))
                 }
@@ -229,7 +229,7 @@ export function BankAccountEditForm({ bankAccount }: BankAccountEditFormProps) {
           {/* STATUS */}
           <div className="flex items-center gap-2">
             <Checkbox
-              checked={isActive}
+              checked={isActive ?? false}
               onCheckedChange={(v) => setValue("isActive", Boolean(v))}
             />
             <Label>Active</Label>

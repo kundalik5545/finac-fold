@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { updateSubCategorySchema } from "@/lib/bank-account-schema";
-import type { SubCategoryFormValues } from "@/lib/bank-account-schema";
+import type { z } from "zod";
 import {
   Dialog,
   DialogContent,
@@ -46,7 +46,7 @@ export function EditSubCategoryDialog({
     formState: { errors },
     setValue,
     watch,
-  } = useForm<SubCategoryFormValues>({
+  } = useForm<z.infer<typeof updateSubCategorySchema>>({
     resolver: zodResolver(updateSubCategorySchema),
     defaultValues: {
       categoryId: subCategory.categoryId,
@@ -66,7 +66,7 @@ export function EditSubCategoryDialog({
     setValue("color", subCategory.color || null);
   }, [subCategory, setValue]);
 
-  const onSubmit = async (data: SubCategoryFormValues) => {
+  const onSubmit = async (data: z.infer<typeof updateSubCategorySchema>) => {
     setIsLoading(true);
 
     try {

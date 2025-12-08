@@ -199,7 +199,7 @@ export function BankAccountForm() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="SAVINGS">Savings</SelectItem>
-                      <SelectItem value="SALARY">Salary</SelectItem>
+                      <SelectItem value="CHECKING">Checking</SelectItem>
                       <SelectItem value="CURRENT">Current</SelectItem>
                       <SelectItem value="OTHER">Other</SelectItem>
                     </SelectContent>

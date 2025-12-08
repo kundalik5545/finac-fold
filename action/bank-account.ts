@@ -272,7 +272,7 @@ export async function getBankTransactions(
  */
 export async function createBankTransaction(
   bankAccountId: string,
-  data: Omit<Prisma.BankTransactionCreateInput, "bankAccount" | "user">,
+  data: Omit<Prisma.BankTransactionCreateInput, "bankAccount" | "user" | "totalDeposit" | "totalWithdrawal" | "currentBalance">,
   userId: string
 ): Promise<BankTransaction> {
   try {
@@ -516,7 +516,7 @@ export async function getBankCards(
  */
 export async function createBankCard(
   bankAccountId: string,
-  data: Omit<Prisma.BankCardCreateInput, "bankAccount" | "user">,
+  data: Omit<Prisma.bankCardCreateInput, "bankAccount" | "user">,
   userId: string
 ): Promise<BankCard> {
   try {
@@ -558,7 +558,7 @@ export async function createBankCard(
  */
 export async function updateBankCard(
   cardId: string,
-  data: Partial<Omit<Prisma.BankCardUpdateInput, "bankAccount" | "user">>,
+  data: Partial<Omit<Prisma.bankCardUpdateInput, "bankAccount" | "user">>,
   userId: string
 ): Promise<BankCard> {
   try {
@@ -942,35 +942,15 @@ export async function getTransactions(
  * Create a new transaction
  */
 export async function createTransaction(
-  data: Omit<Prisma.TransactionCreateInput, "user" | "bankAccount" | "category" | "subCategory">,
+  data: Omit<Prisma.TransactionUncheckedCreateInput, "userId">,
   userId: string
 ): Promise<Transaction> {
   try {
-    const transactionData: Prisma.TransactionCreateInput = {
-      ...data,
-      user: {
-        connect: { id: userId },
-      },
-    };
-
-    if (data.bankAccountId) {
-      transactionData.bankAccount = {
-        connect: { id: data.bankAccountId },
-      };
-    }
-    if (data.categoryId) {
-      transactionData.category = {
-        connect: { id: data.categoryId },
-      };
-    }
-    if (data.subCategoryId) {
-      transactionData.subCategory = {
-        connect: { id: data.subCategoryId },
-      };
-    }
-
     const transaction = await prisma.transaction.create({
-      data: transactionData,
+      data: {
+        ...data,
+        userId,
+      },
     });
 
     return {

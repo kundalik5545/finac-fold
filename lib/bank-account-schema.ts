@@ -17,7 +17,7 @@ export const bankAccountFormSchema = z.object({
     .optional()
     .nullable(),
   accountType: z
-    .enum(["SAVINGS", "SALARY", "CURRENT", "OTHER"])
+    .enum(["SAVINGS", "CHECKING", "CURRENT", "OTHER"])
     .optional()
     .nullable(),
   ifscCode: z
