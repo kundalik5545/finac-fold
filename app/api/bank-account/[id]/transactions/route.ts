@@ -1,13 +1,13 @@
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
-import { bankTransactionFormSchema } from "@/lib/bank-account-schema";
+import { bankTransactionFormSchema } from "@/lib/schema/bank-account-schema";
 import { ZodError } from "zod";
 import {
   getBankTransactions,
   createBankTransaction,
 } from "@/action/bank-account";
-import { StatusScode } from "@/lib/status-code";
+import { StatusScode } from "@/helpers/status-code";
 import type { NextRequest } from "next/server";
 
 type ParamsType = { params: Promise<{ id: string }> };
@@ -31,10 +31,7 @@ export async function GET(_request: NextRequest, { params }: ParamsType) {
 
     const transactions = await getBankTransactions(id, session.user.id);
 
-    return NextResponse.json(
-      { transactions },
-      { status: StatusScode.OK }
-    );
+    return NextResponse.json({ transactions }, { status: StatusScode.OK });
   } catch (error) {
     console.error("Error fetching bank transactions:", error);
 
@@ -126,10 +123,7 @@ export async function POST(request: NextRequest, { params }: ParamsType) {
       session.user.id
     );
 
-    return NextResponse.json(
-      { transaction },
-      { status: StatusScode.CREATED }
-    );
+    return NextResponse.json({ transaction }, { status: StatusScode.CREATED });
   } catch (error) {
     console.error("Error creating bank transaction:", error);
 
@@ -157,4 +151,3 @@ export async function POST(request: NextRequest, { params }: ParamsType) {
     );
   }
 }
-

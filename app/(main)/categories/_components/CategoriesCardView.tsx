@@ -1,7 +1,7 @@
 "use client";
 
 import { CategoryCard } from "./CategoryCard";
-import { Category } from "@/lib/bank-account-types";
+import { Category } from "@/lib/schema/bank-account-types";
 
 /**
  * CategoriesCardView Component

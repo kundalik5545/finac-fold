@@ -70,3 +70,23 @@ create a new feature to categories and sub categories.
 - upon adding category and sub category show them in table and card format with toggle button
 - show category name and icon then sub categories as badge with icon
 - dont show category color in baground of card
+
+# Feature - transactions
+
+create a new feature tranasctions so user can see, filter and add new transactions.
+
+- User should able to add, edit and delete the transactions
+- User should able to filter tranasctions with below filters
+  - based on category and sub category
+  - trnasaction type
+  - payment method
+  - tranasction status
+  - monthly weekly and daily
+  - custome date range
+- show chart
+  - chart should update based on filters
+  - donut for total income, expense percentage
+  - bar chart for transaction with amount for that day or week or month
+  - change x-axis as per tranasction filter
+- show table view only for transactions with pagination and optimise query using pagination and on clicking next load more tranasctions
+- update and create new prisma models as needed to store information

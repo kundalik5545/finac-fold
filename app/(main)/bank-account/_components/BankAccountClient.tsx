@@ -6,7 +6,7 @@ import { Table2, LayoutGrid } from "lucide-react";
 import { BankAccountCard } from "./BankAccountCard";
 import { BankAccountDonutChart } from "./BankAccountDonutChart";
 import { BankAccountBarChart } from "./BankAccountBarChart";
-import { BankAccount } from "@/lib/bank-account-types";
+import { BankAccount } from "@/lib/schema/bank-account-types";
 
 export function BankAccountClient({ bankAccounts }: { bankAccounts: BankAccount[] }) {
   const [viewMode, setViewMode] = useState<"table" | "card">("card");

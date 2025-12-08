@@ -24,8 +24,8 @@ import {
 import { IconPicker } from "@/components/custom-componetns/icon-picker";
 import { ColorPicker } from "@/components/custom-componetns/color-picker";
 
-import { bankAccountFormSchema } from "@/lib/bank-account-schema";
-import { BankAccount } from "@/lib/bank-account-types";
+import { bankAccountFormSchema } from "@/lib/schema/bank-account-schema";
+import { BankAccount } from "@/lib/schema/bank-account-types";
 
 interface BankAccountEditFormProps {
   bankAccount: BankAccount;

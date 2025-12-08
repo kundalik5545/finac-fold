@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
-import { updateSubCategorySchema } from "@/lib/bank-account-schema";
+import { updateSubCategorySchema } from "@/lib/schema/bank-account-schema";
 import { ZodError } from "zod";
 import { updateSubCategory, deleteSubCategory } from "@/action/bank-account";
-import { StatusScode } from "@/lib/status-code";
+import { StatusScode } from "@/helpers/status-code";
 import type { NextRequest } from "next/server";
 
 type ParamsType = { params: Promise<{ id: string }> };
@@ -59,10 +59,7 @@ export async function PATCH(request: NextRequest, { params }: ParamsType) {
       session.user.id
     );
 
-    return NextResponse.json(
-      { subCategory },
-      { status: StatusScode.OK }
-    );
+    return NextResponse.json({ subCategory }, { status: StatusScode.OK });
   } catch (error) {
     console.error("Error updating subcategory:", error);
 
@@ -126,4 +123,3 @@ export async function DELETE(_request: NextRequest, { params }: ParamsType) {
     );
   }
 }
-

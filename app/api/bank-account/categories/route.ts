@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
-import { categoryFormSchema } from "@/lib/bank-account-schema";
+import { categoryFormSchema } from "@/lib/schema/bank-account-schema";
 import { ZodError } from "zod";
 import { getCategories, createCategory } from "@/action/bank-account";
-import { StatusScode } from "@/lib/status-code";
+import { StatusScode } from "@/helpers/status-code";
 
 /**
  * GET /api/bank-account/categories
@@ -23,10 +23,7 @@ export async function GET() {
 
     const categories = await getCategories(session.user.id);
 
-    return NextResponse.json(
-      { categories },
-      { status: StatusScode.OK }
-    );
+    return NextResponse.json({ categories }, { status: StatusScode.OK });
   } catch (error) {
     console.error("Error fetching categories:", error);
     return NextResponse.json(
@@ -91,10 +88,7 @@ export async function POST(request: Request) {
     // Create category
     const category = await createCategory(categoryData, session.user.id);
 
-    return NextResponse.json(
-      { category },
-      { status: StatusScode.CREATED }
-    );
+    return NextResponse.json({ category }, { status: StatusScode.CREATED });
   } catch (error) {
     console.error("Error creating category:", error);
 
@@ -115,4 +109,3 @@ export async function POST(request: Request) {
     );
   }
 }
-

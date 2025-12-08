@@ -1,13 +1,13 @@
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
-import { updateBankTransactionSchema } from "@/lib/bank-account-schema";
+import { updateBankTransactionSchema } from "@/lib/schema/bank-account-schema";
 import { ZodError } from "zod";
 import {
   updateBankTransaction,
   deleteBankTransaction,
 } from "@/action/bank-account";
-import { StatusScode } from "@/lib/status-code";
+import { StatusScode } from "@/helpers/status-code";
 import type { NextRequest } from "next/server";
 
 type ParamsType = {
@@ -51,7 +51,10 @@ export async function PATCH(request: NextRequest, { params }: ParamsType) {
     // Prepare update object
     const updateData: Record<string, any> = {};
     if ("amount" in validatedData) updateData.amount = validatedData.amount;
-    if ("transactionDate" in validatedData && validatedData.transactionDate !== undefined) {
+    if (
+      "transactionDate" in validatedData &&
+      validatedData.transactionDate !== undefined
+    ) {
       const transactionDate =
         validatedData.transactionDate instanceof Date
           ? validatedData.transactionDate
@@ -71,10 +74,7 @@ export async function PATCH(request: NextRequest, { params }: ParamsType) {
       session.user.id
     );
 
-    return NextResponse.json(
-      { transaction },
-      { status: StatusScode.OK }
-    );
+    return NextResponse.json({ transaction }, { status: StatusScode.OK });
   } catch (error) {
     console.error("Error updating bank transaction:", error);
 
@@ -138,4 +138,3 @@ export async function DELETE(_request: NextRequest, { params }: ParamsType) {
     );
   }
 }
-

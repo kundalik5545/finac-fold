@@ -13,11 +13,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Edit, Trash } from "lucide-react";
 import { useFormatCurrency } from "@/hooks/use-formatCurrency";
-import { BankTransaction } from "@/lib/bank-account-types";
+import { BankTransaction } from "@/lib/schema/bank-account-types";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { TransactionFilters } from "./TransactionFilters";
-import { Category } from "@/lib/bank-account-types";
+import { Category } from "@/lib/schema/bank-account-types";
 
 interface BankAccountTransactionTableProps {
   transactions: BankTransaction[];

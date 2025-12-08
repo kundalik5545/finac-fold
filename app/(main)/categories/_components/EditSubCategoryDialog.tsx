@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { updateSubCategorySchema } from "@/lib/bank-account-schema";
+import { updateSubCategorySchema } from "@/lib/schema/bank-account-schema";
 import type { z } from "zod";
 import {
   Dialog,
@@ -20,7 +20,7 @@ import { Label } from "@/components/ui/label";
 import { IconPicker } from "@/components/custom-componetns/icon-picker";
 import { ColorPicker } from "@/components/custom-componetns/color-picker";
 import { toast } from "sonner";
-import { SubCategory } from "@/lib/bank-account-types";
+import { SubCategory } from "@/lib/schema/bank-account-types";
 
 /**
  * EditSubCategoryDialog Component

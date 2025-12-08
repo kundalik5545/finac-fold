@@ -12,7 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
-import { Category } from "@/lib/bank-account-types";
+import { Category } from "@/lib/schema/bank-account-types";
 
 interface TransactionFiltersProps {
   filters: {

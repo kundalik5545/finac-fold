@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Pencil, Trash2, Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { Category } from "@/lib/bank-account-types";
+import { Category } from "@/lib/schema/bank-account-types";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -21,7 +21,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { AddSubCategoryDialog } from "./AddSubCategoryDialog";
 import { EditSubCategoryDialog } from "./EditSubCategoryDialog";
-import { SubCategory } from "@/lib/bank-account-types";
+import { SubCategory } from "@/lib/schema/bank-account-types";
 
 /**
  * CategoryCard Component
@@ -176,7 +176,7 @@ export function CategoryCard({ category }: { category: Category }) {
                 </Button>
               </div>
               {category.subCategories &&
-              category.subCategories.length > 0 ? (
+                category.subCategories.length > 0 ? (
                 <div className="flex flex-wrap gap-2">
                   {category.subCategories.map((subCategory) => (
                     <Badge

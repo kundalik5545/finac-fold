@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
-import { bankCardFormSchema } from "@/lib/bank-account-schema";
+import { bankCardFormSchema } from "@/lib/schema/bank-account-schema";
 import { ZodError } from "zod";
 import { getBankCards, createBankCard } from "@/action/bank-account";
-import { StatusScode } from "@/lib/status-code";
+import { StatusScode } from "@/helpers/status-code";
 import type { NextRequest } from "next/server";
 
 type ParamsType = { params: Promise<{ id: string }> };
@@ -28,10 +28,7 @@ export async function GET(_request: NextRequest, { params }: ParamsType) {
 
     const cards = await getBankCards(id, session.user.id);
 
-    return NextResponse.json(
-      { cards },
-      { status: StatusScode.OK }
-    );
+    return NextResponse.json({ cards }, { status: StatusScode.OK });
   } catch (error) {
     console.error("Error fetching bank cards:", error);
 
@@ -147,10 +144,7 @@ export async function POST(request: NextRequest, { params }: ParamsType) {
     // Create card
     const card = await createBankCard(id, cardData, session.user.id);
 
-    return NextResponse.json(
-      { card },
-      { status: StatusScode.CREATED }
-    );
+    return NextResponse.json({ card }, { status: StatusScode.CREATED });
   } catch (error) {
     console.error("Error creating bank card:", error);
 
@@ -178,4 +172,3 @@ export async function POST(request: NextRequest, { params }: ParamsType) {
     );
   }
 }
-

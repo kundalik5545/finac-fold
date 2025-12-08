@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
-import { subCategoryFormSchema } from "@/lib/bank-account-schema";
+import { subCategoryFormSchema } from "@/lib/schema/bank-account-schema";
 import { ZodError } from "zod";
 import { getSubCategories, createSubCategory } from "@/action/bank-account";
-import { StatusScode } from "@/lib/status-code";
+import { StatusScode } from "@/helpers/status-code";
 import type { NextRequest } from "next/server";
 
 /**
@@ -27,18 +27,12 @@ export async function GET(request: NextRequest) {
 
     if (categoryId) {
       const subCategories = await getSubCategories(categoryId, session.user.id);
-      return NextResponse.json(
-        { subCategories },
-        { status: StatusScode.OK }
-      );
+      return NextResponse.json({ subCategories }, { status: StatusScode.OK });
     }
 
     // If no categoryId, return all subcategories for user
     const subCategories = await getSubCategories("", session.user.id);
-    return NextResponse.json(
-      { subCategories },
-      { status: StatusScode.OK }
-    );
+    return NextResponse.json({ subCategories }, { status: StatusScode.OK });
   } catch (error) {
     console.error("Error fetching subcategories:", error);
     return NextResponse.json(
@@ -106,10 +100,7 @@ export async function POST(request: Request) {
       session.user.id
     );
 
-    return NextResponse.json(
-      { subCategory },
-      { status: StatusScode.CREATED }
-    );
+    return NextResponse.json({ subCategory }, { status: StatusScode.CREATED });
   } catch (error) {
     console.error("Error creating subcategory:", error);
     console.error("Error details:", {
@@ -126,18 +117,21 @@ export async function POST(request: Request) {
     }
 
     // Extract error message from the error
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
-    
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error";
+
     return NextResponse.json(
       {
         error: errorMessage,
-        details: error instanceof Error ? {
-          name: error.name,
-          message: error.message,
-        } : undefined,
+        details:
+          error instanceof Error
+            ? {
+                name: error.name,
+                message: error.message,
+              }
+            : undefined,
       },
       { status: StatusScode.INTERNAL_SERVER_ERROR }
     );
   }
 }
-

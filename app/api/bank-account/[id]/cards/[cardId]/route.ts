@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
-import { updateBankCardSchema } from "@/lib/bank-account-schema";
+import { updateBankCardSchema } from "@/lib/schema/bank-account-schema";
 import { ZodError } from "zod";
 import { updateBankCard, deleteBankCard } from "@/action/bank-account";
-import { StatusScode } from "@/lib/status-code";
+import { StatusScode } from "@/helpers/status-code";
 import type { NextRequest } from "next/server";
 
 type ParamsType = {
@@ -50,11 +50,16 @@ export async function PATCH(request: NextRequest, { params }: ParamsType) {
     if ("name" in validatedData) updateData.name = validatedData.name?.trim();
     if ("cardNumber" in validatedData)
       updateData.cardNumber = toNullIfEmpty(validatedData.cardNumber);
-    if ("cardType" in validatedData) updateData.cardType = validatedData.cardType;
+    if ("cardType" in validatedData)
+      updateData.cardType = validatedData.cardType;
     if ("cardIssuer" in validatedData)
       updateData.cardIssuer = toNullIfEmpty(validatedData.cardIssuer);
-    if ("cvv" in validatedData) updateData.cvv = toNullIfEmpty(validatedData.cvv);
-    if ("expiryDate" in validatedData && validatedData.expiryDate !== undefined) {
+    if ("cvv" in validatedData)
+      updateData.cvv = toNullIfEmpty(validatedData.cvv);
+    if (
+      "expiryDate" in validatedData &&
+      validatedData.expiryDate !== undefined
+    ) {
       const expiryDate =
         validatedData.expiryDate instanceof Date
           ? validatedData.expiryDate
@@ -63,7 +68,8 @@ export async function PATCH(request: NextRequest, { params }: ParamsType) {
           : null;
       updateData.expiryDate = expiryDate;
     }
-    if ("limit" in validatedData) updateData.limit = validatedData.limit ?? null;
+    if ("limit" in validatedData)
+      updateData.limit = validatedData.limit ?? null;
     if ("lastBillAmount" in validatedData)
       updateData.lastBillAmount = validatedData.lastBillAmount ?? null;
     if ("paymentDueDay" in validatedData)
@@ -76,7 +82,10 @@ export async function PATCH(request: NextRequest, { params }: ParamsType) {
       updateData.paymentStatus = validatedData.paymentStatus ?? null;
     if ("paymentAmount" in validatedData)
       updateData.paymentAmount = validatedData.paymentAmount ?? null;
-    if ("paymentDate" in validatedData && validatedData.paymentDate !== undefined) {
+    if (
+      "paymentDate" in validatedData &&
+      validatedData.paymentDate !== undefined
+    ) {
       const paymentDate =
         validatedData.paymentDate instanceof Date
           ? validatedData.paymentDate
@@ -91,14 +100,12 @@ export async function PATCH(request: NextRequest, { params }: ParamsType) {
       updateData.icon = toNullIfEmpty(validatedData.icon);
     if ("notes" in validatedData)
       updateData.notes = toNullIfEmpty(validatedData.notes);
-    if ("isActive" in validatedData) updateData.isActive = validatedData.isActive;
+    if ("isActive" in validatedData)
+      updateData.isActive = validatedData.isActive;
 
     const card = await updateBankCard(cardId, updateData, session.user.id);
 
-    return NextResponse.json(
-      { card },
-      { status: StatusScode.OK }
-    );
+    return NextResponse.json({ card }, { status: StatusScode.OK });
   } catch (error) {
     console.error("Error updating bank card:", error);
 
@@ -162,4 +169,3 @@ export async function DELETE(_request: NextRequest, { params }: ParamsType) {
     );
   }
 }
-

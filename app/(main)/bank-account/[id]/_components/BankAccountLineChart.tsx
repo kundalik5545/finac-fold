@@ -17,7 +17,7 @@ import {
   ChartTooltipContent,
   ChartConfig,
 } from "@/components/ui/chart";
-import { BankTransaction } from "@/lib/bank-account-types";
+import { BankTransaction } from "@/lib/schema/bank-account-types";
 import {
   Card,
   CardContent,

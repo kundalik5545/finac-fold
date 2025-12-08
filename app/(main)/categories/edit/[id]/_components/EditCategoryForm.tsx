@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { updateCategorySchema } from "@/lib/bank-account-schema";
+import { updateCategorySchema } from "@/lib/schema/bank-account-schema";
 import type { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,7 +20,7 @@ import { IconPicker } from "@/components/custom-componetns/icon-picker";
 import { ColorPicker } from "@/components/custom-componetns/color-picker";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Category } from "@/lib/bank-account-types";
+import { Category } from "@/lib/schema/bank-account-types";
 
 /**
  * EditCategoryForm Component

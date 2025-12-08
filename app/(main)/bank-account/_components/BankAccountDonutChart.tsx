@@ -8,7 +8,7 @@ import {
   ChartTooltipContent,
   ChartConfig,
 } from "@/components/ui/chart";
-import { BankAccount, BankTransaction } from "@/lib/bank-account-types";
+import { BankAccount, BankTransaction } from "@/lib/schema/bank-account-types";
 import {
   Card,
   CardContent,

@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
-import { updateCategorySchema } from "@/lib/bank-account-schema";
+import { updateCategorySchema } from "@/lib/schema/bank-account-schema";
 import { ZodError } from "zod";
 import { updateCategory, deleteCategory } from "@/action/bank-account";
-import { StatusScode } from "@/lib/status-code";
+import { StatusScode } from "@/helpers/status-code";
 import type { NextRequest } from "next/server";
 
 type ParamsType = { params: Promise<{ id: string }> };
@@ -54,10 +54,7 @@ export async function PATCH(request: NextRequest, { params }: ParamsType) {
 
     const category = await updateCategory(id, updateData, session.user.id);
 
-    return NextResponse.json(
-      { category },
-      { status: StatusScode.OK }
-    );
+    return NextResponse.json({ category }, { status: StatusScode.OK });
   } catch (error) {
     console.error("Error updating category:", error);
 
@@ -120,18 +117,21 @@ export async function DELETE(_request: NextRequest, { params }: ParamsType) {
     }
 
     // Extract error message from the error
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
-    
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error";
+
     return NextResponse.json(
       {
         error: errorMessage,
-        details: error instanceof Error ? {
-          name: error.name,
-          message: error.message,
-        } : undefined,
+        details:
+          error instanceof Error
+            ? {
+                name: error.name,
+                message: error.message,
+              }
+            : undefined,
       },
       { status: StatusScode.INTERNAL_SERVER_ERROR }
     );
   }
 }
-
