@@ -10,6 +10,7 @@ import { Plus } from "lucide-react";
 import Link from "next/link";
 import { supportsPriceFetching } from "@/lib/utils/investment-utils";
 import { FetchPricesButton } from "./_components/FetchPricesButton";
+import { FetchGoldPriceButton } from "./_components/FetchGoldPriceButton";
 
 type ParamsType = { params: Promise<{ type: string }> };
 
@@ -44,6 +45,7 @@ export default async function InvestmentTypeDetailPage({
   }
 
   const canFetchPrices = supportsPriceFetching(investmentType);
+  const isGoldType = investmentType === InvestmentType.GOLD;
 
   return (
     <div className="container mx-auto md:max-w-5xl lg:max-w-7xl xl:max-w-full px-2 md:px-0 py-6">
@@ -51,6 +53,7 @@ export default async function InvestmentTypeDetailPage({
         <BackButton />
         <div className="flex gap-2">
           {canFetchPrices && <FetchPricesButton investments={investments} />}
+          {isGoldType && <FetchGoldPriceButton investments={investments} />}
           <Button asChild>
             <Link
               href={`/investments/add?type=${type}`}

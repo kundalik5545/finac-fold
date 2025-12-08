@@ -156,14 +156,11 @@ export function calculateAllInvestmentStats(
 }
 
 /**
- * Check if investment type supports API price fetching
+ * Check if investment type supports API price fetching via Alpha Vantage
+ * Note: Gold prices are fetched separately via GOLD_PRICE_API_URI
  */
 export function supportsPriceFetching(type: InvestmentType): boolean {
-  return (
-    type === InvestmentType.STOCKS ||
-    type === InvestmentType.MUTUAL_FUNDS ||
-    type === InvestmentType.GOLD
-  );
+  return type === InvestmentType.STOCKS || type === InvestmentType.MUTUAL_FUNDS;
 }
 
 /**

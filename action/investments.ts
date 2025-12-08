@@ -20,9 +20,53 @@ import {
 import { fetchInvestmentPrice } from "@/lib/utils/alpha-vantage";
 import { createTransaction } from "./bank-account";
 
-// ============================================
-// INVESTMENT FUNCTIONS
-// ============================================
+/**
+ * Investment Functions
+ *
+ * 1. getInvestments(userId: string, type?: InvestmentType): Promise<Investment[]>
+ *    - Fetch all investments for a given user, optionally filtered by investment type.
+ *    - Used in: GET /api/investments (API endpoint)
+ *
+ * 2. getInvestment(...)
+ *    - Fetch a single investment with its related transactions and price history.
+ *    - Used in: GET /api/investments/[id] (API endpoint)
+ *
+ * 3. createInvestment(data: Omit<Prisma.InvestmentCreateInput, "user" | "investmentTransactions" | "investmentPriceHistory" | "transactions">, userId: string): Promise<Investment>
+ *    - Create a new investment with initial price history and transaction entry.
+ *    - Used in: POST /api/investments (API endpoint)
+ *
+ * 4. updateInvestment(investmentId: string, data: Partial<Omit<Prisma.InvestmentUpdateInput, "user" | "investmentTransactions" | "investmentPriceHistory" | "transactions">>, userId: string): Promise<Investment>
+ *    - Update an existing investment.
+ *    - Used in: PATCH /api/investments/[id] (API endpoint)
+ *
+ * 5. deleteInvestment(investmentId: string, userId: string): Promise<void>
+ *    - Delete an existing investment (cascade deletes transactions and price history).
+ *    - Used in: DELETE /api/investments/[id] (API endpoint)
+ *
+ * 6. fetchLatestPrices(investmentIds: string[], userId: string): Promise<Investment[]>
+ *    - Fetch latest prices for investments from Alpha Vantage API.
+ *    - Used in: POST /api/investments/fetch-prices (API endpoint)
+ *
+ * 7. getInvestmentStats(userId: string, type?: InvestmentType): Promise<InvestmentStats | AllInvestmentStats>
+ *    - Calculate investment stats (optionally filtered by type).
+ *    - Used in: GET /api/investments/stats (API endpoint)
+ *
+ * 8. getInvestmentTransactions(investmentId: string, userId: string): Promise<InvestmentTransaction[]>
+ *    - Get all transactions for an investment.
+ *    - Used in: GET /api/investments/[id]/transactions (API endpoint)
+ *
+ * 9. createInvestmentTransaction(investmentId: string, data: Omit<Prisma.InvestmentTransactionCreateInput, "investment" | "user">, userId: string): Promise<InvestmentTransaction>
+ *    - Create a new investment transaction and update investment amounts.
+ *    - Used in: POST /api/investments/[id]/transactions (API endpoint)
+ *
+ * 10. updateInvestmentTransaction(transactionId: string, data: Partial<Omit<Prisma.InvestmentTransactionUpdateInput, "investment" | "user">>, userId: string): Promise<InvestmentTransaction>
+ *    - Update an existing investment transaction.
+ *    - Used in: PATCH /api/investments/[id]/transactions/[id] (API endpoint)
+ *
+ * 11. deleteInvestmentTransaction(transactionId: string, userId: string): Promise<void>
+ *    - Delete an existing investment transaction.
+ *    - Used in: DELETE /api/investments/[id]/transactions/[id] (API endpoint)
+ */
 
 /**
  * Fetch all investments for a user (optionally filtered by type)
@@ -348,8 +392,201 @@ function delay(ms: number): Promise<void> {
 }
 
 /**
+ * Fetch latest gold price from GOLD_PRICE_API_URI and update all gold investments
+ */
+export async function fetchGoldPrices(userId: string): Promise<Investment[]> {
+  try {
+    const GOLD_PRICE_API_URI = process.env.GOLD_PRICE_API_URI;
+
+    if (!GOLD_PRICE_API_URI) {
+      throw new Error(
+        "GOLD_PRICE_API_URI is not configured in environment variables"
+      );
+    }
+
+    // Get today's date in YYYY-MM-DD format
+    const today = new Date().toISOString().split("T")[0];
+
+    // Replace {date} placeholder with today's date if present, or append as query parameter
+    const apiUrl = GOLD_PRICE_API_URI.includes("{date}")
+      ? GOLD_PRICE_API_URI.replace("{date}", today)
+      : `${GOLD_PRICE_API_URI}${
+          GOLD_PRICE_API_URI.includes("?") ? "&" : "?"
+        }date=${today}`;
+
+    console.log(`🚀 Fetching gold price from: ${apiUrl}`);
+
+    const response = await fetch(apiUrl);
+
+    if (!response.ok) {
+      throw new Error(`Gold price API error: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+
+    console.log(`🚀🚀🚀 API Response:`, JSON.stringify(data, null, 2));
+
+    // Extract gold price from response
+    // API response structure: {code, message, data: {lastPrice, avgPrice, bidPrice, askPrice, ...}}
+    let goldPrice: number | null = null;
+
+    // Try to extract price from various possible fields in priority order
+    if (data?.data?.lastPrice) {
+      goldPrice = parseFloat(data.data.lastPrice);
+    } else if (data?.data?.avgPrice) {
+      goldPrice = parseFloat(data.data.avgPrice);
+    } else if (data?.data?.bidPrice) {
+      goldPrice = parseFloat(data.data.bidPrice);
+    } else if (data?.data?.askPrice) {
+      goldPrice = parseFloat(data.data.askPrice);
+    } else if (data?.data?.price) {
+      goldPrice = parseFloat(data.data.price);
+    } else if (data?.lastPrice) {
+      goldPrice = parseFloat(data.lastPrice);
+    } else if (data?.price) {
+      goldPrice = parseFloat(data.price);
+    } else if (data?.rate) {
+      goldPrice = parseFloat(data.rate);
+    } else if (data?.value) {
+      goldPrice = parseFloat(data.value);
+    } else if (
+      Array.isArray(data?.data) &&
+      data.data.length > 0 &&
+      data.data[0]?.lastPrice
+    ) {
+      goldPrice = parseFloat(data.data[0].lastPrice);
+    } else if (Array.isArray(data) && data.length > 0 && data[0]?.lastPrice) {
+      goldPrice = parseFloat(data[0].lastPrice);
+    } else {
+      throw new Error(
+        `Unable to extract gold price from API response. Response structure: ${JSON.stringify(
+          data
+        )}`
+      );
+    }
+
+    if (!goldPrice || goldPrice <= 0) {
+      throw new Error(`Invalid gold price received: ${goldPrice}`);
+    }
+
+    console.log(`Fetched gold price: ${goldPrice}`);
+
+    // Get all gold investments for the user
+    const goldInvestments = await prisma.investment.findMany({
+      where: {
+        userId,
+        type: InvestmentType.GOLD,
+      },
+    });
+
+    if (goldInvestments.length === 0) {
+      console.log("No gold investments found to update");
+      return [];
+    }
+
+    const updatedInvestments: Investment[] = [];
+    const errors: string[] = [];
+
+    // Update each gold investment
+    for (const investment of goldInvestments) {
+      try {
+        const quantity = Number(investment.quantity);
+        const investedAmount = Number(investment.investedAmount);
+
+        // Ensure quantity is valid (greater than 0)
+        if (quantity <= 0) {
+          errors.push(
+            `${investment.name}: Invalid quantity (${quantity}). Please set quantity > 0.`
+          );
+          continue;
+        }
+
+        const newCurrentValue = goldPrice * quantity;
+
+        // Debug logging
+        console.log(`Updating gold investment ${investment.name}:`, {
+          quantity,
+          investedAmount,
+          oldPrice: Number(investment.currentPrice),
+          newPrice: goldPrice,
+          oldValue: Number(investment.currentValue),
+          newCurrentValue,
+          profit: newCurrentValue - investedAmount,
+          profitPercent:
+            investedAmount > 0
+              ? ((newCurrentValue - investedAmount) / investedAmount) * 100
+              : 0,
+        });
+
+        // Update investment price and value in database
+        const updated = await prisma.investment.update({
+          where: { id: investment.id },
+          data: {
+            currentPrice: goldPrice,
+            currentValue: newCurrentValue,
+          },
+        });
+
+        // Create price history entry
+        await prisma.investmentPriceHistory.create({
+          data: {
+            price: goldPrice,
+            date: new Date(),
+            source: "API",
+            investment: {
+              connect: { id: investment.id },
+            },
+            user: {
+              connect: { id: userId },
+            },
+          },
+        });
+
+        updatedInvestments.push({
+          ...updated,
+          type: updated.type as InvestmentType,
+          currentPrice: Number(updated.currentPrice),
+          investedAmount: Number(updated.investedAmount),
+          currentValue: Number(updated.currentValue),
+          quantity: Number(updated.quantity),
+        });
+
+        console.log(`✓ Successfully updated ${investment.name}`);
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : "Unknown error";
+        console.error(
+          `Error updating gold investment ${investment.name}:`,
+          errorMessage
+        );
+        errors.push(`${investment.name}: ${errorMessage}`);
+        // Continue with other investments even if one fails
+      }
+    }
+
+    // Log summary
+    console.log(
+      `Gold price update completed: ${updatedInvestments.length} succeeded, ${errors.length} failed`
+    );
+    if (errors.length > 0) {
+      console.error("Errors:", errors);
+    }
+
+    return updatedInvestments;
+  } catch (error) {
+    console.error("Error fetching gold price:", error);
+    throw new Error(
+      `Failed to fetch gold price: ${
+        error instanceof Error ? error.message : "Unknown error"
+      }`
+    );
+  }
+}
+
+/**
  * Fetch latest prices for investments from Alpha Vantage API
  * Processes all investments with delays to avoid rate limiting
+ * Note: Gold investments are excluded - use fetchGoldPrices() instead
  */
 export async function fetchLatestPrices(
   investmentIds: string[],
@@ -366,7 +603,7 @@ export async function fetchLatestPrices(
     const updatedInvestments: Investment[] = [];
     const errors: string[] = [];
 
-    // Filter investments that support price fetching
+    // Filter investments that support price fetching (excludes GOLD)
     const investmentsToFetch = investments.filter((investment) => {
       const investmentType = investment.type as InvestmentType;
       return supportsPriceFetching(investmentType);
@@ -389,13 +626,9 @@ export async function fetchLatestPrices(
       }
 
       try {
-        // For Gold, symbol is not required
-        const symbol =
-          investmentType === InvestmentType.GOLD
-            ? null
-            : investment.symbol || null;
+        const symbol = investment.symbol || null;
 
-        if (investmentType !== InvestmentType.GOLD && !symbol) {
+        if (!symbol) {
           errors.push(
             `${investment.name}: Symbol is required for ${investmentType}`
           );

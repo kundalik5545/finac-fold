@@ -7,6 +7,7 @@ import { InvestmentTransactionHistory } from "./_components/InvestmentTransactio
 import { UpdatePriceButton } from "./_components/UpdatePriceButton";
 import BackButton from "@/components/custom-componetns/back-button";
 import { supportsPriceFetching } from "@/lib/utils/investment-utils";
+import { InvestmentType } from "@/lib/types/investments-types";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import Link from "next/link";
@@ -36,8 +37,10 @@ export default async function InvestmentDetailPage({
   }
 
   const canFetchPrices = supportsPriceFetching(investment.type);
+  const isGoldType = investment.type === InvestmentType.GOLD;
   const requiresManualTransactions =
     !canFetchPrices &&
+    !isGoldType &&
     (investment.type === "FIXED_DEPOSIT" ||
       investment.type === "NPS" ||
       investment.type === "PF");
@@ -47,7 +50,7 @@ export default async function InvestmentDetailPage({
       <div className="mb-4 flex items-center justify-between">
         <BackButton />
         <div className="flex gap-2">
-          {canFetchPrices && <UpdatePriceButton investment={investment} />}
+          {(canFetchPrices || isGoldType) && <UpdatePriceButton investment={investment} />}
           {requiresManualTransactions && (
             <Button asChild>
               <Link

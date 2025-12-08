@@ -43,7 +43,7 @@ export function FetchPricesButton({ investments }: FetchPricesButtonProps) {
       if (response.ok) {
         const successCount = data.successCount || data.investments?.length || 0;
         const totalRequested = data.totalRequested || investments.length;
-        
+
         if (successCount === totalRequested) {
           toast.success(
             `Successfully updated prices for all ${successCount} investment(s)`

@@ -5,7 +5,7 @@ import { RefreshCw } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { Investment } from "@/lib/types/investments-types";
+import { Investment, InvestmentType } from "@/lib/types/investments-types";
 import { useFormatCurrency } from "@/hooks/use-formatCurrency";
 
 interface UpdatePriceButtonProps {
@@ -14,7 +14,8 @@ interface UpdatePriceButtonProps {
 
 /**
  * UpdatePriceButton Component
- * Fetches latest price for a single investment from Alpha Vantage API
+ * Fetches latest price for a single investment
+ * Uses Alpha Vantage API for stocks/mutual funds, GOLD_PRICE_API_URI for gold
  */
 export function UpdatePriceButton({ investment }: UpdatePriceButtonProps) {
   const router = useRouter();
@@ -25,27 +26,49 @@ export function UpdatePriceButton({ investment }: UpdatePriceButtonProps) {
     setIsFetching(true);
 
     try {
-      const response = await fetch("/api/investments/fetch-prices", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ investmentIds: [investment.id] }),
-      });
+      let response;
+      
+      // Use different API endpoint for gold investments
+      if (investment.type === InvestmentType.GOLD) {
+        response = await fetch("/api/investments/fetch-gold-price", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+      } else {
+        response = await fetch("/api/investments/fetch-prices", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ investmentIds: [investment.id] }),
+        });
+      }
 
       const data = await response.json();
 
       if (response.ok) {
         if (data.investments && data.investments.length > 0) {
-          const updatedInvestment = data.investments[0];
-          const oldPrice = investment.currentPrice;
-          const newPrice = updatedInvestment.currentPrice;
+          // For gold, find the updated investment in the array
+          const updatedInvestment = investment.type === InvestmentType.GOLD
+            ? data.investments.find((inv: Investment) => inv.id === investment.id) || data.investments[0]
+            : data.investments[0];
           
-          toast.success(
-            `Price updated successfully. ${formatCurrency(oldPrice)} → ${formatCurrency(newPrice)}`
-          );
+          if (updatedInvestment) {
+            const oldPrice = investment.currentPrice;
+            const newPrice = updatedInvestment.currentPrice;
+            
+            toast.success(
+              `Price updated successfully. ${formatCurrency(oldPrice)} → ${formatCurrency(newPrice)}`
+            );
+          } else {
+            toast.warning("Price could not be fetched. Please try again.");
+          }
         } else {
-          const errorMsg = investment.symbol
+          const errorMsg = investment.type === InvestmentType.GOLD
+            ? `Gold price could not be fetched. Please check if GOLD_PRICE_API_URI is configured correctly.`
+            : investment.symbol
             ? `Price could not be fetched for ${investment.symbol}. Please check if the symbol is correct and API key is configured.`
             : `Price could not be fetched. Please ensure the investment has a valid symbol and API key is configured.`;
           toast.warning(errorMsg);

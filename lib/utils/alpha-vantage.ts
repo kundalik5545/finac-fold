@@ -52,50 +52,6 @@ export async function fetchStockPrice(symbol: string): Promise<number | null> {
 }
 
 /**
- * Fetch gold price from Alpha Vantage (using commodity API)
- */
-export async function fetchGoldPrice(): Promise<number | null> {
-  if (!ALPHA_VANTAGE_API_KEY) {
-    console.warn("Alpha Vantage API key not configured");
-    return null;
-  }
-
-  try {
-    // Alpha Vantage uses XAU/USD for gold
-    const url = `${ALPHA_VANTAGE_BASE_URL}?function=CURRENCY_EXCHANGE_RATE&from_currency=XAU&to_currency=USD&apikey=${ALPHA_VANTAGE_API_KEY}`;
-    const response = await fetch(url);
-
-    if (!response.ok) {
-      throw new Error(`Alpha Vantage API error: ${response.statusText}`);
-    }
-
-    const data = await response.json();
-
-    // Check for API errors
-    if (data["Error Message"]) {
-      throw new Error(data["Error Message"]);
-    }
-
-    if (data["Note"]) {
-      throw new Error("API rate limit exceeded. Please try again later.");
-    }
-
-    // Extract exchange rate (price per ounce in USD)
-    const exchangeRate = data["Realtime Currency Exchange Rate"];
-    if (!exchangeRate || !exchangeRate["5. Exchange Rate"]) {
-      throw new Error("No exchange rate found");
-    }
-
-    // Convert to INR if needed (you may want to fetch USD to INR rate separately)
-    // For now, returning USD price per ounce
-    return parseFloat(exchangeRate["5. Exchange Rate"]);
-  } catch (error) {
-    console.error("Error fetching gold price:", error);
-    return null;
-  }
-}
-
-/**
  * Fetch mutual fund NAV (Note: Alpha Vantage doesn't support MF NAV directly)
  * This is a placeholder - you may need to use a different API or manual entry
  */
@@ -113,6 +69,7 @@ export async function fetchMutualFundNAV(
 
 /**
  * Fetch price based on investment type
+ * Note: Gold prices are fetched separately via GOLD_PRICE_API_URI
  */
 export async function fetchInvestmentPrice(
   type: InvestmentType,
@@ -124,8 +81,6 @@ export async function fetchInvestmentPrice(
         throw new Error("Symbol is required for stocks");
       }
       return fetchStockPrice(symbol);
-    case InvestmentType.GOLD:
-      return fetchGoldPrice();
     case InvestmentType.MUTUAL_FUNDS:
       if (!symbol) {
         throw new Error("Symbol is required for mutual funds");
