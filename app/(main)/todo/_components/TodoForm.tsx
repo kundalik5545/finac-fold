@@ -15,11 +15,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "next/navigation";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { todoFormSchema } from "@/lib/todo-schema";
+import { todoFormSchema } from "@/lib/schema/todo-schema";
 import { useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
-import { TodoWithRelations, TodoCategory, TodoTag } from "@/lib/todo-types";
+import { TodoWithRelations, TodoCategory, TodoTag } from "@/lib/types/todo-types";
 import { createTodo, updateTodo } from "@/action/todo";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
@@ -309,8 +309,8 @@ export function TodoForm({
                     ? "Updating..."
                     : "Creating..."
                   : isEditing
-                  ? "Update Todo"
-                  : "Create Todo"}
+                    ? "Update Todo"
+                    : "Create Todo"}
               </Button>
               <Button
                 type="button"

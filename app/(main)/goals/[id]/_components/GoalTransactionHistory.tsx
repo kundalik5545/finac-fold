@@ -7,7 +7,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { useFormatCurrency } from "@/hooks/use-formatCurrency";
-import { GoalTransaction } from "@/lib/goals-types";
+import { GoalTransaction } from "@/lib/types/goals-types";
 import {
   Dialog,
   DialogContent,

@@ -15,11 +15,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { assetFormSchema } from "@/lib/assets-tracking-schema";
+import { assetFormSchema } from "@/lib/schema/assets-tracking-schema";
 import { useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
-import { Asset } from "@/lib/assets-tracking-types";
+import { Asset } from "@/lib/types/assets-tracking-types";
 
 const assetTypes = [
     { label: "Property", value: "PROPERTY" },

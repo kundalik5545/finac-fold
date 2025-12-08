@@ -8,7 +8,7 @@ import { GoalsCardView } from "./GoalsCardView";
 import { GoalsDonutChart } from "./GoalsDonutChart";
 import { GoalsBarChart } from "./GoalsBarChart";
 import { GoalsAreaChart } from "./GoalsAreaChart";
-import { Goal } from "@/lib/goals-types";
+import { Goal } from "@/lib/types/goals-types";
 
 export function GoalsClient({ goals }: { goals: Goal[] }) {
   const [viewMode, setViewMode] = useState<"table" | "card">("table");

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { TodoWithRelations, TodoPriority } from "@/lib/todo-types";
+import { TodoWithRelations, TodoPriority } from "@/lib/types/todo-types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -183,16 +183,14 @@ export function MonthlyView({ todos }: MonthlyViewProps) {
             return (
               <div
                 key={`current-${day}`}
-                className={`min-h-[100px] p-2 border rounded-lg ${
-                  today
+                className={`min-h-[100px] p-2 border rounded-lg ${today
                     ? "bg-primary/10 border-primary"
                     : "bg-background hover:bg-muted/20"
-                }`}
+                  }`}
               >
                 <div
-                  className={`text-xs mb-1 font-semibold ${
-                    today ? "text-primary" : ""
-                  }`}
+                  className={`text-xs mb-1 font-semibold ${today ? "text-primary" : ""
+                    }`}
                 >
                   {day}
                   {today && (
@@ -205,9 +203,8 @@ export function MonthlyView({ todos }: MonthlyViewProps) {
                   {dayTodos.slice(0, 3).map((todo) => (
                     <div
                       key={todo.id}
-                      className={`text-xs p-1 rounded bg-muted cursor-pointer hover:bg-muted/80 truncate ${
-                        todo.completed ? "opacity-60 line-through" : ""
-                      }`}
+                      className={`text-xs p-1 rounded bg-muted cursor-pointer hover:bg-muted/80 truncate ${todo.completed ? "opacity-60 line-through" : ""
+                        }`}
                       onClick={() => handleTodoClick(todo.id)}
                       title={todo.title}
                     >

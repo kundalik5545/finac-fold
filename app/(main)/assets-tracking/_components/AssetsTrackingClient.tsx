@@ -7,7 +7,7 @@ import { AssetsTrackingTable } from "./AssetsTrackingTable";
 import { AssetsTrackingCard } from "./AssetsTrackingCard";
 import { AssetsPieChart } from "./AssetsPieChart";
 import { AssetsLineChart } from "./AssetsLineChart";
-import { Asset } from "@/lib/assets-tracking-types";
+import { Asset } from "@/lib/types/assets-tracking-types";
 import { AssestsAreacChart } from "./AssestsAreacChart";
 import { AssestsLineChartMultiple } from "./AssestsLineChartMultiple";
 

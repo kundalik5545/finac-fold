@@ -1,6 +1,6 @@
 "use client";
 
-import { TodoWithRelations } from "@/lib/todo-types";
+import { TodoWithRelations } from "@/lib/types/todo-types";
 import { TodoCard } from "./TodoCard";
 
 interface TodoCardViewProps {

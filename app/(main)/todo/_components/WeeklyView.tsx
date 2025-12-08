@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { TodoWithRelations, TodoPriority } from "@/lib/todo-types";
+import { TodoWithRelations, TodoPriority } from "@/lib/types/todo-types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -128,24 +128,21 @@ export function WeeklyView({ todos }: WeeklyViewProps) {
             return (
               <div
                 key={idx}
-                className={`min-h-[200px] p-3 border rounded-lg ${
-                  today
+                className={`min-h-[200px] p-3 border rounded-lg ${today
                     ? "bg-primary/10 border-primary"
                     : "bg-background hover:bg-muted/20"
-                }`}
+                  }`}
               >
                 <div className="mb-2">
                   <div
-                    className={`font-semibold text-sm ${
-                      today ? "text-primary" : ""
-                    }`}
+                    className={`font-semibold text-sm ${today ? "text-primary" : ""
+                      }`}
                   >
                     {dayName}
                   </div>
                   <div
-                    className={`text-xs text-muted-foreground ${
-                      today ? "text-primary/70" : ""
-                    }`}
+                    className={`text-xs text-muted-foreground ${today ? "text-primary/70" : ""
+                      }`}
                   >
                     {monthName} {dayNumber}
                     {today && (
@@ -162,9 +159,8 @@ export function WeeklyView({ todos }: WeeklyViewProps) {
                     dayTodos.map((todo) => (
                       <div
                         key={todo.id}
-                        className={`text-xs p-2 rounded bg-muted cursor-pointer hover:bg-muted/80 ${
-                          todo.completed ? "opacity-60" : ""
-                        }`}
+                        className={`text-xs p-2 rounded bg-muted cursor-pointer hover:bg-muted/80 ${todo.completed ? "opacity-60" : ""
+                          }`}
                         onClick={() => handleTodoClick(todo.id)}
                       >
                         <div className="flex items-start gap-2">
@@ -175,9 +171,8 @@ export function WeeklyView({ todos }: WeeklyViewProps) {
                           />
                           <div className="flex-1 min-w-0">
                             <div
-                              className={`font-medium ${
-                                todo.completed ? "line-through" : ""
-                              }`}
+                              className={`font-medium ${todo.completed ? "line-through" : ""
+                                }`}
                             >
                               {todo.title}
                             </div>

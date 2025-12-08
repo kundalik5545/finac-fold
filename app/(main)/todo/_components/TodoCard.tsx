@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Edit, Trash, Calendar as CalendarIcon, Tag } from "lucide-react";
-import { TodoWithRelations, TodoPriority } from "@/lib/todo-types";
+import { TodoWithRelations, TodoPriority } from "@/lib/types/todo-types";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";

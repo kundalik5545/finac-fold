@@ -1,13 +1,10 @@
 import { auth } from "@/lib/auth";
-import { updateGoalTransactionSchema } from "@/lib/goals-schema";
+import { updateGoalTransactionSchema } from "@/lib/schema/goals-schema";
 import { headers } from "next/headers";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { ZodError } from "zod";
-import {
-  updateGoalTransaction,
-  deleteGoalTransaction,
-} from "@/action/goals";
+import { updateGoalTransaction, deleteGoalTransaction } from "@/action/goals";
 
 type ParamsType = { params: Promise<{ id: string; transactionId: string }> };
 
@@ -100,4 +97,3 @@ export async function DELETE(_request: NextRequest, { params }: ParamsType) {
     );
   }
 }
-

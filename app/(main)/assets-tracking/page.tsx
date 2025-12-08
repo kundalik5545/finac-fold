@@ -6,7 +6,7 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { AssetsTrackingClient } from "./_components/AssetsTrackingClient";
 import { getAssets } from "@/action/assets-tracking";
-import { Asset } from "@/lib/assets-tracking-types";
+import { Asset } from "@/lib/types/assets-tracking-types";
 
 const AssetsTrackingPage = async () => {
     let assets: Asset[] = [];

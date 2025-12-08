@@ -1,7 +1,7 @@
 "use client";
 
 import { GoalCard } from "./GoalCard";
-import { Goal } from "@/lib/goals-types";
+import { Goal } from "@/lib/types/goals-types";
 
 export function GoalsCardView({ goals }: { goals: Goal[] }) {
   if (!goals || goals.length === 0) {

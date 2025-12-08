@@ -1,7 +1,7 @@
 "use server";
 
 import prisma from "@/lib/prisma";
-import { Asset, AssetsTransaction } from "@/lib/assets-tracking-types";
+import { Asset, AssetsTransaction } from "@/lib/types/assets-tracking-types";
 import { Prisma } from "@/app/generated/prisma/client";
 
 // ============================================

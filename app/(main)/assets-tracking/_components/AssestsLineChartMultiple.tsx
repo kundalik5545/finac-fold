@@ -24,7 +24,7 @@ import {
     ChartConfig,
     ChartContainer,
 } from "@/components/ui/chart"
-import { Asset } from "@/lib/assets-tracking-types"
+import { Asset } from "@/lib/types/assets-tracking-types"
 
 export const description = "A bar chart showing asset value vs purchase price"
 

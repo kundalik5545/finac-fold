@@ -17,7 +17,7 @@ import {
   TodoCategory,
   TodoTag,
   TodoPriority,
-} from "@/lib/todo-types";
+} from "@/lib/types/todo-types";
 
 interface TodoFiltersProps {
   filters: TodoFiltersType;
@@ -105,8 +105,8 @@ export function TodoFilters({
                 localFilters.completed === undefined
                   ? "all"
                   : localFilters.completed
-                  ? "completed"
-                  : "active"
+                    ? "completed"
+                    : "active"
               }
               onValueChange={handleCompletionChange}
             >
