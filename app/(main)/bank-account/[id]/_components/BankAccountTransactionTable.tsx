@@ -102,8 +102,16 @@ export function BankAccountTransactionTable({
         toast.success("Transaction deleted successfully");
         router.refresh();
       } else {
-        const error = await response.json();
-        toast.error(error.error || "Failed to delete transaction");
+        let errorData: any = {};
+        try {
+          const text = await response.text();
+          if (text) {
+            errorData = JSON.parse(text);
+          }
+        } catch {
+          // If parsing fails, use default error message
+        }
+        toast.error(errorData.error || "Failed to delete transaction");
       }
     } catch (error) {
       toast.error("Failed to delete transaction");

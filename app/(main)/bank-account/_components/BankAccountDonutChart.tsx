@@ -63,7 +63,15 @@ export function BankAccountDonutChart({ bankAccounts }: { bankAccounts: BankAcco
             const response = await fetch(`/api/bank-account/${account.id}/transactions`);
             if (!response.ok) continue;
             
-            const data = await response.json();
+            let data: any = {};
+            try {
+              const text = await response.text();
+              if (text) {
+                data = JSON.parse(text);
+              }
+            } catch {
+              continue; // Skip if parsing fails
+            }
             const transactions: BankTransaction[] = data.transactions || [];
 
             // Calculate weekly spending (DEBIT only)

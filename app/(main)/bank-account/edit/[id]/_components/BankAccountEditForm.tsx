@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { bankAccountFormSchema } from "@/lib/bank-account-schema";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
 import { IconPicker } from "@/components/custom-componetns/icon-picker";
@@ -44,7 +44,7 @@ export function BankAccountEditForm({ bankAccount }: BankAccountEditFormProps) {
       name: bankAccount.name,
       accountNumber: bankAccount.accountNumber,
       bankName: bankAccount.bankName,
-      accountType: bankAccount.accountType,
+      accountType: bankAccount.accountType as "SAVINGS" | "CURRENT" | "OTHER" | "SALARY" | null,
       ifscCode: bankAccount.ifscCode,
       branch: bankAccount.branch,
       startingBalance: bankAccount.startingBalance,
@@ -87,26 +87,51 @@ export function BankAccountEditForm({ bankAccount }: BankAccountEditFormProps) {
         insuranceAmount: data.insuranceAmount && data.insuranceAmount > 0 ? data.insuranceAmount : null,
       };
 
-      console.log("Updating bank account data:", cleanedData);
-
       const response = await fetch(`/api/bank-account/${bankAccount.id}`, {
-        method: "PUT",
+        method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(cleanedData),
       });
 
-      const responseData = await response.json();
+      // Parse response JSON if available
+      let responseData: any = {};
+      const contentType = response.headers.get("content-type");
+
+      try {
+        const text = await response.text();
+        if (text && contentType && contentType.includes("application/json")) {
+          responseData = JSON.parse(text);
+        } else if (text) {
+          // If response has text but isn't JSON, use it as error message
+          responseData = { error: text };
+        }
+      } catch (parseError) {
+        console.error("Error parsing response:", parseError);
+        responseData = { error: "Failed to parse server response" };
+      }
 
       if (response.ok) {
         toast.success("Bank account updated successfully");
+        // Redirect user to bank account page after successful update and "close" the edit form
         router.push("/bank-account");
-        router.refresh();
+        // No need to call router.refresh() after .push()
+        // (If you only want to close the modal, do that here instead)
+        return; // Stop here, don't continue (prevents setIsSubmitting from setting to false briefly after nav)
       } else {
-        console.error("Error response:", responseData);
-        toast.error(responseData.error || "Failed to update bank account");
-        if (responseData.details) {
+        // Only log if we have meaningful error data
+        if (responseData && (responseData.error || responseData.details)) {
+          console.error("Error response:", responseData);
+        }
+
+        // Show appropriate error message
+        const errorMessage =
+          responseData?.error ||
+          `Failed to update bank account (${response.status} ${response.statusText})`;
+        toast.error(errorMessage);
+
+        if (responseData?.details) {
           console.error("Validation details:", responseData.details);
         }
       }
@@ -372,4 +397,3 @@ export function BankAccountEditForm({ bankAccount }: BankAccountEditFormProps) {
     </form>
   );
 }
-

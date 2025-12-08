@@ -56,8 +56,16 @@ export function BankAccountDetailView({
         router.push("/bank-account");
         router.refresh();
       } else {
-        const error = await response.json();
-        toast.error(error.error || "Failed to delete bank account");
+        let errorData: any = {};
+        try {
+          const text = await response.text();
+          if (text) {
+            errorData = JSON.parse(text);
+          }
+        } catch {
+          // If parsing fails, use default error message
+        }
+        toast.error(errorData.error || "Failed to delete bank account");
       }
     } catch (error) {
       toast.error("Failed to delete bank account");

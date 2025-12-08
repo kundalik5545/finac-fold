@@ -90,16 +90,40 @@ export function BankAccountForm() {
         body: JSON.stringify(cleanedData),
       });
 
-      const responseData = await response.json();
+      // Parse response JSON if available
+      let responseData: any = {};
+      const contentType = response.headers.get("content-type");
+
+      try {
+        const text = await response.text();
+        if (text && contentType && contentType.includes("application/json")) {
+          responseData = JSON.parse(text);
+        } else if (text) {
+          // If response has text but isn't JSON, use it as error message
+          responseData = { error: text };
+        }
+      } catch (parseError) {
+        console.error("Error parsing response:", parseError);
+        responseData = { error: "Failed to parse server response" };
+      }
 
       if (response.ok) {
         toast.success("Bank account created successfully");
         router.push("/bank-account");
         router.refresh();
       } else {
-        console.error("Error response:", responseData);
-        toast.error(responseData.error || "Failed to create bank account");
-        if (responseData.details) {
+        // Only log if we have meaningful error data
+        if (responseData && (responseData.error || responseData.details)) {
+          console.error("Error response:", responseData);
+        }
+
+        // Show appropriate error message
+        const errorMessage =
+          responseData?.error ||
+          `Failed to create bank account (${response.status} ${response.statusText})`;
+        toast.error(errorMessage);
+
+        if (responseData?.details) {
           console.error("Validation details:", responseData.details);
         }
       }

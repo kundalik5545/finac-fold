@@ -36,7 +36,6 @@ export function BankAccountCard({ bankAccount }: { bankAccount: BankAccount }) {
     if (!confirm(`Are you sure you want to delete "${accountName}"?`)) {
       return;
     }
-
     setLoadingStates((prev) => ({ ...prev, [`delete-${accountId}`]: true }));
 
     try {
@@ -48,17 +47,31 @@ export function BankAccountCard({ bankAccount }: { bankAccount: BankAccount }) {
         toast.success("Bank account deleted successfully");
         router.refresh();
       } else {
-        const error = await response.json();
-        toast.error(error.error || "Failed to delete bank account");
+        let errorData: any = {};
+        try {
+          const text = await response.text();
+          if (text) {
+            errorData = JSON.parse(text);
+          }
+        } catch {
+          // If parsing fails, use default error message
+        }
+        toast.error(errorData.error || "Failed to delete bank account");
       }
     } catch (error) {
       toast.error("Failed to delete bank account");
     } finally {
-      setLoadingStates((prev) => ({ ...prev, [`delete-${accountId}`]: false }));
+      setLoadingStates((prev) => ({
+        ...prev,
+        [`delete-${accountId}`]: false,
+      }));
     }
   };
 
-  const handleEdit = (e: React.MouseEvent<HTMLButtonElement>, accountId: string) => {
+  const handleEdit = (
+    e: React.MouseEvent<HTMLButtonElement>,
+    accountId: string
+  ) => {
     e.stopPropagation();
     router.push(`/bank-account/edit/${accountId}`);
   };
@@ -72,23 +85,50 @@ export function BankAccountCard({ bankAccount }: { bankAccount: BankAccount }) {
   return (
     <Card
       className={cn(
-        "cursor-pointer hover:shadow-lg transition-shadow",
+        "relative cursor-pointer hover:shadow-xl hover:scale-[1.018] transition-all ring-1 ring-muted/20",
         cardBgColor && "border-0"
       )}
       style={cardBgColor ? { backgroundColor: cardBgColor } : undefined}
       onClick={handleCardClick}
     >
-      <CardHeader className="pb-3">
-        <div className="flex items-start justify-between">
+      <CardHeader className="pb-2 pt-4 px-5">
+        <div className="flex items-center justify-between gap-x-3 gap-y-0">
           <div className="flex items-center gap-2">
             {bankAccount.icon && (
-              <span className="text-3xl" role="img" aria-label="Bank account icon">
+              <span
+                className={cn(
+                  "text-4xl drop-shadow",
+                  !bankAccount.isActive && "opacity-60"
+                )}
+                role="img"
+                aria-label="Bank account icon"
+              >
                 {bankAccount.icon}
               </span>
             )}
-            <h3 className="font-semibold text-lg">{bankAccount.name}</h3>
+            <span className="flex flex-col">
+              <span className="font-semibold text-lg leading-snug truncate max-w-[160px]">
+                {bankAccount.name}
+              </span>
+              <div className="flex gap-1 mt-0.5">
+                {bankAccount.accountType && (
+                  <Badge
+                    variant="secondary"
+                    className="text-xs font-normal px-2 py-0"
+                  >
+                    {bankAccount.accountType.charAt(0).toUpperCase() + bankAccount.accountType.slice(1).toLowerCase()}
+                  </Badge>
+                )}
+                <Badge
+                  variant={bankAccount.isActive ? "default" : "secondary"}
+                  className="text-xs font-normal px-2 py-0"
+                >
+                  {bankAccount.isActive ? "Active" : "Inactive"}
+                </Badge>
+              </div>
+            </span>
           </div>
-          <div className="flex gap-1">
+          <div className="flex gap-0.5 ml-2">
             <Button
               variant="ghost"
               size="icon"
@@ -102,7 +142,9 @@ export function BankAccountCard({ bankAccount }: { bankAccount: BankAccount }) {
               variant="ghost"
               size="icon"
               className="h-8 w-8"
-              onClick={(e) => handleDelete(e, bankAccount.id, bankAccount.name)}
+              onClick={(e) =>
+                handleDelete(e, bankAccount.id, bankAccount.name)
+              }
               disabled={!!loadingStates[`delete-${bankAccount.id}`]}
             >
               <Trash className="h-4 w-4" />
@@ -110,57 +152,42 @@ export function BankAccountCard({ bankAccount }: { bankAccount: BankAccount }) {
           </div>
         </div>
       </CardHeader>
-      <CardContent className="space-y-4">
-        {/* Bank Name */}
-        {bankAccount.bankName && (
-          <div className="flex items-center gap-2 text-sm">
-            <Building2 className="h-4 w-4 text-muted-foreground" />
-            <span className="text-muted-foreground">{bankAccount.bankName}</span>
-          </div>
-        )}
-
-        {/* Account Type */}
-        {bankAccount.accountType && (
-          <Badge variant="outline" className="w-fit">
-            {bankAccount.accountType}
-          </Badge>
-        )}
-
-        {/* Account Number */}
-        {bankAccount.accountNumber && (
-          <div className="flex items-center gap-2 text-sm">
-            <CreditCard className="h-4 w-4 text-muted-foreground" />
-            <span className="text-muted-foreground">
-              {bankAccount.accountNumber}
-            </span>
-          </div>
-        )}
-
-        {/* Starting Balance */}
-        <div className="space-y-1">
-          <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Starting Balance</span>
-            <span className="font-semibold">
-              {formatCurrency(bankAccount.startingBalance)}
-            </span>
-          </div>
+      <CardContent className="pt-2 pb-5 px-5">
+        <div className="flex items-center justify-between gap-x-6 flex-wrap">
+          {bankAccount.bankName && (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
+              <Building2 className="h-4 w-4" />
+              <span className="truncate">{bankAccount.bankName}</span>
+            </div>
+          )}
+          {bankAccount.accountNumber && (
+            <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
+              <CreditCard className="h-4 w-4" />
+              <span className="truncate">{bankAccount.accountNumber}</span>
+            </div>
+          )}
         </div>
 
-        {/* Account Opening Date */}
+        <hr className="my-3 border-muted/20" />
+
+        <div className="flex items-center justify-between mt-1">
+          <span className="text-muted-foreground text-sm">
+            Starting Balance
+          </span>
+          <span className="font-semibold text-lg">
+            {formatCurrency(bankAccount.startingBalance)}
+          </span>
+        </div>
         {bankAccount.accountOpeningDate && (
-          <div className="flex items-center gap-2 text-sm">
-            <span className="text-muted-foreground">
-              Opened: {formatDate(bankAccount.accountOpeningDate)}
+          <div className="flex items-center justify-between mt-2">
+            <span className="text-muted-foreground text-xs">
+              Opened
+            </span>
+            <span className="text-muted-foreground text-sm font-medium">
+              {formatDate(bankAccount.accountOpeningDate)}
             </span>
           </div>
         )}
-
-        {/* Status Badge */}
-        <div className="flex items-center justify-between pt-2">
-          <Badge variant={bankAccount.isActive ? "default" : "secondary"}>
-            {bankAccount.isActive ? "Active" : "Inactive"}
-          </Badge>
-        </div>
       </CardContent>
     </Card>
   );
