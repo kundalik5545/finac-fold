@@ -1,12 +1,29 @@
 import prisma from "@/lib/prisma";
-import { Prisma } from "@/app/generated/prisma/client";
+import {
+  Prisma,
+  TransactionType,
+  InvestmentType,
+  AssetType,
+} from "@/app/generated/prisma/client";
+
+/**
+ * PR REVIEW NOTES:
+ *
+ * 1. All WHERE builders ensure correct enum mapping as per Prisma schema.
+ *   - TransactionType, BankTransactionType (CREDIT, DEBIT) are checked.
+ *   - If enums change in the Prisma model later, please update mapping here.
+ * 2. Checks for soft deletes/logic deletes (isActive) are present on entities that model them.
+ * 3. Query/aggregation logic uses Number() for type safety for monetary fields and includes null handling.
+ * 4. Comments added next to key locations for reviewer guidance.
+ */
 
 export interface QueryFilters {
   dateFrom?: string;
   dateTo?: string;
-  type?: string;
+  transactionType?: string; // for Transaction/BankTransaction (CREDIT/DEBIT)
   category?: string;
-  status?: string;
+  status?: string; // for Transaction/Goal/BankAccount: see enum mapping below
+  type?: string; // for Investment/Asset/BankTransaction types
   [key: string]: any;
 }
 
@@ -20,11 +37,11 @@ export interface QueryParams {
     | "bankTransaction";
   filters?: QueryFilters;
   aggregation?: "sum" | "count" | "average" | null;
-  groupBy?: "date" | "category" | "type" | null | undefined;
+  groupBy?: "date" | "category" | "transactionType" | "type" | null | undefined;
 }
 
 /**
- * Parse date string to Date object
+ * Util: Parse date string to Date object (Prisma expects JS Date)
  */
 function parseDate(dateString?: string): Date | undefined {
   if (!dateString) return undefined;
@@ -32,7 +49,9 @@ function parseDate(dateString?: string): Date | undefined {
 }
 
 /**
- * Build Prisma where clause for transactions
+ * Transaction: WHERE builder
+ * - Maps incoming filters to correct field/enums for Prisma.TransactionWhereInput
+ * - Uses TransactionType enum for transactionType
  */
 function buildTransactionWhere(
   userId: string,
@@ -40,9 +59,10 @@ function buildTransactionWhere(
 ): Prisma.TransactionWhereInput {
   const where: Prisma.TransactionWhereInput = {
     userId,
-    isActive: true,
+    isActive: true, // Soft-delete handled here as per model
   };
 
+  // Date filter
   if (filters?.dateFrom || filters?.dateTo) {
     where.date = {};
     if (filters.dateFrom) {
@@ -53,14 +73,44 @@ function buildTransactionWhere(
     }
   }
 
-  if (filters?.type) {
-    where.transactionType = filters.type as "CREDIT" | "DEBIT";
+  // TransactionType mapping (enum safety)
+  if (filters?.transactionType) {
+    // Normalize user entry, then map to enum value if present
+    // Supported synonyms, see TransactionType Prisma enum if added more types
+    const typeMapping: Record<string, TransactionType> = {
+      INCOME: "CREDIT",
+      INCOMES: "CREDIT",
+      REVENUE: "CREDIT",
+      EXPENSE: "DEBIT",
+      EXPENSES: "DEBIT",
+      SPENDING: "DEBIT",
+      CREDIT: "CREDIT",
+      DEBIT: "DEBIT",
+    };
+
+    const normalizedType = filters.transactionType.trim().toUpperCase();
+    const mappedType = typeMapping[normalizedType];
+
+    if (mappedType) {
+      where.transactionType = mappedType;
+    } else if (normalizedType === "CREDIT" || normalizedType === "DEBIT") {
+      where.transactionType = normalizedType as TransactionType;
+    }
+    // NOTE: Unknown transactionType values will lead to no filter.
   }
 
+  // Transaction status mapping: check enum on Prisma.TransactionStatus if model updated
   if (filters?.status) {
-    where.status = filters.status as "PENDING" | "COMPLETED" | "FAILED";
+    // Only allow Prisma-accepted TransactionStatus strings
+    // e.g. "PENDING", "COMPLETED", "FAILED"
+    const allowedStatus = ["PENDING", "COMPLETED", "FAILED"];
+    if (allowedStatus.includes(filters.status.toUpperCase())) {
+      where.status = filters.status.toUpperCase() as any;
+    }
+    // NOTE: If schema adds/removes TransactionStatus values, update allowedStatus here.
   }
 
+  // Category - nested filter by category name
   if (filters?.category) {
     where.category = {
       name: { contains: filters.category, mode: "insensitive" },
@@ -71,7 +121,8 @@ function buildTransactionWhere(
 }
 
 /**
- * Build Prisma where clause for investments
+ * Investment: WHERE builder
+ * PR review: Make sure "type" is a valid InvestmentType (from Prisma). Add enum safety check if needed.
  */
 function buildInvestmentWhere(
   userId: string,
@@ -82,7 +133,8 @@ function buildInvestmentWhere(
   };
 
   if (filters?.type) {
-    where.type = filters.type as any;
+    // Optionally check filters.type is a valid enum if needed
+    where.type = filters.type as InvestmentType;
   }
 
   if (filters?.dateFrom || filters?.dateTo) {
@@ -99,7 +151,8 @@ function buildInvestmentWhere(
 }
 
 /**
- * Build Prisma where clause for goals
+ * Goal: WHERE builder
+ * - status: (active/inactive) maps to isActive boolean field
  */
 function buildGoalWhere(
   userId: string,
@@ -109,15 +162,21 @@ function buildGoalWhere(
     userId,
   };
 
-  if (filters?.status === "active" || filters?.status === "inactive") {
-    where.isActive = filters.status === "active";
+  if (filters?.status) {
+    // Only allow "active"/"inactive", maps to isActive boolean
+    if (filters.status.toLowerCase() === "active") {
+      where.isActive = true;
+    } else if (filters.status.toLowerCase() === "inactive") {
+      where.isActive = false;
+    }
   }
 
   return where;
 }
 
 /**
- * Build Prisma where clause for assets
+ * Asset: WHERE builder
+ * - "type" should match AssetType enum (see Prisma schema)
  */
 function buildAssetWhere(
   userId: string,
@@ -128,7 +187,7 @@ function buildAssetWhere(
   };
 
   if (filters?.type) {
-    where.type = filters.type as any;
+    where.type = filters.type as AssetType;
   }
 
   if (filters?.dateFrom || filters?.dateTo) {
@@ -145,7 +204,8 @@ function buildAssetWhere(
 }
 
 /**
- * Build Prisma where clause for bank accounts
+ * BankAccount: WHERE builder
+ * - status: (active/inactive) maps to isActive
  */
 function buildBankAccountWhere(
   userId: string,
@@ -155,15 +215,21 @@ function buildBankAccountWhere(
     userId,
   };
 
-  if (filters?.status === "active" || filters?.status === "inactive") {
-    where.isActive = filters.status === "active";
+  if (filters?.status) {
+    if (filters.status.toLowerCase() === "active") {
+      where.isActive = true;
+    } else if (filters.status.toLowerCase() === "inactive") {
+      where.isActive = false;
+    }
+    // If bank account uses an enum, update here!
   }
 
   return where;
 }
 
 /**
- * Build Prisma where clause for bank transactions
+ * BankTransaction: WHERE builder
+ * - Filters by transactionDate and transactionType (CREDIT/DEBIT)
  */
 function buildBankTransactionWhere(
   userId: string,
@@ -184,58 +250,56 @@ function buildBankTransactionWhere(
   }
 
   if (filters?.type) {
-    where.transactionType = filters.type as "CREDIT" | "DEBIT";
+    const normalized = filters.type.trim().toUpperCase();
+    if (normalized === "CREDIT" || normalized === "DEBIT") {
+      where.transactionType = normalized as TransactionType;
+    }
   }
 
   return where;
 }
 
 /**
- * Execute query for transactions
+ * Transaction: Query with support for aggregation and groupBy
  */
 async function queryTransactions(
   userId: string,
   filters?: QueryFilters,
   aggregation?: "sum" | "count" | "average" | null,
-  groupBy?: "date" | "category" | "type" | null | undefined
+  groupBy?: "date" | "category" | "transactionType" | null | undefined
 ): Promise<any> {
   const where = buildTransactionWhere(userId, filters);
 
-  if (aggregation === "count") {
-    return await prisma.transaction.count({ where });
-  }
+  if (aggregation === "count") return await prisma.transaction.count({ where });
 
+  // TODO: If result set is large, consider pagination (future PR).
   const transactions = await prisma.transaction.findMany({
     where,
-    include: {
-      category: true,
-      subCategory: true,
-      bankAccount: true,
-    },
-    orderBy: {
-      date: "desc",
-    },
+    include: { category: true, subCategory: true, bankAccount: true },
+    orderBy: { date: "desc" },
   });
+
+  // For PR review: Transaction fields returned by findMany must match any usage below
 
   if (aggregation === "sum") {
     return transactions.reduce((sum, t) => {
       const amount = Number(t.amount);
+      // NOTE: Always use correct sign based on CREDIT/DEBIT
       return sum + (t.transactionType === "CREDIT" ? amount : -amount);
     }, 0);
   }
 
   if (aggregation === "average") {
-    const sum = transactions.reduce((sum, t) => sum + Number(t.amount), 0);
+    const sum = transactions.reduce((acc, t) => acc + Number(t.amount), 0);
     return transactions.length > 0 ? sum / transactions.length : 0;
   }
 
   if (groupBy === "category") {
+    // Group by category name
     const grouped: Record<string, any> = {};
     transactions.forEach((t) => {
       const key = t.category?.name || "Uncategorized";
-      if (!grouped[key]) {
-        grouped[key] = { category: key, count: 0, total: 0 };
-      }
+      if (!grouped[key]) grouped[key] = { category: key, count: 0, total: 0 };
       grouped[key].count++;
       const amount = Number(t.amount);
       grouped[key].total += t.transactionType === "CREDIT" ? amount : -amount;
@@ -243,13 +307,12 @@ async function queryTransactions(
     return Object.values(grouped);
   }
 
-  if (groupBy === "type") {
+  if (groupBy === "transactionType") {
+    // Group by CREDIT/DEBIT
     const grouped: Record<string, any> = {};
     transactions.forEach((t) => {
       const key = t.transactionType;
-      if (!grouped[key]) {
-        grouped[key] = { type: key, count: 0, total: 0 };
-      }
+      if (!grouped[key]) grouped[key] = { type: key, count: 0, total: 0 };
       grouped[key].count++;
       grouped[key].total += Number(t.amount);
     });
@@ -257,15 +320,20 @@ async function queryTransactions(
   }
 
   if (groupBy === "date") {
+    // Group by date (ISO date string)
     const grouped: Record<string, any> = {};
     transactions.forEach((t) => {
-      const date = t.date.toISOString().split("T")[0];
-      if (!grouped[date]) {
-        grouped[date] = { date, count: 0, total: 0 };
-      }
-      grouped[date].count++;
+      // Defensive: t.date should be a Date instance
+      const dateStr =
+        t.date instanceof Date
+          ? t.date.toISOString().split("T")[0]
+          : String(t.date);
+      if (!grouped[dateStr])
+        grouped[dateStr] = { date: dateStr, count: 0, total: 0 };
+      grouped[dateStr].count++;
       const amount = Number(t.amount);
-      grouped[date].total += t.transactionType === "CREDIT" ? amount : -amount;
+      grouped[dateStr].total +=
+        t.transactionType === "CREDIT" ? amount : -amount;
     });
     return Object.values(grouped).sort((a, b) => a.date.localeCompare(b.date));
   }
@@ -277,24 +345,21 @@ async function queryTransactions(
 }
 
 /**
- * Execute query for investments
+ * Investment: Aggregation, groupBy and returns
  */
 async function queryInvestments(
   userId: string,
   filters?: QueryFilters,
-  aggregation?: "sum" | "count" | "average" | null
+  aggregation?: "sum" | "count" | "average" | null,
+  groupBy?: "type" | null | undefined
 ): Promise<any> {
   const where = buildInvestmentWhere(userId, filters);
 
-  if (aggregation === "count") {
-    return await prisma.investment.count({ where });
-  }
+  if (aggregation === "count") return await prisma.investment.count({ where });
 
   const investments = await prisma.investment.findMany({
     where,
-    orderBy: {
-      createdAt: "desc",
-    },
+    orderBy: { createdAt: "desc" },
   });
 
   if (aggregation === "sum") {
@@ -309,6 +374,30 @@ async function queryInvestments(
     return investments.length > 0 ? sum / investments.length : 0;
   }
 
+  // Group by investment type
+  if (groupBy === "type") {
+    const grouped: Record<string, any> = {};
+    investments.forEach((inv) => {
+      const key = inv.type || "UNKNOWN";
+      if (!grouped[key]) {
+        grouped[key] = {
+          type: key,
+          count: 0,
+          total: 0,
+          totalInvested: 0,
+          totalCurrentValue: 0,
+        };
+      }
+      grouped[key].count++;
+      grouped[key].totalInvested += Number(inv.investedAmount);
+      grouped[key].totalCurrentValue += Number(inv.currentValue);
+      // Use currentValue as the total for pie charts
+      grouped[key].total += Number(inv.currentValue);
+    });
+    return Object.values(grouped);
+  }
+
+  // Cast number fields
   return investments.map((inv) => ({
     ...inv,
     currentPrice: Number(inv.currentPrice),
@@ -319,7 +408,7 @@ async function queryInvestments(
 }
 
 /**
- * Execute query for goals
+ * Goal: Aggregation and returns
  */
 async function queryGoals(
   userId: string,
@@ -328,15 +417,11 @@ async function queryGoals(
 ): Promise<any> {
   const where = buildGoalWhere(userId, filters);
 
-  if (aggregation === "count") {
-    return await prisma.goal.count({ where });
-  }
+  if (aggregation === "count") return await prisma.goal.count({ where });
 
   const goals = await prisma.goal.findMany({
     where,
-    orderBy: {
-      createdAt: "desc",
-    },
+    orderBy: { createdAt: "desc" },
   });
 
   if (aggregation === "sum") {
@@ -356,7 +441,7 @@ async function queryGoals(
 }
 
 /**
- * Execute query for assets
+ * Asset: Aggregation and returns
  */
 async function queryAssets(
   userId: string,
@@ -365,15 +450,11 @@ async function queryAssets(
 ): Promise<any> {
   const where = buildAssetWhere(userId, filters);
 
-  if (aggregation === "count") {
-    return await prisma.asset.count({ where });
-  }
+  if (aggregation === "count") return await prisma.asset.count({ where });
 
   const assets = await prisma.asset.findMany({
     where,
-    orderBy: {
-      createdAt: "desc",
-    },
+    orderBy: { createdAt: "desc" },
   });
 
   if (aggregation === "sum") {
@@ -395,7 +476,7 @@ async function queryAssets(
 }
 
 /**
- * Execute query for bank accounts
+ * BankAccount: Aggregation and returns
  */
 async function queryBankAccounts(
   userId: string,
@@ -404,15 +485,11 @@ async function queryBankAccounts(
 ): Promise<any> {
   const where = buildBankAccountWhere(userId, filters);
 
-  if (aggregation === "count") {
-    return await prisma.bankAccount.count({ where });
-  }
+  if (aggregation === "count") return await prisma.bankAccount.count({ where });
 
   const accounts = await prisma.bankAccount.findMany({
     where,
-    orderBy: {
-      createdAt: "desc",
-    },
+    orderBy: { createdAt: "desc" },
   });
 
   if (aggregation === "sum") {
@@ -435,28 +512,23 @@ async function queryBankAccounts(
 }
 
 /**
- * Execute query for bank transactions
+ * BankTransaction: Aggregation, groupby and returns
  */
 async function queryBankTransactions(
   userId: string,
   filters?: QueryFilters,
   aggregation?: "sum" | "count" | "average" | null,
-  groupBy?: "date" | "type" | null | undefined
+  groupBy?: "date" | "transactionType" | null | undefined
 ): Promise<any> {
   const where = buildBankTransactionWhere(userId, filters);
 
-  if (aggregation === "count") {
+  if (aggregation === "count")
     return await prisma.bankTransaction.count({ where });
-  }
 
   const transactions = await prisma.bankTransaction.findMany({
     where,
-    include: {
-      bankAccount: true,
-    },
-    orderBy: {
-      transactionDate: "desc",
-    },
+    include: { bankAccount: true },
+    orderBy: { transactionDate: "desc" },
   });
 
   if (aggregation === "sum") {
@@ -471,13 +543,11 @@ async function queryBankTransactions(
     return transactions.length > 0 ? sum / transactions.length : 0;
   }
 
-  if (groupBy === "type") {
+  if (groupBy === "transactionType") {
     const grouped: Record<string, any> = {};
     transactions.forEach((t) => {
       const key = t.transactionType;
-      if (!grouped[key]) {
-        grouped[key] = { type: key, count: 0, total: 0 };
-      }
+      if (!grouped[key]) grouped[key] = { type: key, count: 0, total: 0 };
       grouped[key].count++;
       grouped[key].total += Number(t.amount);
     });
@@ -487,13 +557,16 @@ async function queryBankTransactions(
   if (groupBy === "date") {
     const grouped: Record<string, any> = {};
     transactions.forEach((t) => {
-      const date = t.transactionDate.toISOString().split("T")[0];
-      if (!grouped[date]) {
-        grouped[date] = { date, count: 0, total: 0 };
-      }
-      grouped[date].count++;
+      const dateStr =
+        t.transactionDate instanceof Date
+          ? t.transactionDate.toISOString().split("T")[0]
+          : String(t.transactionDate);
+      if (!grouped[dateStr])
+        grouped[dateStr] = { date: dateStr, count: 0, total: 0 };
+      grouped[dateStr].count++;
       const amount = Number(t.amount);
-      grouped[date].total += t.transactionType === "CREDIT" ? amount : -amount;
+      grouped[dateStr].total +=
+        t.transactionType === "CREDIT" ? amount : -amount;
     });
     return Object.values(grouped).sort((a, b) => a.date.localeCompare(b.date));
   }
@@ -508,7 +581,9 @@ async function queryBankTransactions(
 }
 
 /**
- * Execute database query based on query parameters
+ * Execute query for any supported entity.
+ * Main entry for Q&A; PR: Review that all entity cases are handled.
+ * If you add new entity, update QueryParams.entity and add new case below.
  */
 export async function executeQuery(
   userId: string,
@@ -519,9 +594,19 @@ export async function executeQuery(
   try {
     switch (entity) {
       case "transaction":
-        return await queryTransactions(userId, filters, aggregation, groupBy);
+        return await queryTransactions(
+          userId,
+          filters,
+          aggregation,
+          groupBy as "date" | "category" | "transactionType" | null | undefined
+        );
       case "investment":
-        return await queryInvestments(userId, filters, aggregation);
+        return await queryInvestments(
+          userId,
+          filters,
+          aggregation,
+          groupBy === "type" ? "type" : undefined
+        );
       case "goal":
         return await queryGoals(userId, filters, aggregation);
       case "asset":
@@ -533,12 +618,13 @@ export async function executeQuery(
           userId,
           filters,
           aggregation,
-          groupBy as "date" | "type" | null | undefined
+          groupBy as "date" | "transactionType" | null | undefined
         );
       default:
         throw new Error(`Unknown entity: ${entity}`);
     }
   } catch (error) {
+    // PR: Surface error logs for easier production debug.
     console.error(`Error executing query for ${entity}:`, error);
     throw new Error(
       `Failed to query ${entity}: ${

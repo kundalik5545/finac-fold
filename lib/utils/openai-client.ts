@@ -188,7 +188,13 @@ When a user asks a question:
    - TABLE: For structured data that should be displayed in rows/columns
    - CHART: For data that should be visualized (time series, comparisons, distributions)
 
-3. For database queries, respond in this JSON format:
+3. For CHART type, choose the appropriate chartType:
+   - "line": For time series data (use with groupBy: "date")
+   - "bar": For comparing categories or groups side-by-side
+   - "pie" or "donut": For showing proportions/percentages of categories (e.g., "show expenses by category as pie chart", "breakdown by type", "distribution of investments")
+   - IMPORTANT: If user explicitly asks for "pie chart", "pie", "donut", "circular chart", or wants to see "proportions", "percentages", "breakdown", or "distribution", use chartType: "pie" or "donut"
+
+4. For database queries, respond in this JSON format:
 {
   "queryType": "TEXT" | "TABLE" | "CHART",
   "entity": "transaction" | "investment" | "goal" | "asset" | "bankAccount" | "bankTransaction",
@@ -196,16 +202,17 @@ When a user asks a question:
     "dateFrom": "YYYY-MM-DD" (optional),
     "dateTo": "YYYY-MM-DD" (optional),
     "type": "value" (optional),
-    "category": "value" (optional),
+    "category": "value" (optional), 
     "status": "value" (optional)
   },
   "aggregation": "sum" | "count" | "average" | null,
-  "groupBy": "date" | "category" | "type" | null,
-  "chartType": "line" | "bar" | "pie" | "donut" | null (only if queryType is CHART),
+  "groupBy": "date" | "category" | "type" | "transactionType" | null,
+  Note: For investments, use groupBy: "type" to group by investment type (STOCKS, MUTUAL_FUNDS, etc.)
+  "chartType": "line" | "bar" | "pie" | "donut" | null (REQUIRED if queryType is CHART - choose based on user's request),
   "explanation": "Natural language explanation of what the data shows"
 }
 
-4. After the JSON, provide a natural language response explaining the data.
+5. After the JSON, provide a natural language response explaining the data.
 
 Always ensure queries are scoped to the user's own data. Be helpful and provide insights when appropriate.`;
 

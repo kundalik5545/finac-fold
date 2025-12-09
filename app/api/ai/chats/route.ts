@@ -6,17 +6,8 @@ import { getChats } from "@/action/ai-chat";
 export async function GET() {
   try {
     const headersList = await headers();
-    console.log("🔍 GET /api/ai/chats - Headers check:", {
-      hasCookie: !!headersList.get("cookie"),
-    });
-    
+
     const session = await auth.api.getSession({ headers: headersList });
-    
-    console.log("🔍 GET /api/ai/chats - Session:", {
-      hasSession: !!session,
-      hasUser: !!session?.user,
-      userId: session?.user?.id,
-    });
 
     if (!session || !session.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

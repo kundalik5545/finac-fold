@@ -17,8 +17,8 @@ export default async function FinacAIPage() {
     }
 
     return (
-        <div className="h-[calc(100vh-4rem)] flex flex-col">
-            <div className="p-4 border-b">
+        <div className="h-[calc(100vh-4rem)] flex flex-col overflow-hidden">
+            <div className="p-4 border-b flex-shrink-0 bg-background">
                 <h1 className="text-xl md:text-2xl lg:text-3xl font-bold">
                     Finac AI Assistant
                 </h1>
@@ -26,7 +26,7 @@ export default async function FinacAIPage() {
                     Ask questions about your finances and get insights
                 </p>
             </div>
-            <div className="flex-1 overflow-hidden">
+            <div className="flex-1 overflow-hidden min-h-0">
                 <ChatInterface initialChats={chats} />
             </div>
         </div>

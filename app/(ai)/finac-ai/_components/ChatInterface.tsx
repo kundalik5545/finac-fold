@@ -203,7 +203,7 @@ export function ChatInterface({ initialChats, initialChatId }: ChatInterfaceProp
     };
 
     return (
-        <div className="flex h-full">
+        <div className="flex h-full overflow-hidden relative">
             <ChatSidebar
                 chats={chats}
                 activeChatId={activeChatId}
@@ -211,28 +211,43 @@ export function ChatInterface({ initialChats, initialChatId }: ChatInterfaceProp
                 onNewChat={handleNewChat}
                 onDeleteChat={handleDeleteChat}
             />
-            <div className="flex-1 flex flex-col">
-                <ScrollArea className="flex-1" ref={scrollAreaRef}>
-                    <div className="space-y-4 p-4">
+            <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+                <div 
+                    className="flex-1 overflow-y-auto overflow-x-auto" 
+                    ref={scrollAreaRef}
+                    style={{ scrollBehavior: 'smooth' }}
+                >
+                    <div className="space-y-4 p-4 min-h-full" style={{ minWidth: 'max-content' }}>
+                        {messages.length === 0 && !streamingContent && (
+                            <div className="flex flex-col items-center justify-center h-full text-center py-12">
+                                <Bot className="h-12 w-12 text-muted-foreground mb-4" />
+                                <h3 className="text-lg font-semibold mb-2">Start a conversation</h3>
+                                <p className="text-sm text-muted-foreground">
+                                    Ask me anything about your finances
+                                </p>
+                            </div>
+                        )}
                         {messages.map((message) => (
                             <ChatMessage key={message.id} message={message} />
                         ))}
                         {streamingContent && (
-                            <div className="flex gap-4 p-4">
-                                <div className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center bg-secondary">
+                            <div className="flex gap-4 p-4 w-full min-w-0">
+                                <div className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center bg-secondary">
                                     <Bot className="h-4 w-4" />
                                 </div>
-                                <div className="flex-1">
+                                <div className="flex-1 min-w-0">
                                     <div className="text-sm font-medium">AI Assistant</div>
-                                    <div className="text-sm whitespace-pre-wrap">{streamingContent}</div>
+                                    <div className="text-sm whitespace-pre-wrap break-words">{streamingContent}</div>
                                     {loading && <Spinner className="inline-block ml-2" />}
                                 </div>
                             </div>
                         )}
                         <div ref={messagesEndRef} />
                     </div>
-                </ScrollArea>
-                <ChatInput onSend={handleSend} disabled={loading} />
+                </div>
+                <div className="border-t bg-background shrink-0">
+                    <ChatInput onSend={handleSend} disabled={loading} />
+                </div>
             </div>
         </div>
     );

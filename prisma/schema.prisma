@@ -549,9 +549,9 @@ model Chat {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  title  String
-  userId String
-  user   User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title    String
+  userId   String
+  user     User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   messages ChatMessage[]
 
   @@index([userId])
@@ -561,15 +561,15 @@ model Chat {
 
 // Chat Message Model - Stores individual messages
 model ChatMessage {
-  id          String          @id @default(uuid())
-  createdAt   DateTime        @default(now())
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
 
-  chatId      String
-  chat        Chat            @relation(fields: [chatId], references: [id], onDelete: Cascade)
-  role        ChatMessageRole
-  content     String
+  chatId       String
+  chat         Chat              @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  role         ChatMessageRole
+  content      String
   responseType ChatResponseType? @default(TEXT)
-  metadata    Json?
+  metadata     Json?
 
   @@index([chatId, createdAt])
   @@map("chat_message")

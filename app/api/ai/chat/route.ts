@@ -79,6 +79,8 @@ export async function POST(request: NextRequest) {
       { role: "user" as const, content: message },
     ];
 
+    console.log("🤑 openaiMessages:", openaiMessages);
+
     // Create streaming response
     const encoder = new TextEncoder();
     const stream = new ReadableStream({
@@ -99,9 +101,23 @@ export async function POST(request: NextRequest) {
               // Try to extract JSON query from response
               if (!queryJson) {
                 // Look for JSON block in the response
-                const jsonMatch = fullResponse.match(
+                // Try to match JSON block inside ```json ... ```
+                let jsonMatch = fullResponse.match(
                   /```json\s*([\s\S]*?)\s*```/
                 );
+
+                // If not found, try to find a top-level JSON object anywhere in the text
+                if (!jsonMatch) {
+                  jsonMatch = fullResponse.match(
+                    /\{[\s\S]*"queryType"[\s\S]*\}/m
+                  );
+                  // If found this way, set match[1] as the whole match
+                  if (jsonMatch) {
+                    // mock the array structure as [fullMatch, firstGroup]
+                    jsonMatch = [jsonMatch[0], jsonMatch[0]];
+                  }
+                }
+
                 if (jsonMatch) {
                   try {
                     queryJson = JSON.parse(jsonMatch[1]);
@@ -130,6 +146,8 @@ export async function POST(request: NextRequest) {
             }
           }
 
+          console.log("🚀🚀🚀 queryJson:", queryJson);
+
           // If we found a query, execute it
           if (queryJson && queryJson.entity) {
             try {
@@ -144,6 +162,8 @@ export async function POST(request: NextRequest) {
                 session.user.id,
                 queryParams
               );
+
+              console.log("🚀🚀🚀 queryResult:", queryResult);
 
               // Format response
               const formatted = formatResponse(
@@ -246,8 +266,6 @@ export async function POST(request: NextRequest) {
         }
       },
     });
-
-    console.log("🚀🚀🚀 stream:", stream);
 
     return new Response(stream, {
       headers: {

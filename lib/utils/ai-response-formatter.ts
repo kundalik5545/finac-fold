@@ -71,6 +71,19 @@ export function formatAsTable(data: any[]): TableData {
       const val = item[col];
       if (val instanceof Date) {
         row[col] = val.toLocaleDateString();
+      } else if (val === null || val === undefined) {
+        row[col] = "-";
+      } else if (typeof val === "object" && !Array.isArray(val)) {
+        // Handle nested objects (like Prisma relations)
+        // Try to extract meaningful properties
+        if (val.name !== undefined) {
+          row[col] = val.name;
+        } else if (val.id !== undefined) {
+          row[col] = String(val.id);
+        } else {
+          // Fallback: stringify the object
+          row[col] = JSON.stringify(val);
+        }
       } else if (
         typeof val === "number" &&
         (col.toLowerCase().includes("amount") ||
@@ -210,7 +223,8 @@ export function formatResponse(
   if (queryType === "TEXT") {
     return {
       type: "TEXT",
-      content: explanation || JSON.stringify(data, null, 2),
+      content:
+        `${explanation} Result are : ${data} ` || JSON.stringify(data, null, 2),
     };
   }
 
@@ -237,8 +251,36 @@ export function formatResponse(
       keys = Object.keys(data[0]);
     }
 
+    // Auto-detect pie chart suitability: if data has category/type grouping without date
+    const hasCategoryOrType = keys.some(
+      (k) => k === "category" || k === "type"
+    );
+    const hasDate = keys.some((k) => k === "date");
+    const hasTotalOrValue = keys.some((k) => k === "total" || k === "value");
+    const isPieChartSuitable = hasCategoryOrType && !hasDate && hasTotalOrValue;
+
+    // Check if user requested pie chart in explanation text
+    const explanationLower = (explanation || "").toLowerCase();
+    const requestedPieChart =
+      explanationLower.includes("pie") ||
+      explanationLower.includes("donut") ||
+      explanationLower.includes("circular") ||
+      explanationLower.includes("proportion") ||
+      explanationLower.includes("percentage") ||
+      explanationLower.includes("breakdown") ||
+      explanationLower.includes("distribution");
+
+    // If chartType is not specified but data is suitable for pie chart OR user requested it, default to pie
+    let effectiveChartType = chartType;
+    if (!chartType && (isPieChartSuitable || requestedPieChart)) {
+      effectiveChartType = "pie";
+      console.log(
+        `🎯 Auto-detected pie chart: data suitable=${isPieChartSuitable}, user requested=${requestedPieChart}`
+      );
+    }
+
     let chart: ChartData;
-    switch (chartType) {
+    switch (effectiveChartType) {
       case "line":
         chart = formatAsLineChart(data, "date", "total", explanation);
         break;
@@ -272,16 +314,20 @@ export function formatResponse(
         const valueCandidate =
           keys.find((k) => k === "value" || k === "total" || k === "amount") ||
           "value";
+        console.log(
+          `🍰 Creating ${effectiveChartType} chart with nameKey: ${nameCandidate}, valueKey: ${valueCandidate}`
+        );
         chart = formatAsPieChart(
           data,
           nameCandidate,
           valueCandidate,
-          chartType,
+          effectiveChartType as "pie" | "donut",
           explanation
         );
         break;
       }
       default:
+        // Default to bar chart if no chart type specified and not suitable for pie
         chart = formatAsBarChart(data, undefined, undefined, explanation);
     }
 
