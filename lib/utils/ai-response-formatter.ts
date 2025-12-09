@@ -224,7 +224,8 @@ export function formatResponse(
     return {
       type: "TEXT",
       content:
-        `${explanation} Result are : ${data} ` || JSON.stringify(data, null, 2),
+        `${explanation} 🤖 Result are : ${data} ` ||
+        JSON.stringify(data, null, 2),
     };
   }
 

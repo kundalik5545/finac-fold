@@ -79,8 +79,6 @@ export async function POST(request: NextRequest) {
       { role: "user" as const, content: message },
     ];
 
-    console.log("🤑 openaiMessages:", openaiMessages);
-
     // Create streaming response
     const encoder = new TextEncoder();
     const stream = new ReadableStream({
@@ -146,8 +144,6 @@ export async function POST(request: NextRequest) {
             }
           }
 
-          console.log("🚀🚀🚀 queryJson:", queryJson);
-
           // If we found a query, execute it
           if (queryJson && queryJson.entity) {
             try {
@@ -162,8 +158,6 @@ export async function POST(request: NextRequest) {
                 session.user.id,
                 queryParams
               );
-
-              console.log("🚀🚀🚀 queryResult:", queryResult);
 
               // Format response
               const formatted = formatResponse(
