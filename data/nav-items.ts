@@ -13,9 +13,15 @@ import {
   Download,
   Settings,
   Search,
+  Brain,
 } from "lucide-react";
 
 export const navItems = [
+  {
+    title: "Finac AI",
+    url: "/finac-ai",
+    icon: Brain,
+  },
   {
     title: "Dashboard",
     url: "/dashboard",

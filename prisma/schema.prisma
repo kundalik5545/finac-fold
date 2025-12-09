@@ -19,28 +19,32 @@ model Test {
 }
 
 model User {
-  id                 String              @id
-  name               String
-  email              String
-  emailVerified      Boolean             @default(false)
-  image              String?
-  createdAt          DateTime            @default(now())
-  updatedAt          DateTime            @updatedAt
-  sessions           Session[]
-  accounts           Account[]
-  assets             Asset[]
-  assetsTransactions AssetsTransaction[]
-  todos              Todo[]
-  todoCategories     TodoCategory[]
-  todoTags           TodoTag[]
-  goals              Goal[]
-  goalTransactions   GoalTransaction[]
-  bankAccounts       BankAccount[]
-  bankTransactions   BankTransaction[]
-  categories         Category[]
-  subCategories      SubCategory[]
-  bankCards          bankCard[]
-  transactions       Transaction[]
+  id                     String                   @id
+  name                   String
+  email                  String
+  emailVerified          Boolean                  @default(false)
+  image                  String?
+  createdAt              DateTime                 @default(now())
+  updatedAt              DateTime                 @updatedAt
+  sessions               Session[]
+  accounts               Account[]
+  assets                 Asset[]
+  assetsTransactions     AssetsTransaction[]
+  todos                  Todo[]
+  todoCategories         TodoCategory[]
+  todoTags               TodoTag[]
+  goals                  Goal[]
+  goalTransactions       GoalTransaction[]
+  bankAccounts           BankAccount[]
+  bankTransactions       BankTransaction[]
+  categories             Category[]
+  subCategories          SubCategory[]
+  bankCards              bankCard[]
+  transactions           Transaction[]
+  investments            Investment[]
+  investmentTransactions InvestmentTransaction[]
+  investmentPriceHistory InvestmentPriceHistory[]
+  chats                  Chat[]
 
   @@unique([email])
   @@map("user")
@@ -403,11 +407,13 @@ model Transaction {
   categoryId      String?
   subCategoryId   String?
   paymentMethod   PaymentMethod?
+  investmentId    String?
 
   category    Category?    @relation(fields: [categoryId], references: [id])
   subCategory SubCategory? @relation(fields: [subCategoryId], references: [id])
   user        User         @relation(fields: [userId], references: [id])
   bankAccount BankAccount? @relation(fields: [bankAccountId], references: [id])
+  investment  Investment?  @relation(fields: [investmentId], references: [id])
 
   @@index([userId])
   @@index([categoryId])
@@ -500,4 +506,144 @@ enum CategoryType {
   EXPENSE
   TRANSFER
   INVESTMENT
+}
+
+// Investment Type Enum
+enum InvestmentType {
+  STOCKS
+  MUTUAL_FUNDS
+  GOLD
+  FIXED_DEPOSIT
+  NPS
+  PF
+}
+
+// Investment Transaction Type Enum
+enum InvestmentTransactionType {
+  INVEST
+  WITHDRAW
+}
+
+// Price Source Enum
+enum PriceSource {
+  MANUAL
+  API
+}
+
+// Chat Response Type Enum
+enum ChatResponseType {
+  TEXT
+  TABLE
+  CHART
+}
+
+// Chat Message Role Enum
+enum ChatMessageRole {
+  USER
+  ASSISTANT
+}
+
+// Chat Model - Stores chat sessions
+model Chat {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  title    String
+  userId   String
+  user     User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages ChatMessage[]
+
+  @@index([userId])
+  @@index([userId, createdAt])
+  @@map("chat")
+}
+
+// Chat Message Model - Stores individual messages
+model ChatMessage {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+
+  chatId       String
+  chat         Chat              @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  role         ChatMessageRole
+  content      String
+  responseType ChatResponseType? @default(TEXT)
+  metadata     Json?
+
+  @@index([chatId, createdAt])
+  @@map("chat_message")
+}
+
+// Investment Model
+model Investment {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  name           String
+  type           InvestmentType
+  symbol         String? // Ticker/symbol for stocks/MF
+  icon           String?
+  color          String?
+  currentPrice   Decimal        @default(0) @db.Decimal(65, 4)
+  investedAmount Decimal        @default(0) @db.Decimal(65, 4)
+  currentValue   Decimal        @default(0) @db.Decimal(65, 4)
+  quantity       Decimal        @default(0) @db.Decimal(65, 4) // Units/shares
+  purchaseDate   DateTime
+  description    String?
+
+  userId                 String
+  user                   User                     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  investmentTransactions InvestmentTransaction[]
+  investmentPriceHistory InvestmentPriceHistory[]
+  transactions           Transaction[]
+
+  @@index([userId])
+  @@index([userId, type])
+  @@index([type])
+  @@map("investment")
+}
+
+// Investment Transaction Model - For manual updates (FD, NPS, PF)
+model InvestmentTransaction {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  amount          Decimal                   @db.Decimal(65, 4)
+  date            DateTime
+  transactionType InvestmentTransactionType
+  notes           String?
+
+  investmentId String
+  investment   Investment @relation(fields: [investmentId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@index([investmentId, date])
+  @@index([userId])
+  @@map("investment_transaction")
+}
+
+// Investment Price History Model - Tracks price changes over time
+model InvestmentPriceHistory {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  price  Decimal     @db.Decimal(65, 4)
+  date   DateTime
+  source PriceSource
+
+  investmentId String
+  investment   Investment @relation(fields: [investmentId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@index([investmentId, date])
+  @@index([userId])
+  @@map("investment_price_history")
 }

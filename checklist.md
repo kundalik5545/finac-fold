@@ -90,3 +90,27 @@ create a new feature tranasctions so user can see, filter and add new transactio
   - change x-axis as per tranasction filter
 - show table view only for transactions with pagination and optimise query using pagination and on clicking next load more tranasctions
 - update and create new prisma models as needed to store information
+
+# Feature - Investment Management
+
+Create a new feature where user can manage its investment and track there returns.
+
+- user should able to add, edit, delete the investmenets
+- these are the main investment which i will add to app
+  - stocks
+  - MF
+  - Gold
+  - FD, NPS, PF
+- For gold, stocks and mf make such arrangement that todays day close val should feteched when ever user click on feactch latest updated data button
+- for nps,pf, fd user will add manualy increase or decrease in value for that create seperate table wchich will hold historic price change and also show transaction history of them on each investment in table format
+- create top card like stocks, mf gold etc then show basic data about them like profi/loss, invested amount, transactions,
+- upon clicking that card navigate user to that investmenet page where details about that investment should be shown
+  - show stats card at top about that investmenet
+  - show tranasctions about that investments and current price
+  - show total investmenet, profit/loss (percent/amount)
+  - show donut chart and bar chart
+- create prisma new model when required
+- add investment into transaction table when user create new investmenet or invest money
+- create nice looking cards and make them responsive
+- use logo for each card then title and edit delete button. Also use badge to show nice data
+- add other features as needed
