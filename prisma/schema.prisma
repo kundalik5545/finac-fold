@@ -44,6 +44,7 @@ model User {
   investments            Investment[]
   investmentTransactions InvestmentTransaction[]
   investmentPriceHistory InvestmentPriceHistory[]
+  chats                  Chat[]
 
   @@unique([email])
   @@map("user")
@@ -527,6 +528,51 @@ enum InvestmentTransactionType {
 enum PriceSource {
   MANUAL
   API
+}
+
+// Chat Response Type Enum
+enum ChatResponseType {
+  TEXT
+  TABLE
+  CHART
+}
+
+// Chat Message Role Enum
+enum ChatMessageRole {
+  USER
+  ASSISTANT
+}
+
+// Chat Model - Stores chat sessions
+model Chat {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  title  String
+  userId String
+  user   User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages ChatMessage[]
+
+  @@index([userId])
+  @@index([userId, createdAt])
+  @@map("chat")
+}
+
+// Chat Message Model - Stores individual messages
+model ChatMessage {
+  id          String          @id @default(uuid())
+  createdAt   DateTime        @default(now())
+
+  chatId      String
+  chat        Chat            @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  role        ChatMessageRole
+  content     String
+  responseType ChatResponseType? @default(TEXT)
+  metadata    Json?
+
+  @@index([chatId, createdAt])
+  @@map("chat_message")
 }
 
 // Investment Model
