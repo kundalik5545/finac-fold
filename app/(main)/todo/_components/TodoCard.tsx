@@ -65,8 +65,8 @@ export function TodoCard({ todo }: TodoCardProps) {
     });
   };
 
-  const handleToggleComplete = async (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const handleToggleComplete = async (checked: boolean | "indeterminate") => {
+    if (checked === "indeterminate") return;
     setIsLoading(true);
 
     try {

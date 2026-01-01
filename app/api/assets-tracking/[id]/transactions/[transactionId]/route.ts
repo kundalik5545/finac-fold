@@ -6,7 +6,7 @@ import { NextResponse } from "next/server";
 import { ZodError } from "zod";
 import { updateTransaction, deleteTransaction } from "@/action/assets-tracking";
 
-type ParamsType = { params: { id: string; transactionId: string } };
+type ParamsType = { params: Promise<{ id: string; transactionId: string }> };
 
 export async function PATCH(request: NextRequest, { params }: ParamsType) {
   try {

@@ -35,6 +35,7 @@ model User {
   todoTags           TodoTag[]
   goals              Goal[]
   goalTransactions   GoalTransaction[]
+  subscriptions      Subscription[]
 
   @@unique([email])
   @@map("user")
@@ -284,6 +285,39 @@ enum TodoPriority {
 
 // Recurring Frequency Enum
 enum RecurringFrequency {
+  DAILY
+  WEEKLY
+  MONTHLY
+  YEARLY
+}
+
+// Subscription Model
+model Subscription {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  name        String
+  amount      Decimal               @db.Decimal(65, 4)
+  frequency   SubscriptionFrequency
+  startDate   DateTime
+  nextDueDate DateTime
+  icon        String? // Single letter or emoji
+  color       String? // Hex color for icon background
+  description String?
+  isActive    Boolean               @default(true)
+  cancelledAt DateTime?
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isActive])
+  @@index([userId, nextDueDate])
+  @@map("subscriptions")
+}
+
+// Subscription Frequency Enum
+enum SubscriptionFrequency {
   DAILY
   WEEKLY
   MONTHLY

@@ -47,6 +47,11 @@ export const navItems = [
     icon: Calendar,
   },
   {
+    title: "Subscriptions",
+    url: "/subscriptions",
+    icon: Calendar,
+  },
+  {
     title: "Investments",
     url: "/investments",
     icon: TrendingUp,

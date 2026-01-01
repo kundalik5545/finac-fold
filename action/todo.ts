@@ -9,7 +9,7 @@ import {
   RecurringTodo,
   TodoFilters,
 } from "@/lib/todo-types";
-import { Prisma } from "@/app/generated/prisma/client";
+import { Prisma, TodoPriority, RecurringFrequency } from "@/app/generated/prisma/client";
 
 // ============================================
 // TODO FUNCTIONS
@@ -161,7 +161,7 @@ export async function createTodo(
     title: string;
     description?: string | null;
     dueDate?: Date | string | null;
-    priority?: Prisma.TodoPriority;
+    priority?: TodoPriority;
     categoryId?: string | null;
     tagIds?: string[];
     recurringId?: string | null;
@@ -213,7 +213,7 @@ export async function updateTodo(
     title?: string;
     description?: string | null;
     dueDate?: Date | string | null;
-    priority?: Prisma.TodoPriority;
+    priority?: TodoPriority;
     completed?: boolean;
     categoryId?: string | null;
     tagIds?: string[];
@@ -535,13 +535,13 @@ export async function deleteTag(id: string, userId: string): Promise<void> {
  */
 export async function createRecurringTodo(
   data: {
-    frequency: Prisma.RecurringFrequency;
+    frequency: RecurringFrequency;
     interval?: number;
     startDate: Date | string;
     endDate?: Date | string | null;
     title: string;
     description?: string | null;
-    priority?: Prisma.TodoPriority;
+    priority?: TodoPriority;
     categoryId?: string | null;
     tagIds?: string[];
   },

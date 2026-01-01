@@ -6,7 +6,7 @@ import { NextResponse } from "next/server";
 import { ZodError } from "zod";
 import { getTransactions, createTransaction } from "@/action/assets-tracking";
 
-type ParamsType = { params: { id: string } };
+type ParamsType = { params: Promise<{ id: string }> };
 
 export async function GET(_request: NextRequest, { params }: ParamsType) {
   try {
