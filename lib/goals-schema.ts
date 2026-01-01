@@ -38,4 +38,3 @@ export const updateGoalTransactionSchema = goalTransactionSchema.partial();
 // Type exports for use in components
 export type GoalFormValues = z.infer<typeof goalFormSchema>;
 export type GoalTransactionFormValues = z.infer<typeof goalTransactionSchema>;
-

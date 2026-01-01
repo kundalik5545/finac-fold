@@ -9,7 +9,11 @@ import {
   RecurringTodo,
   TodoFilters,
 } from "@/lib/todo-types";
-import { Prisma, TodoPriority, RecurringFrequency } from "@/app/generated/prisma/client";
+import {
+  Prisma,
+  TodoPriority,
+  RecurringFrequency,
+} from "@/app/generated/prisma/client";
 
 // ============================================
 // TODO FUNCTIONS
@@ -548,7 +552,14 @@ export async function createRecurringTodo(
   userId: string
 ): Promise<RecurringTodo> {
   try {
-    const { title, description, priority, categoryId, tagIds, ...recurringData } = data;
+    const {
+      title,
+      description,
+      priority,
+      categoryId,
+      tagIds,
+      ...recurringData
+    } = data;
 
     // Create the recurring pattern
     const recurring = await prisma.recurringTodo.create({
@@ -629,7 +640,9 @@ export async function generateRecurringTodoInstances(
           nextDueDate.setMonth(lastDueDate.getMonth() + recurring.interval);
           break;
         case "YEARLY":
-          nextDueDate.setFullYear(lastDueDate.getFullYear() + recurring.interval);
+          nextDueDate.setFullYear(
+            lastDueDate.getFullYear() + recurring.interval
+          );
           break;
       }
 
@@ -723,4 +736,3 @@ export async function deleteRecurringTodo(
     throw new Error("Failed to delete recurring todo");
   }
 }
-
