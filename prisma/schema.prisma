@@ -19,7 +19,6 @@ model Test {
 }
 
 model User {
-<<<<<<< HEAD
   id                     String                   @id
   name                   String
   email                  String
@@ -47,25 +46,6 @@ model User {
   investmentPriceHistory InvestmentPriceHistory[]
   chats                  Chat[]
   subscriptions          Subscription[]
-=======
-  id                 String              @id
-  name               String
-  email              String
-  emailVerified      Boolean             @default(false)
-  image              String?
-  createdAt          DateTime            @default(now())
-  updatedAt          DateTime            @updatedAt
-  sessions           Session[]
-  accounts           Account[]
-  assets             Asset[]
-  assetsTransactions AssetsTransaction[]
-  todos              Todo[]
-  todoCategories     TodoCategory[]
-  todoTags           TodoTag[]
-  goals              Goal[]
-  goalTransactions   GoalTransaction[]
-  subscriptions      Subscription[]
->>>>>>> 36d92b0397d7c777313a28eab56eaa7392041f49
 
   @@unique([email])
   @@map("user")
@@ -493,7 +473,6 @@ enum RecurringFrequency {
   YEARLY
 }
 
-<<<<<<< HEAD
 // Account Type Enum
 enum AccountType {
   SAVINGS
@@ -670,8 +649,6 @@ model InvestmentPriceHistory {
   @@map("investment_price_history")
 }
 
-=======
->>>>>>> 36d92b0397d7c777313a28eab56eaa7392041f49
 // Subscription Model
 model Subscription {
   id        String   @id @default(uuid())

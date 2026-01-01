@@ -19,8 +19,8 @@ import { subscriptionFormSchema } from "@/lib/subscriptions-schema";
 import { useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
-import { IconPicker } from "@/components/ui/icon-picker";
-import { ColorPicker } from "@/components/ui/color-picker";
+import { IconPicker } from "@/components/custom-componetns/icon-picker";
+import { ColorPicker } from "@/components/custom-componetns/color-picker";
 
 export function AddSubscriptionForm() {
     const router = useRouter();

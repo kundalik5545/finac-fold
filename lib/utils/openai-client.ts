@@ -1,24 +1,42 @@
 import OpenAI from "openai";
 
-if (!process.env.OPENROUTER_API_KEY) {
-  throw new Error("OPENROUTER_API_KEY is not set in environment variables");
+// Only validate environment variables at runtime, not during build
+function getOpenAIClient() {
+  if (!process.env.OPENROUTER_API_KEY) {
+    throw new Error("OPENROUTER_API_KEY is not set in environment variables");
+  }
+
+  if (!process.env.OPENROUTER_BASE_URL) {
+    throw new Error("OPENROUTER_BASE_URL is not set in environment variables");
+  }
+
+  if (!process.env.NEXT_PUBLIC_BASE_URL) {
+    throw new Error("NEXT_PUBLIC_BASE_URL is not set in environment variables");
+  }
+
+  // Use OpenAI SDK but point to OpenRouter endpoint
+  return new OpenAI({
+    baseURL: process.env.OPENROUTER_BASE_URL,
+    apiKey: process.env.OPENROUTER_API_KEY,
+    defaultHeaders: {
+      "HTTP-Referer": process.env.NEXT_PUBLIC_BASE_URL,
+      "X-Title": "Finac AI Assistant",
+    },
+  });
 }
 
-if (!process.env.OPENROUTER_BASE_URL) {
-  throw new Error("OPENROUTER_BASE_URL is not set in environment variables");
-}
-
-if (!process.env.NEXT_PUBLIC_BASE_URL) {
-  throw new Error("NEXT_PUBLIC_BASE_URL is not set in environment variables");
-}
-
-// Use OpenAI SDK but point to OpenRouter endpoint
-export const openai = new OpenAI({
-  baseURL: process.env.OPENROUTER_BASE_URL,
-  apiKey: process.env.OPENROUTER_API_KEY,
-  defaultHeaders: {
-    "HTTP-Referer": process.env.NEXT_PUBLIC_BASE_URL,
-    "X-Title": "Finac AI Assistant",
+// Lazy initialization - only create client when needed
+let openaiInstance: OpenAI | null = null;
+export const openai = new Proxy({} as OpenAI, {
+  get(_target, prop) {
+    if (!openaiInstance) {
+      openaiInstance = getOpenAIClient();
+    }
+    const value = openaiInstance[prop as keyof OpenAI];
+    if (typeof value === "function") {
+      return value.bind(openaiInstance);
+    }
+    return value;
   },
 });
 
