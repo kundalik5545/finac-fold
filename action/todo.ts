@@ -8,10 +8,8 @@ import {
   TodoTag,
   RecurringTodo,
   TodoFilters,
-  TodoPriority,
-  RecurringFrequency,
 } from "@/lib/types/todo-types";
-import { Prisma } from "@/app/generated/prisma/client";
+import { Prisma, TodoPriority, RecurringFrequency } from "@/app/generated/prisma/client";
 
 // ============================================
 // TODO FUNCTIONS
