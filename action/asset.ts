@@ -2,6 +2,7 @@
 
 import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { AssetType } from "@/app/generated/prisma/client";
 
 export async function getAssets(userId: string) {
   try {
@@ -30,16 +31,14 @@ export async function getAssetStats(userId: string) {
     });
 
     // Calculate stats by type
-    const statsByType: Record<
-      string,
-      {
-        type: string;
-        count: number;
-        totalCurrentValue: number;
-        totalPurchaseValue: number;
-        totalGainLoss: number;
-      }
-    > = {};
+    type StatsByType = {
+      type: AssetType;
+      count: number;
+      totalCurrentValue: number;
+      totalPurchaseValue: number;
+      totalGainLoss: number;
+    };
+    const statsByType: Partial<Record<AssetType, StatsByType>> = {};
     let totalCurrentValue = 0;
     let totalPurchaseValue = 0;
 

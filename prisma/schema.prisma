@@ -19,6 +19,7 @@ model Test {
 }
 
 model User {
+<<<<<<< HEAD
   id                     String                   @id
   name                   String
   email                  String
@@ -45,6 +46,26 @@ model User {
   investmentTransactions InvestmentTransaction[]
   investmentPriceHistory InvestmentPriceHistory[]
   chats                  Chat[]
+  subscriptions          Subscription[]
+=======
+  id                 String              @id
+  name               String
+  email              String
+  emailVerified      Boolean             @default(false)
+  image              String?
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  sessions           Session[]
+  accounts           Account[]
+  assets             Asset[]
+  assetsTransactions AssetsTransaction[]
+  todos              Todo[]
+  todoCategories     TodoCategory[]
+  todoTags           TodoTag[]
+  goals              Goal[]
+  goalTransactions   GoalTransaction[]
+  subscriptions      Subscription[]
+>>>>>>> 36d92b0397d7c777313a28eab56eaa7392041f49
 
   @@unique([email])
   @@map("user")
@@ -472,6 +493,7 @@ enum RecurringFrequency {
   YEARLY
 }
 
+<<<<<<< HEAD
 // Account Type Enum
 enum AccountType {
   SAVINGS
@@ -646,4 +668,39 @@ model InvestmentPriceHistory {
   @@index([investmentId, date])
   @@index([userId])
   @@map("investment_price_history")
+}
+
+=======
+>>>>>>> 36d92b0397d7c777313a28eab56eaa7392041f49
+// Subscription Model
+model Subscription {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  name        String
+  amount      Decimal               @db.Decimal(65, 4)
+  frequency   SubscriptionFrequency
+  startDate   DateTime
+  nextDueDate DateTime
+  icon        String? // Single letter or emoji
+  color       String? // Hex color for icon background
+  description String?
+  isActive    Boolean               @default(true)
+  cancelledAt DateTime?
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isActive])
+  @@index([userId, nextDueDate])
+  @@map("subscriptions")
+}
+
+// Subscription Frequency Enum
+enum SubscriptionFrequency {
+  DAILY
+  WEEKLY
+  MONTHLY
+  YEARLY
 }

@@ -65,7 +65,8 @@ export function TodoCard({ todo }: TodoCardProps) {
     });
   };
 
-  const handleToggleComplete = async () => {
+  const handleToggleComplete = async (checked: boolean | "indeterminate") => {
+    if (checked === "indeterminate") return;
     setIsLoading(true);
 
     try {
