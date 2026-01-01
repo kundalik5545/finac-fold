@@ -79,4 +79,3 @@ export type CategoryFormValues = z.infer<typeof categoryFormSchema>;
 export type TagFormValues = z.infer<typeof tagFormSchema>;
 export type RecurringTodoFormValues = z.infer<typeof recurringTodoFormSchema>;
 export type TodoFilterValues = z.infer<typeof todoFilterSchema>;
-
