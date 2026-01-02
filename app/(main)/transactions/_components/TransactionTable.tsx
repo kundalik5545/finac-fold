@@ -199,8 +199,8 @@ export function TransactionTable({
                                         <div className="flex items-center gap-3">
                                             <div
                                                 className={`h-10 w-10 rounded-full flex items-center justify-center border shrink-0 transition-colors ${isCredit
-                                                        ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-500 group-hover:bg-emerald-500/20"
-                                                        : "bg-muted border-border text-muted-foreground group-hover:bg-muted/80"
+                                                    ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-500 group-hover:bg-emerald-500/20"
+                                                    : "bg-muted border-border text-muted-foreground group-hover:bg-muted/80"
                                                     }`}
                                             >
                                                 {isCredit ? (

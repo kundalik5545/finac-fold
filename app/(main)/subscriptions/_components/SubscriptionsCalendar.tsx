@@ -14,7 +14,7 @@ export function SubscriptionsCalendar({
     const monthEnd = endOfMonth(today);
     const calendarStart = startOfWeek(monthStart, { weekStartsOn: 0 });
     const calendarEnd = endOfWeek(monthEnd, { weekStartsOn: 0 });
-    
+
     const days = eachDayOfInterval({ start: calendarStart, end: calendarEnd });
     const weekDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
@@ -78,16 +78,14 @@ export function SubscriptionsCalendar({
                             return (
                                 <div
                                     key={day.toISOString()}
-                                    className={`relative h-24 sm:h-32 border-b border-r border-border p-2 transition-colors hover:bg-muted/20 ${
-                                        !isCurrentMonthDay ? "bg-muted/30 text-muted-foreground" : ""
-                                    } ${isTodayDay ? "bg-primary/5" : ""}`}
+                                    className={`relative h-24 sm:h-32 border-b border-r border-border p-2 transition-colors hover:bg-muted/20 ${!isCurrentMonthDay ? "bg-muted/30 text-muted-foreground" : ""
+                                        } ${isTodayDay ? "bg-primary/5" : ""}`}
                                 >
                                     <span
-                                        className={`text-sm font-medium h-7 w-7 flex items-center justify-center rounded-full ${
-                                            isTodayDay
+                                        className={`text-sm font-medium h-7 w-7 flex items-center justify-center rounded-full ${isTodayDay
                                                 ? "bg-primary text-primary-foreground"
                                                 : ""
-                                        }`}
+                                            }`}
                                     >
                                         {format(day, "d")}
                                     </span>
