@@ -46,6 +46,9 @@ export async function GET(request: NextRequest) {
     const endDate = searchParams.get("endDate");
     const skip = searchParams.get("skip");
     const take = searchParams.get("take");
+    const search = searchParams.get("search");
+    const sortBy = searchParams.get("sortBy") || "date";
+    const sortOrder = searchParams.get("sortOrder") || "desc";
 
     const filters = {
       ...(bankAccountId && { bankAccountId }),
@@ -58,6 +61,9 @@ export async function GET(request: NextRequest) {
       ...(endDate && { endDate }),
       ...(skip && { skip: parseInt(skip, 10) }),
       ...(take && { take: parseInt(take, 10) }),
+      ...(search && { search }),
+      ...(sortBy && { sortBy: sortBy as "date" | "amount" }),
+      ...(sortOrder && { sortOrder: sortOrder as "asc" | "desc" }),
     };
 
     const result = await getTransactions(session.user.id, filters);

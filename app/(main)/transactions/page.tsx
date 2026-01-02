@@ -1,17 +1,13 @@
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
-import React from "react";
-import Link from "next/link";
+import {
+    getBankAccounts,
+    getCategories,
+    getTransactions,
+} from "@/action/bank-account";
 import { auth } from "@/lib/auth";
+import { BankAccount, Category, Transaction } from "@/lib/schema/bank-account-types";
+import { getMonthlyDateRange } from "@/lib/utils/transaction-utils";
 import { headers } from "next/headers";
 import { TransactionClient } from "./_components/TransactionClient";
-import {
-    getTransactions,
-    getCategories,
-    getBankAccounts,
-} from "@/action/bank-account";
-import { Transaction, Category, BankAccount } from "@/lib/schema/bank-account-types";
-import { getMonthlyDateRange } from "@/lib/utils/transaction-utils";
 
 /**
  * Transactions Page
@@ -60,37 +56,14 @@ const TransactionsPage = async () => {
     }
 
     return (
-        <div className="transactions-page container mx-auto md:max-w-5xl lg:max-w-7xl xl:max-w-full px-2 md:px-0">
-            {/* Heading Section */}
-            <section className="flex justify-between items-center pb-5">
-                <div>
-                    <h1 className="text-xl md:text-2xl lg:text-3xl font-bold">
-                        Transactions
-                    </h1>
-                    <p className="text-sm text-muted-foreground mt-1">
-                        View and manage all your transactions
-                    </p>
-                </div>
-                <Button>
-                    <Link
-                        href="/transactions/add"
-                        className="flex items-center justify-around"
-                    >
-                        <Plus size={16} /> Add Transaction
-                    </Link>
-                </Button>
-            </section>
-
-            {/* Transactions List and Charts Section */}
-            <section className="py-5">
-                <TransactionClient
-                    initialTransactions={transactions}
-                    initialTotal={total}
-                    categories={categories}
-                    subCategories={subCategories}
-                    bankAccounts={bankAccounts}
-                />
-            </section>
+        <div className="flex-1 overflow-auto p-4 lg:p-8">
+            <TransactionClient
+                initialTransactions={transactions}
+                initialTotal={total}
+                categories={categories}
+                subCategories={subCategories}
+                bankAccounts={bankAccounts}
+            />
         </div>
     );
 };
