@@ -39,6 +39,7 @@ export function TransactionTable({
     total,
     currentPage,
     pageSize,
+    onPageChange,
     onDelete,
     loading = false,
     sortOption = "date-desc",
@@ -105,7 +106,7 @@ export function TransactionTable({
 
     const handleSort = (field: "date" | "amount") => {
         if (!onSortChange) return;
-        
+
         if (field === "date") {
             if (sortOption === "date-desc") {
                 onSortChange("date-asc");
@@ -197,11 +198,10 @@ export function TransactionTable({
                                     <TableCell className="p-4 align-middle font-medium">
                                         <div className="flex items-center gap-3">
                                             <div
-                                                className={`h-10 w-10 rounded-full flex items-center justify-center border shrink-0 transition-colors ${
-                                                    isCredit
+                                                className={`h-10 w-10 rounded-full flex items-center justify-center border shrink-0 transition-colors ${isCredit
                                                         ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-500 group-hover:bg-emerald-500/20"
                                                         : "bg-muted border-border text-muted-foreground group-hover:bg-muted/80"
-                                                }`}
+                                                    }`}
                                             >
                                                 {isCredit ? (
                                                     <ArrowUpRight className="h-5 w-5" />
@@ -254,9 +254,8 @@ export function TransactionTable({
                                         )}
                                     </TableCell>
                                     <TableCell
-                                        className={`p-4 align-middle text-right font-semibold whitespace-nowrap ${
-                                            isCredit ? "text-emerald-600" : "text-foreground"
-                                        }`}
+                                        className={`p-4 align-middle text-right font-semibold whitespace-nowrap ${isCredit ? "text-emerald-600" : "text-foreground"
+                                            }`}
                                     >
                                         {isCredit ? "+" : "-"}
                                         {formatCurrency(Math.abs(transaction.amount))}
