@@ -21,6 +21,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { AddSubCategoryDialog } from "./AddSubCategoryDialog";
 import { EditSubCategoryDialog } from "./EditSubCategoryDialog";
+import { EditCategoryDialog } from "./EditCategoryDialog";
 import { SubCategory } from "@/lib/schema/bank-account-types";
 
 /**
@@ -36,6 +37,7 @@ export function CategoryCard({ category }: { category: Category }) {
   const [showAddSubCategory, setShowAddSubCategory] = useState(false);
   const [editingSubCategory, setEditingSubCategory] =
     useState<SubCategory | null>(null);
+  const [showEditCategory, setShowEditCategory] = useState(false);
 
   // Handle delete category
   const handleDeleteCategory = async (categoryId: string) => {
@@ -121,7 +123,7 @@ export function CategoryCard({ category }: { category: Category }) {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => router.push(`/categories/edit/${category.id}`)}
+                onClick={() => setShowEditCategory(true)}
               >
                 <Pencil size={16} />
               </Button>
@@ -243,6 +245,15 @@ export function CategoryCard({ category }: { category: Category }) {
           onOpenChange={(open) => {
             if (!open) setEditingSubCategory(null);
           }}
+        />
+      )}
+
+      {/* Edit Category Dialog */}
+      {showEditCategory && (
+        <EditCategoryDialog
+          category={category}
+          open={showEditCategory}
+          onOpenChange={setShowEditCategory}
         />
       )}
     </>

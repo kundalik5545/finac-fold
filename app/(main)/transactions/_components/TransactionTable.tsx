@@ -200,7 +200,7 @@ export function TransactionTable({
                                             <div
                                                 className={`h-10 w-10 rounded-full flex items-center justify-center border shrink-0 transition-colors ${isCredit
                                                     ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-500 group-hover:bg-emerald-500/20"
-                                                    : "bg-muted border-border text-muted-foreground group-hover:bg-muted/80"
+                                                    : "bg-red-500/10 border-red-500/20 text-red-500 group-hover:bg-red-500/20"
                                                     }`}
                                             >
                                                 {isCredit ? (
@@ -211,7 +211,7 @@ export function TransactionTable({
                                             </div>
                                             <div className="flex flex-col">
                                                 <span className="truncate max-w-[200px] sm:max-w-xs">
-                                                    {transaction.description || "No description"}
+                                                    {transaction.description || "-"}
                                                 </span>
                                                 <span className="text-xs text-muted-foreground font-normal md:hidden">
                                                     {paymentMethod}
