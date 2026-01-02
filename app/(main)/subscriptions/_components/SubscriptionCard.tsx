@@ -12,23 +12,25 @@ export function SubscriptionCard({ subscription }: { subscription: Subscription 
   return (
     <div
       onClick={() => router.push(`/subscriptions/edit/${subscription.id}`)}
-      className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer"
+      className="flex items-center justify-between p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors cursor-pointer"
     >
-      <div
-        className="h-10 w-10 rounded-full flex items-center justify-center text-white font-semibold text-sm shrink-0"
-        style={{ backgroundColor: color }}
-      >
-        {icon}
+      <div className="flex items-center gap-3">
+        <div
+          className="h-8 w-8 rounded-full flex items-center justify-center text-white text-xs font-bold"
+          style={{ backgroundColor: color }}
+        >
+          {icon}
+        </div>
+        <div>
+          <div className="text-sm font-medium">{subscription.name}</div>
+          <div className="text-xs text-muted-foreground">
+            {formatFrequency(subscription.frequency)}
+          </div>
+        </div>
       </div>
-      <div className="flex-1 min-w-0">
-        <p className="font-medium text-sm truncate">{subscription.name}</p>
-        <p className="text-xs text-muted-foreground">
-          {formatFrequency(subscription.frequency)}
-        </p>
-      </div>
-      <p className="font-semibold text-sm">
+      <div className="font-semibold text-sm">
         {formatCurrency(subscription.amount)}
-      </p>
+      </div>
     </div>
   );
 }
