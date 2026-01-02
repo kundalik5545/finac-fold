@@ -982,8 +982,14 @@ export async function getTransactions(
     if (filters?.search) {
       where.OR = [
         { description: { contains: filters.search, mode: "insensitive" } },
-        { category: { name: { contains: filters.search, mode: "insensitive" } } },
-        { subCategory: { name: { contains: filters.search, mode: "insensitive" } } },
+        {
+          category: { name: { contains: filters.search, mode: "insensitive" } },
+        },
+        {
+          subCategory: {
+            name: { contains: filters.search, mode: "insensitive" },
+          },
+        },
       ];
     }
 
@@ -994,9 +1000,7 @@ export async function getTransactions(
     const sortBy = filters?.sortBy || "date";
     const sortOrder = filters?.sortOrder || "desc";
     const orderBy: Prisma.TransactionOrderByWithRelationInput =
-      sortBy === "amount"
-        ? { amount: sortOrder }
-        : { date: sortOrder };
+      sortBy === "amount" ? { amount: sortOrder } : { date: sortOrder };
 
     // Fetch transactions with pagination
     const transactions = await prisma.transaction.findMany({

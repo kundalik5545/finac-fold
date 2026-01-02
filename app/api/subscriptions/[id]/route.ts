@@ -2,7 +2,11 @@ import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import { deleteSubscription, getSubscription, updateSubscription } from "@/action/subscriptions";
+import {
+  deleteSubscription,
+  getSubscription,
+  updateSubscription,
+} from "@/action/subscriptions";
 import { subscriptionFormSchema } from "@/lib/subscriptions-schema";
 import { ZodError } from "zod";
 
@@ -56,18 +60,28 @@ export async function PATCH(request: NextRequest, { params }: ParamsType) {
     const updateData: Record<string, any> = {};
     if ("name" in validatedData) updateData.name = validatedData.name;
     if ("amount" in validatedData) updateData.amount = validatedData.amount;
-    if ("frequency" in validatedData) updateData.frequency = validatedData.frequency;
+    if ("frequency" in validatedData)
+      updateData.frequency = validatedData.frequency;
     if ("startDate" in validatedData && validatedData.startDate !== undefined) {
       updateData.startDate = new Date(validatedData.startDate);
     }
-    if ("nextDueDate" in validatedData && validatedData.nextDueDate !== undefined) {
+    if (
+      "nextDueDate" in validatedData &&
+      validatedData.nextDueDate !== undefined
+    ) {
       updateData.nextDueDate = new Date(validatedData.nextDueDate);
     }
-    if ("description" in validatedData) updateData.description = validatedData.description ?? null;
+    if ("description" in validatedData)
+      updateData.description = validatedData.description ?? null;
     if ("icon" in validatedData) updateData.icon = validatedData.icon ?? null;
-    if ("color" in validatedData) updateData.color = validatedData.color ?? null;
+    if ("color" in validatedData)
+      updateData.color = validatedData.color ?? null;
 
-    const subscription = await updateSubscription(id, updateData, session.user.id);
+    const subscription = await updateSubscription(
+      id,
+      updateData,
+      session.user.id
+    );
 
     return NextResponse.json({ subscription });
   } catch (error) {
@@ -123,4 +137,3 @@ export async function DELETE(_request: NextRequest, { params }: ParamsType) {
     );
   }
 }
-

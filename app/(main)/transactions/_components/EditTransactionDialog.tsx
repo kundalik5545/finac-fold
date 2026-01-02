@@ -101,14 +101,14 @@ export function EditTransactionDialog({
         return categories;
     }, [categories, transactionTypeValue]);
 
-    const selectedCategory = filteredCategories.find((c) => c.id === categoryIdValue) || 
-                             categories.find((c) => c.id === transaction.categoryId);
+    const selectedCategory = filteredCategories.find((c) => c.id === categoryIdValue) ||
+        categories.find((c) => c.id === transaction.categoryId);
     const subCategories = selectedCategory?.subCategories || [];
 
     // Initialize form with transaction data
     useEffect(() => {
         if (open && transaction) {
-            const transactionDate = transaction.date instanceof Date 
+            const transactionDate = transaction.date instanceof Date
                 ? transaction.date.toISOString().split("T")[0]
                 : new Date(transaction.date).toISOString().split("T")[0];
 
