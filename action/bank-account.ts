@@ -939,6 +939,9 @@ export async function getTransactions(
     endDate?: Date | string;
     skip?: number;
     take?: number;
+    search?: string;
+    sortBy?: "date" | "amount";
+    sortOrder?: "asc" | "desc";
   }
 ): Promise<{ transactions: Transaction[]; total: number }> {
   try {
@@ -975,8 +978,25 @@ export async function getTransactions(
       }
     }
 
+    // Search functionality
+    if (filters?.search) {
+      where.OR = [
+        { description: { contains: filters.search, mode: "insensitive" } },
+        { category: { name: { contains: filters.search, mode: "insensitive" } } },
+        { subCategory: { name: { contains: filters.search, mode: "insensitive" } } },
+      ];
+    }
+
     // Get total count for pagination
     const total = await prisma.transaction.count({ where });
+
+    // Determine sort order
+    const sortBy = filters?.sortBy || "date";
+    const sortOrder = filters?.sortOrder || "desc";
+    const orderBy: Prisma.TransactionOrderByWithRelationInput =
+      sortBy === "amount"
+        ? { amount: sortOrder }
+        : { date: sortOrder };
 
     // Fetch transactions with pagination
     const transactions = await prisma.transaction.findMany({
@@ -986,9 +1006,7 @@ export async function getTransactions(
         subCategory: true,
         bankAccount: true,
       },
-      orderBy: {
-        date: "desc",
-      },
+      orderBy,
       skip: filters?.skip,
       take: filters?.take,
     });

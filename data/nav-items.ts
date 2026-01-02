@@ -48,11 +48,6 @@ export const navItems = [
     icon: Wallet,
   },
   {
-    title: "Recurring Transactions",
-    url: "/recurring-transactions",
-    icon: Calendar,
-  },
-  {
     title: "Subscriptions",
     url: "/subscriptions",
     icon: Calendar,

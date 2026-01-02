@@ -11,7 +11,7 @@ export function SubscriptionCard({ subscription }: { subscription: Subscription 
 
   return (
     <div
-      onClick={() => router.push(`/subscriptions/edit/${subscription.id}`)}
+      onClick={() => router.push(`/subscriptions/${subscription.id}`)}
       className="flex items-center justify-between p-3 rounded-lg border border-border hover:bg-muted/50 transition-colors cursor-pointer"
     >
       <div className="flex items-center gap-3">
