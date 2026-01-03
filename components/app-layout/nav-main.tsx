@@ -43,7 +43,7 @@ export function NavMain({ items }: { items: NavItem[] }) {
                                     <Link
                                         href={item.url}
                                         className={cn(
-                                            "group relative flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200",
+                                            "group relative flex items-center gap-3 px-3 py-2.5 rounded-md transition-all duration-200",
                                             isActive
                                                 ? "bg-linear-to-r from-blue-500 to-purple-600 text-white shadow-lg transform scale-105"
                                                 : "text-gray-700 hover:bg-gray-100 hover:text-blue-600 hover:scale-105 dark:text-white"

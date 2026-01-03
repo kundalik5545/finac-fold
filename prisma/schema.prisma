@@ -360,6 +360,7 @@ model Category {
   type          CategoryType
   color         String?
   icon          String?
+  order         Int            @default(0)
   userId        String
   user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   subCategories SubCategory[]
@@ -367,6 +368,7 @@ model Category {
 
   @@unique([userId, name])
   @@index([userId])
+  @@index([userId, order])
   @@map("category")
 }
 

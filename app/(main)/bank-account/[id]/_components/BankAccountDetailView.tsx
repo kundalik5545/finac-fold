@@ -1,32 +1,35 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash, Wallet, TrendingUp, TrendingDown } from "lucide-react";
+import { Edit, Trash, ArrowLeft, Copy, TrendingUp, TrendingDown, Building2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useFormatCurrency } from "@/hooks/use-formatCurrency";
 import { BankAccount, BankTransaction } from "@/lib/schema/bank-account-types";
 import { cn } from "@/lib/utils";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { maskAccountNumber, copyToClipboard } from "@/lib/utils/bank-account-helpers";
+import Link from "next/link";
 
 interface BankAccountDetailViewProps {
   bankAccount: BankAccount;
   transactions: BankTransaction[];
   balance: number;
+  userName?: string;
 }
 
 export function BankAccountDetailView({
   bankAccount,
   transactions,
   balance,
+  userName = "Account Holder",
 }: BankAccountDetailViewProps) {
   const { formatCurrency } = useFormatCurrency("en-IN", "INR");
   const router = useRouter();
   const [isDeleting, setIsDeleting] = useState(false);
-  const isMobile = useIsMobile();
+
   // Calculate total income and expense
   const totalIncome = transactions
     .filter((t) => t.transactionType === "CREDIT")
@@ -75,58 +78,179 @@ export function BankAccountDetailView({
     }
   };
 
-  const cardBgColor = bankAccount.color || undefined;
+  const handleCopyAccountNumber = async () => {
+    if (!bankAccount.accountNumber) return;
+    const success = await copyToClipboard(bankAccount.accountNumber);
+    if (success) {
+      toast.success("Account number copied to clipboard");
+    } else {
+      toast.error("Failed to copy account number");
+    }
+  };
+
+  const cardBgColor = bankAccount.color || "#f97316"; // Default orange color
+  const maskedAccountNumber = maskAccountNumber(bankAccount.accountNumber);
+  const accountTypeLabel = bankAccount.accountType
+    ? bankAccount.accountType.charAt(0).toUpperCase() + bankAccount.accountType.slice(1).toLowerCase()
+    : "";
+
+  const formatDate = (date: Date | string | null) => {
+    if (!date) return "N/A";
+    return new Date(date).toLocaleDateString("en-IN", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  };
+
+  // Determine text color based on background brightness
+  const getTextColor = (bgColor: string) => {
+    if (bgColor === "#f3f4f6" || !bgColor) return "text-gray-900";
+    return "text-white";
+  };
+
+  const textColor = getTextColor(cardBgColor);
 
   return (
     <div className="space-y-6">
-      {/* Header with actions */}
+      {/* Header with back button and actions */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          {bankAccount.icon && (
-            <span className="text-4xl" role="img" aria-label="Bank account icon">
-              {bankAccount.icon}
-            </span>
-          )}
-          <div>
-            <h1 className="text-2xl md:text-3xl font-bold">{bankAccount.name}</h1>
-            {bankAccount.bankName && (
-              <p className="text-sm text-muted-foreground mt-1">{bankAccount.bankName}</p>
-            )}
-            <Badge
-              variant={bankAccount.isActive ? "default" : "secondary"}
-              className="mt-2"
-            >
-              {bankAccount.isActive ? "Active" : "Inactive"}
-            </Badge>
-          </div>
-        </div>
-        <div className="flex flex-col md:flex-row gap-2">
-          <Button variant="outline" onClick={handleEdit}>
-            {isMobile ? <Edit size={16} /> : <Edit size={16} className="mr-2" />}
-            {isMobile ? "" : "Edit"}
+        <Link href="/bank-account" className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
+          <ArrowLeft className="h-4 w-4" />
+          <span className="text-sm font-medium">Back to Accounts</span>
+        </Link>
+        <div className="flex gap-2">
+          <Button variant="default" onClick={handleEdit}>
+            <Edit size={16} className="mr-2" />
+            Edit
           </Button>
           <Button
             variant="destructive"
             onClick={handleDelete}
             disabled={isDeleting}
           >
-            {isMobile ? <Trash size={16} /> : <Trash size={16} className="mr-2" />}
-            {isMobile ? isDeleting ? "Deleting..." : "" : "Delete"}
-
+            <Trash size={16} className="mr-2" />
+            Delete
           </Button>
         </div>
       </div>
 
-      {/* Balance Card */}
+      {/* Large Account Summary Card */}
       <Card
-        className={cn(cardBgColor && "border-0")}
-        style={cardBgColor ? { backgroundColor: cardBgColor } : undefined}
+        className={cn(
+          "border-0 overflow-hidden",
+          cardBgColor && cardBgColor !== "#f3f4f6" && "border-0"
+        )}
+        style={{ backgroundColor: cardBgColor }}
       >
-        <CardHeader>
-          <CardTitle>Current Balance</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-3xl font-bold">{formatCurrency(balance)}</p>
+        <CardContent className="p-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Left side - Bank info and balance */}
+            <div>
+              <div className="flex items-center gap-3 mb-4">
+                {bankAccount.icon && (
+                  <span className="text-4xl" role="img" aria-label="Bank account icon">
+                    {bankAccount.icon}
+                  </span>
+                )}
+                <div>
+                  <h2 className={cn("text-2xl font-bold mb-1", textColor)}>
+                    {bankAccount.bankName || bankAccount.name}
+                  </h2>
+                  {bankAccount.description && (
+                    <p className={cn("text-sm opacity-80", textColor)}>
+                      {bankAccount.description}
+                    </p>
+                  )}
+                  <div className="flex gap-2 mt-2">
+                    {accountTypeLabel && (
+                      <Badge
+                        variant="secondary"
+                        className={cn(
+                          "text-xs font-normal px-2 py-0.5",
+                          textColor === "text-white"
+                            ? "bg-white/20 text-white border-white/30"
+                            : "bg-gray-200 text-gray-700"
+                        )}
+                      >
+                        {accountTypeLabel}
+                      </Badge>
+                    )}
+                    <Badge
+                      variant={bankAccount.isActive ? "default" : "secondary"}
+                      className={cn(
+                        "text-xs font-normal px-2 py-0.5",
+                        bankAccount.isActive && textColor === "text-white"
+                          ? "bg-white/20 text-white border-white/30"
+                          : ""
+                      )}
+                    >
+                      {bankAccount.isActive ? "Active" : "Inactive"}
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-6">
+                <p className={cn("text-xs font-medium mb-1 opacity-80", textColor)}>
+                  CURRENT BALANCE
+                </p>
+                <p className={cn("text-4xl font-bold", textColor)}>
+                  {formatCurrency(balance)}
+                </p>
+              </div>
+            </div>
+
+            {/* Right side - Account details */}
+            <div className="space-y-4">
+              {bankAccount.accountNumber && (
+                <div>
+                  <p className={cn("text-xs font-medium mb-1 opacity-80", textColor)}>
+                    ACCOUNT NUMBER
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <p className={cn("text-lg font-semibold font-mono", textColor)}>
+                      {maskedAccountNumber}
+                    </p>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className={cn(
+                        "h-8 w-8",
+                        textColor === "text-white"
+                          ? "text-white hover:bg-white/20"
+                          : "text-gray-700"
+                      )}
+                      onClick={handleCopyAccountNumber}
+                    >
+                      <Copy className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+
+              {bankAccount.ifscCode && (
+                <div>
+                  <p className={cn("text-xs font-medium mb-1 opacity-80", textColor)}>
+                    IFSC CODE
+                  </p>
+                  <p className={cn("text-lg font-semibold", textColor)}>
+                    {bankAccount.ifscCode}
+                  </p>
+                </div>
+              )}
+
+              {bankAccount.accountOpeningDate && (
+                <div>
+                  <p className={cn("text-xs font-medium mb-1 opacity-80", textColor)}>
+                    OPENED
+                  </p>
+                  <p className={cn("text-lg font-semibold", textColor)}>
+                    {formatDate(bankAccount.accountOpeningDate)}
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
         </CardContent>
       </Card>
 
@@ -134,98 +258,34 @@ export function BankAccountDetailView({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Total Income Card */}
         <Card>
-          <CardHeader>
-            <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
-              <TrendingUp className="h-4 w-4 text-green-600" />
-              Total Income
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold text-green-600">
-              {formatCurrency(totalIncome)}
-            </p>
-            <p className="text-xs text-muted-foreground mt-1">
-              Total credits
-            </p>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground mb-1">Total Income</p>
+                <p className="text-2xl font-bold text-green-600">
+                  +{formatCurrency(totalIncome)}
+                </p>
+              </div>
+              <TrendingUp className="h-8 w-8 text-green-600" />
+            </div>
           </CardContent>
         </Card>
 
         {/* Total Expense Card */}
         <Card>
-          <CardHeader>
-            <CardTitle className="text-sm text-muted-foreground flex items-center gap-2">
-              <TrendingDown className="h-4 w-4 text-red-600" />
-              Total Expense
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-bold text-red-600">
-              {formatCurrency(totalExpense)}
-            </p>
-            <p className="text-xs text-muted-foreground mt-1">
-              Total debits
-            </p>
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-muted-foreground mb-1">Total Expense</p>
+                <p className="text-2xl font-bold text-red-600">
+                  -{formatCurrency(totalExpense)}
+                </p>
+              </div>
+              <TrendingDown className="h-8 w-8 text-red-600" />
+            </div>
           </CardContent>
         </Card>
       </div>
-
-      {/* Account Details */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {bankAccount.accountNumber && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm text-muted-foreground">
-                Account Number
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-lg font-bold">{bankAccount.accountNumber}</p>
-            </CardContent>
-          </Card>
-        )}
-
-        {bankAccount.accountType && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm text-muted-foreground">
-                Account Type
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Badge variant="outline" className="text-lg px-3 py-1">
-                {bankAccount.accountType}
-              </Badge>
-            </CardContent>
-          </Card>
-        )}
-
-        {bankAccount.startingBalance !== undefined && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm text-muted-foreground">
-                Starting Balance
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-lg font-bold">
-                {formatCurrency(bankAccount.startingBalance)}
-              </p>
-            </CardContent>
-          </Card>
-        )}
-      </div>
-
-      {/* Description */}
-      {bankAccount.description && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Description</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground">{bankAccount.description}</p>
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 }

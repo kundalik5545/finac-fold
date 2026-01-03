@@ -2,7 +2,8 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useFormatCurrency } from "@/hooks/use-formatCurrency";
-import { Building2, Wallet, TrendingDown } from "lucide-react";
+import { Building2, Wallet, TrendingDown, ArrowUpCircle, TrendingUp } from "lucide-react";
+import BankStatsCard from "./BankStatsCard";
 
 interface BankAccountStatsProps {
   totalAccounts: number;
@@ -17,49 +18,22 @@ export function BankAccountStats({
 }: BankAccountStatsProps) {
   const { formatCurrency } = useFormatCurrency("en-IN", "INR");
 
+  const totalIncome = 0;
+  const currentMonthIncome = 0;
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-4 md:p-4">
       {/* Total Accounts */}
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Total Accounts</CardTitle>
-          <Building2 className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{totalAccounts}</div>
-          <p className="text-xs text-muted-foreground">
-            Active bank accounts
-          </p>
-        </CardContent>
-      </Card>
+      <BankStatsCard cardTitle="Total Accounts" number={totalAccounts} description="Active bank accounts" icon={Building2} />
 
       {/* Total Balance */}
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Total Balance</CardTitle>
-          <Wallet className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{formatCurrency(totalBalance)}</div>
-          <p className="text-xs text-muted-foreground">
-            Across all accounts
-          </p>
-        </CardContent>
-      </Card>
+      <BankStatsCard cardTitle="Total Balance" number={formatCurrency(totalBalance)} description="Across all accounts" icon={Wallet} />
 
       {/* Current Month Spending */}
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">This Month Spending</CardTitle>
-          <TrendingDown className="h-4 w-4 text-muted-foreground" />
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold">{formatCurrency(currentMonthSpending)}</div>
-          <p className="text-xs text-muted-foreground">
-            Total debits this month
-          </p>
-        </CardContent>
-      </Card>
+      <BankStatsCard cardTitle="Total Spending" number={formatCurrency(currentMonthSpending)} description="Total spending in this month" icon={TrendingDown} />
+
+      {/* Current Month Income */}
+      <BankStatsCard cardTitle="Total Income" number={formatCurrency(currentMonthIncome)} description="Total income in this month" icon={TrendingUp} />
     </div>
   );
 }

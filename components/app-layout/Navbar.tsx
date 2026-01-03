@@ -44,6 +44,7 @@ const Navbar = async () => {
                 />
                 <h1 className="text-base font-medium"><Link href={isHomePage ? "/" : "/dashboard"}>{websiteDetails.websiteName}</Link></h1>
 
+
                 {/* Right Side */}
                 <div className="ml-auto flex items-center gap-2">
                     {/* Notification Icon, Dark Mode Icon,User Icon */}

@@ -22,7 +22,7 @@ const BackButton = () => {
         router.back()
     }
     return (
-        <Button variant="default" size="sm" onClick={handleBack}>
+        <Button variant="ghost" size="sm" onClick={handleBack}>
             <ArrowLeft size={16} className="mr-2" />
             <span>Back</span>
         </Button>

@@ -22,6 +22,7 @@ interface ColorPickerProps {
   onChange: (color: string | null) => void;
   colors?: string[];
   className?: string;
+  variant?: "default" | "circular"; // New variant for circular swatches
 }
 
 export function ColorPicker({
@@ -29,7 +30,41 @@ export function ColorPicker({
   onChange,
   colors = DEFAULT_COLORS,
   className,
+  variant = "default",
 }: ColorPickerProps) {
+  if (variant === "circular") {
+    return (
+      <div className={cn("space-y-2", className)}>
+        <div className="flex gap-3 items-center">
+          {colors.map((color) => {
+            const isSelected = value === color;
+            return (
+              <button
+                key={color}
+                type="button"
+                onClick={() => onChange(isSelected ? null : color)}
+                className={cn(
+                  "relative h-10 w-10 rounded-full border-2 transition-all hover:scale-110",
+                  isSelected
+                    ? "border-foreground ring-2 ring-offset-2 ring-foreground/20"
+                    : "border-border hover:border-foreground/50"
+                )}
+                style={{ backgroundColor: color }}
+                aria-label={`Select color ${color}`}
+              >
+                {isSelected && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <Check className="h-4 w-4 text-white drop-shadow-md" />
+                  </div>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={cn("space-y-2", className)}>
       <div className="grid grid-cols-5 gap-2">

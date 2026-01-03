@@ -1,47 +1,31 @@
-import { notFound } from "next/navigation";
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
-import { getBankAccount } from "@/action/bank-account";
-import { BankAccountEditForm } from "./_components/BankAccountEditForm";
-import BackButton from "@/components/custom-componetns/back-button";
+"use client";
 
-type ParamsType = { params: Promise<{ id: string }> };
+import { useParams, useRouter } from "next/navigation";
+import { useState } from "react";
+import { BankAccountEditModal } from "../../_components/BankAccountEditModal";
 
-export default async function EditBankAccountPage({ params }: ParamsType) {
-  const session = await auth.api.getSession({ headers: await headers() });
-  const { id } = await params;
+export default function EditBankAccountPage() {
+    const params = useParams();
+    const router = useRouter();
+    const [isOpen, setIsOpen] = useState(true);
+    const bankAccountId = params?.id as string | undefined;
 
-  if (!session?.user) {
-    notFound();
-  }
+    const handleClose = () => {
+        setIsOpen(false);
+        router.push("/bank-account");
+    };
 
-  let bankAccount;
-  try {
-    bankAccount = await getBankAccount(id, session.user.id);
-  } catch (error) {
-    console.error("Error fetching bank account:", error);
-    notFound();
-  }
+    if (!bankAccountId) {
+        router.push("/bank-account");
+        return null;
+    }
 
-  if (!bankAccount) {
-    notFound();
-  }
-
-  return (
-    <div className="container mx-auto md:max-w-5xl lg:max-w-7xl xl:max-w-full px-2 md:px-0 py-6">
-      <div className="mb-6">
-        <BackButton />
-      </div>
-      <div className="mb-6">
-        <h1 className="text-xl md:text-2xl lg:text-3xl font-bold">
-          Edit Bank Account
-        </h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Update bank account details
-        </p>
-      </div>
-      <BankAccountEditForm bankAccount={bankAccount} />
-    </div>
-  );
+    return (
+        <BankAccountEditModal
+            open={isOpen}
+            onOpenChange={handleClose}
+            bankAccountId={bankAccountId}
+        />
+    );
 }
 

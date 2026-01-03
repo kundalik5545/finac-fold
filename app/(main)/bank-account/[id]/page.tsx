@@ -6,7 +6,7 @@ import { BankAccountDetailView } from "./_components/BankAccountDetailView";
 import { BankAccountTransactionTable } from "./_components/BankAccountTransactionTable";
 import { BankAccountLineChart } from "./_components/BankAccountLineChart";
 import { BankAccountCategoryDonutChart } from "./_components/BankAccountCategoryDonutChart";
-import BackButton from "@/components/custom-componetns/back-button";
+import prisma from "@/lib/prisma";
 
 type ParamsType = { params: Promise<{ id: string }> };
 
@@ -22,6 +22,7 @@ export default async function BankAccountDetailPage({ params }: ParamsType) {
   let balance = 0;
   let categories: any[] = [];
   let subCategories: any[] = [];
+  let userName = "Account Holder";
 
   try {
     bankAccount = await getBankAccount(id, session.user.id);
@@ -33,6 +34,19 @@ export default async function BankAccountDetailPage({ params }: ParamsType) {
       categories.map((cat) => getSubCategories(cat.id, session.user.id))
     );
     subCategories = allSubCategories.flat();
+
+    // Fetch user name
+    try {
+      const user = await prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: { name: true },
+      });
+      if (user?.name) {
+        userName = user.name;
+      }
+    } catch (error) {
+      console.error("Error fetching user name:", error);
+    }
   } catch (error) {
     console.error("Error fetching bank account:", error);
     notFound();
@@ -46,15 +60,13 @@ export default async function BankAccountDetailPage({ params }: ParamsType) {
 
   return (
     <div className="container mx-auto md:max-w-5xl lg:max-w-7xl xl:max-w-full px-2 md:px-0 py-6">
-      <div className="mb-4 flex justify-end">
-        <BackButton />
-      </div>
       <div className="space-y-8">
         {/* Bank Account Detail View */}
         <BankAccountDetailView
           bankAccount={bankAccount}
           transactions={transactions}
           balance={balance}
+          userName={userName}
         />
 
         {/* Charts Section */}

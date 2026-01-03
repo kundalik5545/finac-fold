@@ -103,6 +103,20 @@ export function CategoryCard({ category }: { category: Category }) {
     }
   };
 
+  // Get color class for subcategory badge background
+  const getSubCategoryBgColor = (color: string | null) => {
+    if (!color) return "bg-slate-100";
+    const colorMap: Record<string, string> = {
+      slate: "bg-slate-100",
+      red: "bg-red-100",
+      orange: "bg-orange-100",
+      amber: "bg-amber-100",
+      emerald: "bg-emerald-100",
+      blue: "bg-blue-100",
+    };
+    return colorMap[color.toLowerCase()] || "bg-slate-100";
+  };
+
   return (
     <>
       <Card className="hover:shadow-md transition-shadow">
@@ -110,7 +124,7 @@ export function CategoryCard({ category }: { category: Category }) {
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-2">
               {category.icon && (
-                <span className="text-2xl">{category.icon}</span>
+                <span className={`h-10 w-10 rounded-xl flex items-center justify-center text-lg shadow-sm border border-black/5 bg-${category.color}-100`} >{category.icon}</span>
               )}
               <div>
                 <h3 className="font-semibold text-lg">{category.name}</h3>
@@ -180,41 +194,44 @@ export function CategoryCard({ category }: { category: Category }) {
               {category.subCategories &&
                 category.subCategories.length > 0 ? (
                 <div className="flex flex-wrap gap-2">
-                  {category.subCategories.map((subCategory) => (
-                    <Badge
-                      key={subCategory.id}
-                      variant="secondary"
-                      className="flex items-center gap-1"
-                    >
-                      {subCategory.icon && (
-                        <span className="text-xs">{subCategory.icon}</span>
-                      )}
-                      {subCategory.name}
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setEditingSubCategory(subCategory);
-                        }}
-                        className="ml-1 hover:text-primary"
-                        title="Edit subcategory"
+                  {category.subCategories.map((subCategory) => {
+                    const bgColorClass = getSubCategoryBgColor(subCategory.color);
+                    return (
+                      <span
+                        key={subCategory.id}
+                        className={`group/sub inline-flex items-center gap-1.5 px-2 py-1 rounded-full ${bgColorClass} border border-border/50 text-xs transition-colors hover:opacity-80`}
+                        id="subcategory-badge"
                       >
-                        <Pencil size={12} />
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDeleteSubCategory(subCategory.id);
-                        }}
-                        disabled={
-                          loadingStates[`delete-sub-${subCategory.id}`]
-                        }
-                        className="ml-1 hover:text-destructive"
-                        title="Delete subcategory"
-                      >
-                        <Trash2 size={12} />
-                      </button>
-                    </Badge>
-                  ))}
+                        {subCategory.icon && (
+                          <span className="text-xs">{subCategory.icon}</span>
+                        )}
+                        <span className="font-medium">{subCategory.name}</span>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setEditingSubCategory(subCategory);
+                          }}
+                          className="ml-0.5 hover:text-primary opacity-0 group-hover/sub:opacity-100 transition-opacity"
+                          title="Edit subcategory"
+                        >
+                          <Pencil size={12} />
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteSubCategory(subCategory.id);
+                          }}
+                          disabled={
+                            loadingStates[`delete-sub-${subCategory.id}`]
+                          }
+                          className="ml-0.5 hover:text-destructive opacity-0 group-hover/sub:opacity-100 transition-opacity"
+                          title="Delete subcategory"
+                        >
+                          <Trash2 size={12} />
+                        </button>
+                      </span>
+                    );
+                  })}
                 </div>
               ) : (
                 <p className="text-sm text-muted-foreground">

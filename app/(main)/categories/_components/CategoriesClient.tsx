@@ -1,14 +1,13 @@
 "use client";
 
-import { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
-import { List, LayoutGrid, Search, Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { CategoriesTableView } from "./CategoriesTableView";
-import { CategoriesCardView } from "./CategoriesCardView";
-import { AddCategoryDialog } from "./AddCategoryDialog";
 import { Category } from "@/lib/schema/bank-account-types";
-import { CategoryType } from "@/lib/schema/bank-account-types";
+import { LayoutGrid, List, Plus, Search } from "lucide-react";
+import { useMemo, useState } from "react";
+import { AddCategoryDialog } from "./AddCategoryDialog";
+import { CategoriesCardView } from "./CategoriesCardView";
+import { CategoriesTableView } from "./CategoriesTableView";
 
 /**
  * CategoriesClient Component
