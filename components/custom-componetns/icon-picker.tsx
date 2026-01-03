@@ -9,13 +9,15 @@ interface IconPickerProps {
   onChange: (icon: string | null) => void;
   label?: string;
   className?: string;
+  isPVisible?: boolean;
 }
 
 export function IconPicker({
   value,
   onChange,
-  label = "Icon",
+  label,
   className,
+  isPVisible = false,
 }: IconPickerProps) {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
@@ -45,9 +47,9 @@ export function IconPicker({
           </div>
         )}
       </div>
-      <p className="text-xs text-muted-foreground">
+      {isPVisible && <p className="text-xs text-muted-foreground">
         Press Win + . (Windows) or Cmd + Ctrl + Space (Mac) to open emoji picker
-      </p>
+      </p>}
     </div>
   );
 }

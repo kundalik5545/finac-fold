@@ -11,17 +11,22 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Search, Calendar } from "lucide-react";
 import { useFormatCurrency } from "@/hooks/use-formatCurrency";
 import { BankTransaction } from "@/lib/schema/bank-account-types";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { TransactionFilters } from "./TransactionFilters";
-import { Category } from "@/lib/schema/bank-account-types";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 
 interface BankAccountTransactionTableProps {
   transactions: BankTransaction[];
-  categories: Category[];
+  categories: any[];
   subCategories: { id: string; name: string; categoryId: string }[];
   bankAccountId: string;
 }
@@ -34,13 +39,9 @@ export function BankAccountTransactionTable({
 }: BankAccountTransactionTableProps) {
   const { formatCurrency } = useFormatCurrency("en-IN", "INR");
   const router = useRouter();
-  const [filters, setFilters] = useState<{
-    startDate?: string;
-    endDate?: string;
-    transactionType?: "CREDIT" | "DEBIT" | null;
-    categoryId?: string | null;
-    subCategoryId?: string | null;
-  }>({});
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filterType, setFilterType] = useState<"ALL" | "CREDIT" | "DEBIT">("ALL");
+  const [dateRange, setDateRange] = useState<{ from?: Date; to?: Date }>({});
 
   const formatDate = (date: Date | string) => {
     return new Date(date).toLocaleDateString("en-IN", {
@@ -50,40 +51,39 @@ export function BankAccountTransactionTable({
     });
   };
 
-  // Filter transactions based on filters
+  // Filter transactions based on search and filters
   const filteredTransactions = useMemo(() => {
     let filtered = [...transactions];
 
-    // Filter by date range
-    if (filters.startDate) {
-      const startDate = new Date(filters.startDate);
-      startDate.setHours(0, 0, 0, 0);
-      filtered = filtered.filter((t) => {
-        const transactionDate = new Date(t.transactionDate);
-        transactionDate.setHours(0, 0, 0, 0);
-        return transactionDate >= startDate;
-      });
-    }
-
-    if (filters.endDate) {
-      const endDate = new Date(filters.endDate);
-      endDate.setHours(23, 59, 59, 999);
-      filtered = filtered.filter((t) => {
-        const transactionDate = new Date(t.transactionDate);
-        return transactionDate <= endDate;
-      });
+    // Filter by search query
+    if (searchQuery) {
+      filtered = filtered.filter((t) =>
+        t.description?.toLowerCase().includes(searchQuery.toLowerCase())
+      );
     }
 
     // Filter by transaction type
-    if (filters.transactionType) {
-      filtered = filtered.filter((t) => t.transactionType === filters.transactionType);
+    if (filterType !== "ALL") {
+      filtered = filtered.filter((t) => t.transactionType === filterType);
     }
 
-    // Note: Category and subcategory filtering would require transactions to have category/subcategory relations
-    // This is a simplified version - you may need to adjust based on your data model
+    // Filter by date range
+    if (dateRange.from) {
+      filtered = filtered.filter((t) => {
+        const transactionDate = new Date(t.transactionDate);
+        return transactionDate >= dateRange.from!;
+      });
+    }
+
+    if (dateRange.to) {
+      filtered = filtered.filter((t) => {
+        const transactionDate = new Date(t.transactionDate);
+        return transactionDate <= dateRange.to!;
+      });
+    }
 
     return filtered;
-  }, [transactions, filters]);
+  }, [transactions, searchQuery, filterType, dateRange]);
 
   const handleDelete = async (transactionId: string) => {
     if (!confirm("Are you sure you want to delete this transaction?")) {
@@ -118,16 +118,85 @@ export function BankAccountTransactionTable({
     }
   };
 
+  // Get category icon (placeholder - you may need to map this based on your data)
+  const getCategoryIcon = (description: string | null) => {
+    if (!description) return "💰";
+    const desc = description.toLowerCase();
+    if (desc.includes("grocery") || desc.includes("food")) return "🛒";
+    if (desc.includes("salary") || desc.includes("income")) return "👤";
+    if (desc.includes("netflix") || desc.includes("entertainment")) return "📺";
+    if (desc.includes("uber") || desc.includes("transport")) return "🚗";
+    if (desc.includes("amazon") || desc.includes("shopping")) return "🛍️";
+    if (desc.includes("freelance") || desc.includes("payment")) return "💼";
+    return "💰";
+  };
+
+  // Determine status (BankTransaction doesn't have status, so we'll default to COMPLETED)
+  const getStatus = () => "COMPLETED";
+
   if (transactions.length === 0) {
     return (
       <div className="space-y-4">
-        <TransactionFilters
-          filters={filters}
-          categories={categories}
-          subCategories={subCategories}
-          onApplyFilters={setFilters}
-          onClearFilters={() => setFilters({})}
-        />
+        <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
+          <div className="relative flex-1 w-full sm:max-w-md">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search transactions..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          <div className="flex gap-2">
+            <Button
+              variant={filterType === "ALL" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setFilterType("ALL")}
+            >
+              All
+            </Button>
+            <Button
+              variant={filterType === "CREDIT" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setFilterType("CREDIT")}
+            >
+              Credit
+            </Button>
+            <Button
+              variant={filterType === "DEBIT" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setFilterType("DEBIT")}
+            >
+              Debit
+            </Button>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <Calendar className="mr-2 h-4 w-4" />
+                  Date Range
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="end">
+                <CalendarComponent
+                  initialFocus
+                  mode="range"
+                  defaultMonth={dateRange.from}
+                  selected={{
+                    from: dateRange.from,
+                    to: dateRange.to,
+                  }}
+                  onSelect={(range) => {
+                    setDateRange({
+                      from: range?.from,
+                      to: range?.to,
+                    });
+                  }}
+                  numberOfMonths={2}
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+        </div>
         <div className="w-full rounded-lg border border-gray-200 dark:border-gray-700 p-8 text-center">
           <p className="text-muted-foreground">
             No transactions found. Add your first transaction to get started.
@@ -139,72 +208,122 @@ export function BankAccountTransactionTable({
 
   return (
     <div className="space-y-4">
-      <TransactionFilters
-        filters={filters}
-        categories={categories}
-        subCategories={subCategories}
-        onApplyFilters={setFilters}
-        onClearFilters={() => setFilters({})}
-      />
+      {/* Search and Filters */}
+      <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
+        <div className="relative flex-1 w-full sm:max-w-md">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="Search transactions..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+        <div className="flex gap-2 flex-wrap">
+          <Button
+            variant={filterType === "ALL" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setFilterType("ALL")}
+          >
+            All
+          </Button>
+          <Button
+            variant={filterType === "CREDIT" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setFilterType("CREDIT")}
+          >
+            Credit
+          </Button>
+          <Button
+            variant={filterType === "DEBIT" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setFilterType("DEBIT")}
+          >
+            Debit
+          </Button>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" size="sm">
+                <Calendar className="mr-2 h-4 w-4" />
+                Date Range
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="end">
+              <CalendarComponent
+                initialFocus
+                mode="range"
+                defaultMonth={dateRange.from}
+                selected={{
+                  from: dateRange.from,
+                  to: dateRange.to,
+                }}
+                onSelect={(range) => {
+                  setDateRange({
+                    from: range?.from,
+                    to: range?.to,
+                  });
+                }}
+                numberOfMonths={2}
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
+      </div>
 
+      {/* Transactions Table */}
       <div className="rounded-md border">
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead>Date</TableHead>
-              <TableHead>Type</TableHead>
               <TableHead>Description</TableHead>
+              <TableHead>Category</TableHead>
               <TableHead className="text-right">Amount</TableHead>
-              <TableHead className="text-right">Balance</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead>Status</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {filteredTransactions.map((transaction) => {
               const isCredit = transaction.transactionType === "CREDIT";
+              const status = getStatus();
+
               return (
                 <TableRow key={transaction.id}>
-                  <TableCell>{formatDate(transaction.transactionDate)}</TableCell>
-                  <TableCell>
-                    <Badge variant={isCredit ? "default" : "destructive"}>
-                      {transaction.transactionType}
-                    </Badge>
+                  <TableCell className="font-medium">
+                    {formatDate(transaction.transactionDate)}
                   </TableCell>
                   <TableCell>
                     {transaction.description || "—"}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg">
+                        {getCategoryIcon(transaction.description)}
+                      </span>
+                      <span className="text-sm">
+                        {transaction.description
+                          ? transaction.description.split(" ")[0]
+                          : "Other"}
+                      </span>
+                    </div>
                   </TableCell>
                   <TableCell
                     className={`text-right font-semibold ${isCredit ? "text-green-600" : "text-red-600"
                       }`}
                   >
-                    {isCredit ? "+" : "-"}
-                    {formatCurrency(Number(transaction.amount))}
+                    {isCredit ? "+" : "-"} {formatCurrency(Number(transaction.amount))}
                   </TableCell>
-                  <TableCell className="text-right">
-                    {formatCurrency(Number(transaction.currentBalance))}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8"
-                        onClick={() => {
-                          // TODO: Implement edit functionality
-                          toast.info("Edit functionality coming soon");
-                        }}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8"
-                        onClick={() => handleDelete(transaction.id)}
-                      >
-                        <Trash className="h-4 w-4 text-red-500" />
-                      </Button>
-                    </div>
+                  <TableCell>
+                    <Badge
+                      variant={status === "COMPLETED" ? "default" : "secondary"}
+                      className={
+                        status === "COMPLETED"
+                          ? "bg-green-500 text-white"
+                          : "bg-yellow-500 text-white"
+                      }
+                    >
+                      {status}
+                    </Badge>
                   </TableCell>
                 </TableRow>
               );

@@ -51,7 +51,7 @@ export function AppSidebar({ variant }: { variant: "sidebar" | "floating" | "ins
                     </SidebarMenuItem>
                 </SidebarMenu>
             </SidebarHeader>
-            <SidebarContent>
+            <SidebarContent className="p-2">
                 <NavMain items={navItems} />
             </SidebarContent>
             <SidebarFooter>

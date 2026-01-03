@@ -1,27 +1,54 @@
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
-import React from "react";
-import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { BankAccountClient } from "./_components/BankAccountClient";
 import { BankAccountStats } from "./_components/BankAccountStats";
+import { AddBankAccountButton } from "./_components/AddBankAccountButton";
 import { getBankAccounts, calculateBalance } from "@/action/bank-account";
 import { BankAccount } from "@/lib/schema/bank-account-types";
+import prisma from "@/lib/prisma";
 
 const BankAccountPage = async () => {
   let bankAccounts: BankAccount[] = [];
-  let session;
+  let session: any | null = null;
+  let userName = "Account Holder";
 
   try {
     session = await auth.api.getSession({ headers: await headers() });
 
     if (session?.user) {
       bankAccounts = await getBankAccounts(session.user.id);
+
+      // Fetch user name
+      try {
+        const user = await prisma.user.findUnique({
+          where: { id: session.user.id },
+          select: { name: true },
+        });
+        if (user?.name) {
+          userName = user.name;
+        }
+      } catch (error) {
+        console.error("Error fetching user name:", error);
+      }
     }
   } catch (error) {
     console.error("Error fetching bank accounts:", error);
   }
+
+  // Calculate balance for each account
+  const accountsWithBalance = await Promise.all(
+    bankAccounts.map(async (account) => {
+      let balance = 0;
+      if (session?.user) {
+        try {
+          balance = await calculateBalance(account.id, session.user.id);
+        } catch (error) {
+          console.error(`Error calculating balance for account ${account.id}:`, error);
+        }
+      }
+      return { ...account, calculatedBalance: balance };
+    })
+  );
 
   // Calculate total balance for all accounts
   let totalBalance = 0;
@@ -70,10 +97,10 @@ const BankAccountPage = async () => {
   }
 
   return (
-    <div className="bank-account-page container mx-auto md:max-w-5xl lg:max-w-7xl xl:max-w-full px-2 md:px-0">
+    <div className="bank-account-page">
       {/* Heading Section */}
       <section className="flex justify-between items-center pb-5">
-        <div>
+        <div className="mt-7">
           <h1 className="text-xl md:text-2xl lg:text-3xl font-bold">
             Bank Accounts
           </h1>
@@ -81,30 +108,26 @@ const BankAccountPage = async () => {
             Manage your bank accounts and track transactions
           </p>
         </div>
-        <Button>
-          <Link
-            href="/bank-account/add"
-            className="flex items-center justify-around"
-          >
-            <Plus size={16} /> Add Bank Account
-          </Link>
-        </Button>
-      </section>
+        <AddBankAccountButton />
+      </section >
 
       {/* Stats Section */}
-      <section className="py-5">
+      <section className="py-2" >
         <BankAccountStats
           totalAccounts={bankAccounts.length}
           totalBalance={totalBalance}
           currentMonthSpending={currentMonthSpending}
         />
-      </section>
+      </section >
 
       {/* Bank Accounts List and Charts Section */}
-      <section className="py-5">
-        <BankAccountClient bankAccounts={bankAccounts} />
-      </section>
-    </div>
+      <section className="py-5" >
+        <BankAccountClient
+          bankAccounts={accountsWithBalance}
+          userName={userName}
+        />
+      </section >
+    </div >
   );
 };
 

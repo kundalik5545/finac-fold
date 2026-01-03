@@ -1,195 +1,289 @@
 "use client";
 
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { useFormatCurrency } from "@/hooks/use-formatCurrency";
-import { Edit, Trash, Building2, CreditCard } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Edit, Trash, Copy, Landmark } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { toast } from "sonner";
-import { Badge } from "@/components/ui/badge";
 import { BankAccount } from "@/lib/schema/bank-account-types";
 import { cn } from "@/lib/utils";
+import { maskAccountNumber, copyToClipboard } from "@/lib/utils/bank-account-helpers";
+import getContrastTextColor from "@/lib/utils/text-color-finder";
 
-export function BankAccountCard({ bankAccount }: { bankAccount: BankAccount }) {
-  const { formatCurrency } = useFormatCurrency("en-IN", "INR");
-  const router = useRouter();
-  const [loadingStates, setLoadingStates] = useState<{
-    [key: string]: boolean;
-  }>({});
-
-  const formatDate = (date: Date | string | null) => {
-    if (!date) return "N/A";
-    return new Date(date).toLocaleDateString("en-IN", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  };
-
-  const handleDelete = async (
-    e: React.MouseEvent<HTMLButtonElement>,
-    accountId: string,
-    accountName: string
-  ) => {
-    e.stopPropagation();
-    if (!confirm(`Are you sure you want to delete "${accountName}"?`)) {
-      return;
-    }
-    setLoadingStates((prev) => ({ ...prev, [`delete-${accountId}`]: true }));
-
-    try {
-      const response = await fetch(`/api/bank-account/${accountId}`, {
-        method: "DELETE",
-      });
-
-      if (response.ok) {
-        toast.success("Bank account deleted successfully");
-        router.refresh();
-      } else {
-        let errorData: any = {};
-        try {
-          const text = await response.text();
-          if (text) {
-            errorData = JSON.parse(text);
-          }
-        } catch {
-          // If parsing fails, use default error message
-        }
-        toast.error(errorData.error || "Failed to delete bank account");
-      }
-    } catch (error) {
-      toast.error("Failed to delete bank account");
-    } finally {
-      setLoadingStates((prev) => ({
-        ...prev,
-        [`delete-${accountId}`]: false,
-      }));
-    }
-  };
-
-  const handleEdit = (
-    e: React.MouseEvent<HTMLButtonElement>,
-    accountId: string
-  ) => {
-    e.stopPropagation();
-    router.push(`/bank-account/edit/${accountId}`);
-  };
-
-  const handleCardClick = () => {
-    router.push(`/bank-account/${bankAccount.id}`);
-  };
-
-  const cardBgColor = bankAccount.color || undefined;
-
-  return (
-    <Card
-      className={cn(
-        "relative cursor-pointer hover:shadow-xl hover:scale-[1.018] transition-all ring-1 ring-muted/20",
-        cardBgColor && "border-0"
-      )}
-      style={cardBgColor ? { backgroundColor: cardBgColor } : undefined}
-      onClick={handleCardClick}
-    >
-      <CardHeader className="pb-2 pt-4 px-5">
-        <div className="flex items-center justify-between gap-x-3 gap-y-0">
-          <div className="flex items-center gap-2">
-            {bankAccount.icon && (
-              <span
-                className={cn(
-                  "text-4xl drop-shadow",
-                  !bankAccount.isActive && "opacity-60"
-                )}
-                role="img"
-                aria-label="Bank account icon"
-              >
-                {bankAccount.icon}
-              </span>
-            )}
-            <span className="flex flex-col">
-              <span className="font-semibold text-lg leading-snug truncate max-w-[160px]">
-                {bankAccount.name}
-              </span>
-              <div className="flex gap-1 mt-0.5">
-                {bankAccount.accountType && (
-                  <Badge
-                    variant="secondary"
-                    className="text-xs font-normal px-2 py-0"
-                  >
-                    {bankAccount.accountType.charAt(0).toUpperCase() + bankAccount.accountType.slice(1).toLowerCase()}
-                  </Badge>
-                )}
-                <Badge
-                  variant={bankAccount.isActive ? "default" : "secondary"}
-                  className="text-xs font-normal px-2 py-0"
-                >
-                  {bankAccount.isActive ? "Active" : "Inactive"}
-                </Badge>
-              </div>
-            </span>
-          </div>
-          <div className="flex gap-0.5 ml-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8"
-              onClick={(e) => handleEdit(e, bankAccount.id)}
-              disabled={!!loadingStates[`edit-${bankAccount.id}`]}
-            >
-              <Edit className="h-4 w-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8"
-              onClick={(e) =>
-                handleDelete(e, bankAccount.id, bankAccount.name)
-              }
-              disabled={!!loadingStates[`delete-${bankAccount.id}`]}
-            >
-              <Trash className="h-4 w-4" />
-            </Button>
-          </div>
-        </div>
-      </CardHeader>
-      <CardContent className="pt-2 pb-5 px-5">
-        <div className="flex items-center justify-between gap-x-6 flex-wrap">
-          {bankAccount.bankName && (
-            <div className="flex items-center gap-2 text-sm mt-1 text-muted-foreground">
-              <Building2 className="h-4 w-4" />
-              <span className="truncate">{bankAccount.bankName}</span>
-            </div>
-          )}
-          {bankAccount.accountNumber && (
-            <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
-              <CreditCard className="h-4 w-4" />
-              <span className="truncate">{bankAccount.accountNumber}</span>
-            </div>
-          )}
-        </div>
-
-        <hr className="my-3 border-muted/20" />
-
-        <div className="flex items-center justify-between mt-1">
-          <span className="text-muted-foreground text-sm">
-            Starting Balance
-          </span>
-          <span className="font-semibold text-lg">
-            {formatCurrency(bankAccount.startingBalance)}
-          </span>
-        </div>
-        {bankAccount.accountOpeningDate && (
-          <div className="flex items-center justify-between mt-2">
-            <span className="text-muted-foreground text-xs">
-              Opened
-            </span>
-            <span className="text-muted-foreground text-sm font-medium">
-              {formatDate(bankAccount.accountOpeningDate)}
-            </span>
-          </div>
-        )}
-      </CardContent>
-    </Card>
-  );
+interface BankAccountCardProps {
+  bankAccount: BankAccount & { calculatedBalance?: number };
+  userName?: string;
 }
 
+export function BankAccountCard({ bankAccount, userName = "Account Holder" }: BankAccountCardProps) {
+  const { formatCurrency } = useFormatCurrency("en-IN", "INR");
+  const router = useRouter();
+  const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>({});
+  const [isHovered, setIsHovered] = useState(false);
+
+  // Use background color from database, default to light gray if not provided
+  const cardBgColor = bankAccount.color || "#f3f4f6";
+
+  // Get text color class using utility function
+  const textColorClass = useMemo(
+    () => getContrastTextColor(cardBgColor),
+    [cardBgColor]
+  );
+
+  // Determine if we should use white text styling (for dark backgrounds)
+  const isWhiteText = textColorClass === "text-white";
+
+  const handleDelete = useCallback(
+    async (
+      e: React.MouseEvent<HTMLButtonElement>,
+      accountId: string,
+      accountName: string
+    ) => {
+      e.stopPropagation();
+      if (!confirm(`Are you sure you want to delete "${accountName}"?`)) {
+        return;
+      }
+      setLoadingStates((prev) => ({ ...prev, [`delete-${accountId}`]: true }));
+      try {
+        const response = await fetch(`/api/bank-account/${accountId}`, {
+          method: "DELETE",
+        });
+
+        if (response.ok) {
+          toast.success("Bank account deleted successfully");
+          router.refresh();
+        } else {
+          let errorMsg = "Failed to delete bank account";
+          try {
+            const text = await response.text();
+            if (text) {
+              const errorData = JSON.parse(text);
+              errorMsg = errorData.error || errorMsg;
+            }
+          } catch { /* ignore */ }
+          toast.error(errorMsg);
+        }
+      } catch {
+        toast.error("Failed to delete bank account");
+      } finally {
+        setLoadingStates((prev) => ({
+          ...prev,
+          [`delete-${accountId}`]: false,
+        }));
+      }
+    },
+    [router]
+  );
+
+  const handleEdit = useCallback(
+    (e: React.MouseEvent<HTMLButtonElement>, accountId: string) => {
+      e.stopPropagation();
+      router.push(`/bank-account/edit/${accountId}`);
+    },
+    [router]
+  );
+
+  const handleCardClick = useCallback(() => {
+    router.push(`/bank-account/${bankAccount.id}`);
+  }, [router, bankAccount.id]);
+
+  const handleCopyAccountNumber = useCallback(
+    async (e: React.MouseEvent<HTMLButtonElement>, accountNumber: string) => {
+      e.stopPropagation();
+      const success = await copyToClipboard(accountNumber);
+      if (success) {
+        toast.success("Account number copied to clipboard");
+      } else {
+        toast.error("Failed to copy account number");
+      }
+    },
+    []
+  );
+
+  // Computed values
+  const balance = bankAccount.calculatedBalance ?? bankAccount.startingBalance;
+  const maskedAccountNumber = useMemo(
+    () => maskAccountNumber(bankAccount.accountNumber),
+    [bankAccount.accountNumber]
+  );
+  const accountTypeLabel = useMemo(() => {
+    if (!bankAccount.accountType) return "";
+    return (
+      bankAccount.accountType.charAt(0).toUpperCase() +
+      bankAccount.accountType.slice(1).toLowerCase()
+    );
+  }, [bankAccount.accountType]);
+
+  return (
+    <div
+      className={cn(
+        "group relative overflow-hidden rounded-2xl p-6 cursor-pointer shadow-lg transition-shadow hover:shadow-xl",
+        textColorClass
+      )}
+      style={{ backgroundColor: cardBgColor }}
+      onClick={handleCardClick}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      {/* Decorative blur circles */}
+      <div
+        className={cn(
+          "absolute -right-10 -top-10 h-40 w-40 rounded-full blur-3xl",
+          isWhiteText ? "bg-white/10" : "bg-black/5"
+        )}
+      />
+      <div
+        className={cn(
+          "absolute -left-10 -bottom-10 h-40 w-40 rounded-full blur-3xl",
+          isWhiteText ? "bg-black/5" : "bg-black/5"
+        )}
+      />
+
+      {/* Header Section */}
+      <div className="relative z-10 flex justify-between items-start mb-6">
+        <div className="flex items-center gap-3">
+          {/* Icon Container */}
+          <div
+            className={cn(
+              "h-10 w-10 rounded-lg backdrop-blur-md flex items-center justify-center border",
+              isWhiteText
+                ? "bg-white/20 border-white/10"
+                : "bg-black/10 border-black/10"
+            )}
+          >
+            {bankAccount.icon ? (
+              <span className="text-xl" role="img" aria-label="Bank account icon">
+                {bankAccount.icon}
+              </span>
+            ) : (
+              <Landmark className="h-5 w-5" />
+            )}
+          </div>
+          <div>
+            <h3 className="font-bold text-lg leading-tight">
+              {bankAccount.bankName || bankAccount.name}
+            </h3>
+            <div className="flex items-center gap-2 mt-1">
+              {accountTypeLabel && (
+                <span
+                  className={cn(
+                    "text-xs font-medium backdrop-blur-sm px-2 py-0.5 rounded-full border",
+                    isWhiteText
+                      ? "bg-white/20 border-white/10"
+                      : "bg-black/10 border-black/10"
+                  )}
+                >
+                  {accountTypeLabel}
+                </span>
+              )}
+              <span
+                className={cn(
+                  "text-xs font-medium backdrop-blur-sm px-2 py-0.5 rounded-full shadow-sm",
+                  bankAccount.isActive
+                    ? "bg-emerald-500/80"
+                    : isWhiteText
+                      ? "bg-white/20 border border-white/10"
+                      : "bg-black/10 border border-black/10"
+                )}
+              >
+                {bankAccount.isActive ? "Active" : "Inactive"}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Action buttons - appear on hover */}
+        <div
+          className={cn(
+            "flex gap-2 transition-opacity",
+            isHovered ? "opacity-100" : "opacity-0"
+          )}
+        >
+          <button
+            className={cn(
+              "p-1.5 rounded-full transition-colors",
+              isWhiteText ? "hover:bg-white/20" : "hover:bg-black/10"
+            )}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleEdit(e, bankAccount.id);
+            }}
+            disabled={!!loadingStates[`edit-${bankAccount.id}`]}
+            aria-label="Edit account"
+          >
+            <Edit className="h-4 w-4" />
+          </button>
+          <button
+            className={cn(
+              "p-1.5 rounded-full transition-colors",
+              isWhiteText ? "hover:bg-white/20" : "hover:bg-black/10"
+            )}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleDelete(e, bankAccount.id, bankAccount.name);
+            }}
+            disabled={!!loadingStates[`delete-${bankAccount.id}`]}
+            aria-label="Delete account"
+          >
+            <Trash className="h-4 w-4" />
+          </button>
+        </div>
+      </div>
+
+      {/* Available Balance Section */}
+      <div className="relative z-10 mt-4 space-y-1">
+        <p
+          className={cn(
+            "text-sm font-medium tracking-wide",
+            isWhiteText ? "text-white/70" : "text-black/70"
+          )}
+        >
+          Available Balance
+        </p>
+        <h2 className="text-3xl font-bold tracking-tight">
+          {formatCurrency(balance)}
+        </h2>
+      </div>
+
+      {/* Footer Section - Account Holder and Account Number */}
+      <div className="relative z-10 mt-8 flex justify-between items-end">
+        <div>
+          <p
+            className={cn(
+              "text-xs font-medium uppercase tracking-wider mb-1",
+              isWhiteText ? "text-white/60" : "text-black/60"
+            )}
+          >
+            Account Holder
+          </p>
+          <p className="font-medium">{userName}</p>
+        </div>
+        {bankAccount.accountNumber && (
+          <div className="text-right">
+            <p
+              className={cn(
+                "text-xs font-medium uppercase tracking-wider mb-1",
+                isWhiteText ? "text-white/60" : "text-black/60"
+              )}
+            >
+              Account Number
+            </p>
+            <p className="font-mono font-medium tracking-wider flex items-center gap-2">
+              {maskedAccountNumber}
+              <button
+                className="opacity-50 hover:opacity-100 transition-opacity"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleCopyAccountNumber(e, bankAccount.accountNumber!);
+                }}
+                aria-label="Copy account number"
+              >
+                <Copy className="h-3 w-3" />
+              </button>
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

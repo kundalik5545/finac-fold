@@ -652,6 +652,39 @@ export async function deleteBankCard(
  */
 export async function getCategories(userId: string): Promise<Category[]> {
   try {
+    // Check if any categories have order = 0 (might be uninitialized)
+    // and update them if needed (one-time migration)
+    const categoriesWithZeroOrder = await prisma.category.findMany({
+      where: {
+        userId,
+        order: 0,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    // If there are multiple categories with order 0, initialize their order
+    if (categoriesWithZeroOrder.length > 1) {
+      const maxOrder = await prisma.category.findFirst({
+        where: { userId },
+        orderBy: { order: "desc" },
+        select: { order: true },
+      });
+
+      const startOrder = (maxOrder?.order ?? -1) + 1;
+
+      // Update categories with order 0, assigning sequential orders
+      await prisma.$transaction(
+        categoriesWithZeroOrder.map((category, index) =>
+          prisma.category.update({
+            where: { id: category.id },
+            data: { order: startOrder + index },
+          })
+        )
+      );
+    }
+
     const categories = await prisma.category.findMany({
       where: {
         userId,
@@ -663,9 +696,14 @@ export async function getCategories(userId: string): Promise<Category[]> {
           },
         },
       },
-      orderBy: {
-        createdAt: "desc",
-      },
+      orderBy: [
+        {
+          order: "asc",
+        },
+        {
+          createdAt: "desc",
+        },
+      ],
     });
 
     return categories;
@@ -686,9 +724,19 @@ export async function createCategory(
   userId: string
 ): Promise<Category> {
   try {
+    // Get the maximum order value for this user's categories
+    const maxOrder = await prisma.category.findFirst({
+      where: { userId },
+      orderBy: { order: "desc" },
+      select: { order: true },
+    });
+
+    const nextOrder = (maxOrder?.order ?? -1) + 1;
+
     const category = await prisma.category.create({
       data: {
         ...data,
+        order: nextOrder,
         user: {
           connect: { id: userId },
         },
@@ -731,6 +779,43 @@ export async function updateCategory(
   } catch (error) {
     console.error("Error updating category:", error);
     throw new Error("Failed to update category");
+  }
+}
+
+/**
+ * Reorder categories
+ */
+export async function reorderCategories(
+  categoryOrders: Array<{ id: string; order: number }>,
+  userId: string
+): Promise<void> {
+  try {
+    // Verify all categories belong to the user
+    const categoryIds = categoryOrders.map((co) => co.id);
+    const userCategories = await prisma.category.findMany({
+      where: {
+        id: { in: categoryIds },
+        userId,
+      },
+      select: { id: true },
+    });
+
+    if (userCategories.length !== categoryIds.length) {
+      throw new Error("Some categories not found or not owned by user");
+    }
+
+    // Update all categories in a transaction
+    await prisma.$transaction(
+      categoryOrders.map(({ id, order }) =>
+        prisma.category.update({
+          where: { id },
+          data: { order },
+        })
+      )
+    );
+  } catch (error) {
+    console.error("Error reordering categories:", error);
+    throw new Error("Failed to reorder categories");
   }
 }
 

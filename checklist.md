@@ -114,3 +114,5 @@ Create a new feature where user can manage its investment and track there return
 - create nice looking cards and make them responsive
 - use logo for each card then title and edit delete button. Also use badge to show nice data
 - add other features as needed
+
+## 02 Jan 2026

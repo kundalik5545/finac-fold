@@ -1,7 +1,4 @@
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
 import React from "react";
-import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { CategoriesClient } from "./_components/CategoriesClient";
@@ -26,31 +23,11 @@ const CategoriesPage = async () => {
   }
 
   return (
-    <div className="categories-page container mx-auto md:max-w-5xl lg:max-w-7xl xl:max-w-full px-2 md:px-0">
-      {/* Heading Section */}
-      <section className="flex justify-between items-center pb-5">
-        <div>
-          <h1 className="text-xl md:text-2xl lg:text-3xl font-bold">
-            Categories & Subcategories
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Manage your transaction categories and subcategories
-          </p>
-        </div>
-        <Button>
-          <Link
-            href="/categories/add"
-            className="flex items-center justify-around"
-          >
-            <Plus size={16} /> Add Category
-          </Link>
-        </Button>
-      </section>
-
-      {/* Categories List Section */}
-      <section className="py-5">
+    <div className="flex-1 overflow-auto p-4 lg:p-8">
+      <div className="space-y-6 max-w-[1600px] mx-auto pb-10">
+        {/* Header Section */}
         <CategoriesClient categories={categories} />
-      </section>
+      </div>
     </div>
   );
 };
